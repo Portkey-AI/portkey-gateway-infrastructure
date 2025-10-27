@@ -228,7 +228,3 @@ portkey-gateway/
 ```bash
 terraform destroy -var-file="environments/dev/dev.tfvars"
 ```
-
-## License
-
-Copyright © Portkey. All rights reserved.
