@@ -2,6 +2,10 @@
 
 This enterprise-focused deployment guide provides comprehensive instructions for deploying Portkey Gateway on Amazon ECS clusters. Designed to meet the needs of large-scale, mission-critical applications, this guide includes specific recommendations for component sizing, high availability, and integration with monitoring systems.
 
+## Architecture
+![Portkey Gateway](./architecture/portkey-gateway.png)
+*Figure 1: Overview of the Portkey Gateway deployment with Control Plane and Data Plane components.*
+
 ## Components and Sizing Recommendations
 
 | Component                               | Options                                                                   | Sizing Recommendations                                                                                                                                              |
@@ -94,30 +98,35 @@ Navigate to `portkey-gateway-infrastructure/terraform/environments/dev` and upda
 | `docker_cred_secret_arn` | - | **Yes** | ARN of AWS Secrets Manager's secret where docker credentials shared by Portkey is stored |
 | `redis_image` | `{image="redis", tag="7.2-alpine"}` | No | Container image to use for Redis |
 | **Gateway Service Configuration** | | | |
-| `gateway_desired_task` | 1 | No | Number of tasks to run in Gateway Service |
-| `gateway_cpu` | 256 | No | CPU associated with Gateway Service tasks |
-| `gateway_memory` | 1024 | No | Memory associated with Gateway Service tasks |
-| `gateway_enable_autoscaling` | false | No | Set to `true` to enable autoscaling on Gateway Service |
-| `gateway_min_capacity` | 1 | No | Minimum number of tasks to run Gateway Service (relevant if `gateway_enable_autoscaling = true`) |
-| `gateway_max_capacity` | 3 | No | Maximum number of tasks to run Gateway Service (relevant if `gateway_enable_autoscaling = true`) |
-| `gateway_target_cpu_utilization` | null | No | % CPU utilization that ECS autoscaling should try to maintain (relevant if `gateway_enable_autoscaling = true`) |
-| `gateway_target_memory_utilization` | null | No | % memory utilization that ECS autoscaling should try to maintain (relevant if `gateway_enable_autoscaling = true`) |
-| `gateway_scale_in_cooldown` | 120 | No |  Amount of time (seconds) wait after a scale in activity before another scale in activity can start (relevant if `gateway_enable_autoscaling = true`) |
-| `gateway_scale_out_cooldown` | 60 | No |  Amount of time (seconds) wait after a scale out activity before another scale out activity can start (relevant if `gateway_enable_autoscaling = true`) |
+| `gateway_desired_task` | `1` | No | Number of tasks to run in Gateway Service |
+| `gateway_cpu` | `256` | No | CPU associated with Gateway Service tasks |
+| `gateway_memory` | `1024` | No | Memory associated with Gateway Service tasks |
+| `gateway_enable_autoscaling` | `false` | No | Set to `true` to enable autoscaling on Gateway Service |
+| `gateway_min_capacity` | `1` | No | Minimum number of tasks to run Gateway Service (relevant if `gateway_enable_autoscaling = true`) |
+| `gateway_max_capacity` | `3` | No | Maximum number of tasks to run Gateway Service (relevant if `gateway_enable_autoscaling = true`) |
+| `gateway_target_cpu_utilization` | `null` | No | % CPU utilization that ECS autoscaling should try to maintain (relevant if `gateway_enable_autoscaling = true`) |
+| `gateway_target_memory_utilization` | `null` | No | % memory utilization that ECS autoscaling should try to maintain (relevant if `gateway_enable_autoscaling = true`) |
+| `gateway_scale_in_cooldown` | `120` | No |  Amount of time (seconds) wait after a scale in activity before another scale in activity can start (relevant if `gateway_enable_autoscaling = true`) |
+| `gateway_scale_out_cooldown` | `60` | No |  Amount of time (seconds) wait after a scale out activity before another scale out activity can start (relevant if `gateway_enable_autoscaling = true`) |
 | **Data Service Configuration** | | | |
-| `enable_dataservice` | false | No | Set to true to deploy Data Service |
-| `dataservice_desired_task` | 1 | No | Number of tasks to run in Gateway Service |
-| `dataservice_cpu` | 256 | No | CPU associated with Gateway Service tasks |
-| `dataservice_memory` | 1024 | No | Memory associated with Gateway Service tasks |
-| `dataservice_enable_autoscaling` | false | No | Set to `true` to enable autoscaling on Gateway Service |
-| `dataservice_min_capacity` | 1 | No | Minimum number of tasks to run Gateway Service (relevant if `dataservice_enable_autoscaling = true`) |
-| `dataservice_max_capacity` | 3 | No | Maximum number of tasks to run Gateway Service (relevant if `dataservice_enable_autoscaling = true`) |
-| `dataservice_target_cpu_utilization` | null | No | % CPU utilization that ECS autoscaling should try to maintain (relevant if `dataservice_enable_autoscaling = true`) |
-| `dataservice_target_memory_utilization` | null | No | % memory utilization that ECS autoscaling should try to maintain (relevant if `dataservice_enable_autoscaling = true`) |
-| `dataservice_scale_in_cooldown` | 120 | No |  Amount of time (seconds) wait after a scale in activity before another scale in activity can start (relevant if `dataservice_enable_autoscaling = true`) |
-| `dataservice_scale_out_cooldown` | 60 | No |  Amount of time (seconds) wait after a scale out activity before another scale out activity can start (relevant if `dataservice_enable_autoscaling = true`) |
+| `enable_dataservice` | `false` | No | Set to true to deploy Data Service |
+| `dataservice_desired_task` | `1` | No | Number of tasks to run in Gateway Service |
+| `dataservice_cpu` | `256` | No | CPU associated with Gateway Service tasks |
+| `dataservice_memory` | `1024` | No | Memory associated with Gateway Service tasks |
+| `dataservice_enable_autoscaling` | `false` | No | Set to `true` to enable autoscaling on Gateway Service |
+| `dataservice_min_capacity` | `1` | No | Minimum number of tasks to run Gateway Service (relevant if `dataservice_enable_autoscaling = true`) |
+| `dataservice_max_capacity` | `3` | No | Maximum number of tasks to run Gateway Service (relevant if `dataservice_enable_autoscaling = true`) |
+| `dataservice_target_cpu_utilization` | `null` | No | % CPU utilization that ECS autoscaling should try to maintain (relevant if `dataservice_enable_autoscaling = true`) |
+| `dataservice_target_memory_utilization` | `null` | No | % memory utilization that ECS autoscaling should try to maintain (relevant if `dataservice_enable_autoscaling = true`) |
+| `dataservice_scale_in_cooldown` | `120` | No |  Amount of time (seconds) wait after a scale in activity before another scale in activity can start (relevant if `dataservice_enable_autoscaling = true`) |
+| `dataservice_scale_out_cooldown` | `60` | No |  Amount of time (seconds) wait after a scale out activity before another scale out activity can start (relevant if `dataservice_enable_autoscaling = true`) |
 | **Redis Configuration** | | | |
-| `redis_configuration` | `{redis_type="redis"}` | No | Configure details of Redis to be used (object with: redis_type, cpu, memory, endpoint, tls, mode) |
+| `redis_type` | `redis` | No | Set to `aws-elasti-cache` to use AWS ElastiCache as the cache store, or to `redis` to use the built-in containerized redis instance. |
+| `redis_endpoint` | `""` | Conditional* | Specify AWS ElastiCache Endpoint** (required if `redis_type = aws-elasti-cache`)  |
+| `redis_cpu` | `256` | No | Specify CPU for redis task (relevant if `redis_type = redis`)  |
+| `redis_memory` | `1024` | No | Specify memory for redis task (relevant if `redis_type = redis`)  |
+| `redis_tls_enabled` | `false` | No | Specify if TLS is enabled on AWS ElastiCache instance |
+| `redis_mode` | `standalone` | No | Set `cluster` if clustering mode is enabled on AWS ElastiCache instance |
 | **Log Store Configuration** | | | |
 | `object_storage` | - | **Yes** | Specify log stores (object with: log_store_bucket, log_exports_bucket, finetune_bucket, bucket_region) |
 | `enable_bedrock_access` | `false` | No | Enable access to Bedrock |
@@ -129,6 +138,8 @@ Navigate to `portkey-gateway-infrastructure/terraform/environments/dev` and upda
 | `enable_blue_green` | `false` | No | Define whether to configure blue-green deployment for gateway with load balancer |
 
 *Conditional: Required based on other variable values (see description for conditions)
+
+** If cluster mode is enabled in ElastiCache then use **Configuration Endpoint** otherwise use **Primary Endpoint**. For more information on ElastiCache endpoints, refer to the [AWS documentation](https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Endpoints.html).
 
 ## Quick Start
 
@@ -218,6 +229,7 @@ For detailed integration instructions, refer to the [full documentation](https:/
 
 ```
 portkey-gateway/
+├── architecture
 ├── cloudformation/
 │   ├── secrets.yaml                        # CloudFormation template for creating secrets in AWS Secrets Manager
 ├── terraform/

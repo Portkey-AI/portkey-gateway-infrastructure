@@ -60,12 +60,12 @@ locals {
   
   # Contruct environement variables for gateway service
   common_env = {
-    CACHE_STORE = var.redis_configuration.redis_type
-    REDIS_URL = var.redis_configuration.redis_type == "redis" ? (
+    CACHE_STORE = var.redis_type
+    REDIS_URL = var.redis_type == "redis" ? (
       "redis://redis:6379"
-    ) : (var.redis_configuration.endpoint)
-    REDIS_TLS_ENABLED = var.redis_configuration.tls ? "true" : "false"
-    REDIS_MODE        = var.redis_configuration.mode
+    ) : (var.redis_endpoint)
+    REDIS_TLS_ENABLED = var.redis_tls ? "true" : "false"
+    REDIS_MODE        = var.redis_mode
     LOG_STORE_REGION  = var.object_storage.bucket_region
   }
 

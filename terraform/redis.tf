@@ -3,7 +3,7 @@
 ################################################################################
 
 module "redis" {
-  count        = var.redis_configuration.redis_type == "redis" ? 1 : 0
+  count        = var.redis_type == "redis" ? 1 : 0
   source       = "./modules/ecs-service"
   project_name = var.project_name
   environment  = var.environment
@@ -29,8 +29,8 @@ module "redis" {
 
   # Task Definition Configuration
   task_definition_config = {
-    cpu    = var.redis_configuration.cpu
-    memory = var.redis_configuration.memory # If set to true ECS automatically updates the service to use the latest task definition revision whenever a new one is registered.
+    cpu    = var.redis_cpu
+    memory = var.redis_memory 
   }
 
   # ECS Service Configuration
@@ -43,11 +43,11 @@ module "redis" {
     health_check_grace_period_seconds  = 150
     enable_execute_command             = true
     capacity_provider                  = local.capacity_provider_name
-    enable_blue_green                  = false # Define where to ena
+    enable_blue_green                  = false  
 
     log_config = {
       enable_logging    = true
-      retention_in_days = 14
+      retention_in_days = 7
     }
 
     service_connect_config = {
@@ -75,5 +75,3 @@ module "redis" {
   }
   depends_on = [ aws_service_discovery_http_namespace.service_discovery_namespace ]
 }
-
-

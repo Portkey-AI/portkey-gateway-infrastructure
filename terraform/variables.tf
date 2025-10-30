@@ -405,38 +405,74 @@ variable "dataservice_scale_out_cooldown" {
 #                            REDIS CONFIGURATION                          #
 ###########################################################################
 
-
-variable "redis_configuration" {
-  description = "Configure details of Redis to be used."
-  type = object({
-    redis_type = string
-    cpu        = optional(number, 256)
-    memory     = optional(number, 1024)
-    endpoint   = optional(string, "")
-    tls        = optional(bool, false)
-    mode       = optional(string, "standalone")
-  })
-  default = {
-    redis_type = "redis"
-  }
-
+variable "redis_type" {
+  description = "Specify Redis type."
+  type        = string
+  default     = "redis"
   validation {
-    condition     = contains(["redis", "aws-elastic-cache"], var.redis_configuration.redis_type)
+    condition     = contains(["redis", "aws-elastic-cache"], var.redis_type)
     error_message = "'redis_type' must be one of: 'redis', 'aws-elastic-cache'."
   }
+}
+
+variable "redis_endpoint" {
+  description = "Specify Redis endpoint."
+  type        = string
+  default     = ""
   validation {
     condition = (
-      var.redis_configuration.redis_type != "aws-elastic-cache" ||
+      var.redis_type != "aws-elastic-cache" ||
       (
-      var.redis_configuration.redis_type == "aws-elastic-cache" && var.redis_configuration.endpoint != "")
+      var.redis_type == "aws-elastic-cache" && var.redis_endpoint != "")
     )
     error_message = "A valid AWS ElastiCache endpoint must be provided if 'type' = 'aws-elastic-cache'."
   }
+}
+  
+variable "redis_cpu" {
+  description = "Specify Redis CPU."
+  type        = number
+  default     = 256
   validation {
-    condition     = contains(["standalone", "cluster"], var.redis_configuration.mode)
-    error_message = "'mode' must be one of: 'standalone', 'cluster'."
+    condition = (
+      var.redis_type != "redis" ||
+      (
+      var.redis_type == "redis" && var.redis_cpu > 0
+    )
+    error_message = "A valid Redis CPU > 0 must be provided if 'type' = 'redis'."
   }
 }
+variable "redis_memory" {
+  description = "Specify Redis memory."
+  type        = number
+  default     = 256
+  validation {
+    condition = (
+      var.redis_type != "redis" ||
+      (
+      var.redis_type == "redis" && var.redis_memory > 0
+    )
+    error_message = "A valid Redis memory > 0 must be provided if 'type' = 'redis'."
+  }
+}
+
+variable "redis_tls_enabled" {
+  description = "Specify whether Redis TLS is enabled on AWS ElastiCache."
+  type        = bool
+  default     = false
+}
+
+variable "redis_mode" {
+  description = "Specify if cluster mode is enabled on AWS ElastiCache."
+  type = string
+  default = "standalone"
+  validation {
+    condition     = contains(["standalone", "cluster"], var.redis_mode)
+    error_message = "'redis_mode' must be one of: 'standalone', 'cluster'."
+  }
+}
+  
+
 
 ###########################################################################
 #                           LOG STORE CONFIGURATION                       #

@@ -107,14 +107,14 @@ enable_dataservice = false
 ###########################################################################
 #                           REDIS CONFIGURATION                           #
 ###########################################################################
-redis_configuration = {
-    redis_type = "redis"                                       # Set to 'redis' to use 'container' based redis, set to 'aws-elastic-cache' to use AWS ElastiCache as cache store.
-    cpu        = 256                                           # Relevant if using built-in container based redis.
-    memory     = 1024                                          # Relevant if using built-in container based redis.
-    endpoint   = ""                                            # Only required if using Amazon ElastiCache.
-    tls        = false                                         # Set to true if tls is enabled on Amazon ElastiCache
-    mode       = "standalone"                                  # Set to 'cluster' if cluster mode is enabled on Amazon ElastiCache, otherwise set it to standalone.
-}
+
+redis_type = "redis"                                                  # Set to 'redis' to use 'container' based redis, set to 'aws-elastic-cache' to use AWS ElastiCache as cache store.
+# redis_cpu        = 256                                                # Relevant if using built-in container based redis.
+# redis_memory     = 1024                                               # Relevant if using built-in container based redis.
+# redis_endpoint   = ""                                                 # Only required if using Amazon ElastiCache.
+# redis_tls        = false                                              # Set to true if tls is enabled on Amazon ElastiCache
+# redis_mode       = "standalone"                                       # Set to 'cluster' if cluster mode is enabled on Amazon ElastiCache, otherwise set it to standalone.
+
 
 
 ###########################################################################
