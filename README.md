@@ -92,7 +92,7 @@ Navigate to `portkey-gateway-infrastructure/terraform/environments/dev` and upda
 | `min_asg_size` | `1` | No | Minimum number of EC2 in auto scaling group (relevant if `create_cluster = true`) |
 | `desired_asg_size` | `2` | No | Desired number of EC2 in auto scaling group (relevant if `create_cluster = true`) |
 | `target_capacity` | `70` | No | Desired percentage of cluster resources that ECS aims to maintain (relevant if `create_cluster = true`) |
-| **Image Configuration** | | | |
+| **Docker Image Configuration** | | | |
 | `gateway_image` | `{image="portkeyai/gateway_enterprise", tag="latest"}` | No | Container image to use for the gateway |
 | `data_service_image` | `{image="portkeyai/data-service", tag="latest"}` | No | Container image to use for the data service |
 | `docker_cred_secret_arn` | - | **Yes** | ARN of AWS Secrets Manager's secret where docker credentials shared by Portkey is stored |
@@ -121,12 +121,12 @@ Navigate to `portkey-gateway-infrastructure/terraform/environments/dev` and upda
 | `dataservice_scale_in_cooldown` | `120` | No |  Amount of time (seconds) wait after a scale in activity before another scale in activity can start (relevant if `dataservice_enable_autoscaling = true`) |
 | `dataservice_scale_out_cooldown` | `60` | No |  Amount of time (seconds) wait after a scale out activity before another scale out activity can start (relevant if `dataservice_enable_autoscaling = true`) |
 | **Redis Configuration** | | | |
-| `redis_type` | `redis` | No | Set to `aws-elasti-cache` to use AWS ElastiCache as the cache store, or to `redis` to use the built-in containerized redis instance. |
+| `redis_type` | `"redis"` | No | Set to `aws-elasti-cache` to use AWS ElastiCache as the cache store, or to `redis` to use the built-in containerized redis instance. |
 | `redis_endpoint` | `""` | Conditional* | Specify AWS ElastiCache Endpoint** (required if `redis_type = aws-elasti-cache`)  |
 | `redis_cpu` | `256` | No | Specify CPU for redis task (relevant if `redis_type = redis`)  |
 | `redis_memory` | `1024` | No | Specify memory for redis task (relevant if `redis_type = redis`)  |
 | `redis_tls_enabled` | `false` | No | Specify if TLS is enabled on AWS ElastiCache instance |
-| `redis_mode` | `standalone` | No | Set `cluster` if clustering mode is enabled on AWS ElastiCache instance |
+| `redis_mode` | `"standalone"` | No | Set `cluster` if clustering mode is enabled on AWS ElastiCache instance |
 | **Log Store Configuration** | | | |
 | `object_storage` | - | **Yes** | Specify log stores (object with: log_store_bucket, log_exports_bucket, finetune_bucket, bucket_region) |
 | `enable_bedrock_access` | `false` | No | Enable access to Bedrock |
@@ -250,7 +250,6 @@ portkey-gateway/
 
 - Variables marked as "Conditional" have validation rules that depend on other variables. For example, `vpc_cidr` is required when `create_new_vpc` is true, but not when it's false.
 - Default values are shown where applicable. Variables without defaults are required unless they have conditional logic.
-- All object-type variables have nested attributes with their own defaults; see the variables.tf file for detailed specifications of object structures.
 
 ## Uninstalling Portkey Gateway
 

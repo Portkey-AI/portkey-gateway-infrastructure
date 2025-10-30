@@ -164,7 +164,7 @@ variable "target_capacity" {
 }
 
 ###########################################################################
-#                             IMAGE CONFIGURATION                         #
+#                         DOCKER IMAGE CONFIGURATION                      #
 ###########################################################################
 variable "gateway_image" {
   description = "Container image to use for the gateway."

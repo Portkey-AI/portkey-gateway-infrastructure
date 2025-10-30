@@ -49,7 +49,7 @@ target_capacity  = 70                                           # Provide the ca
 
 
 ###########################################################################
-#                             IMAGE CONFIGURATION                         #
+#                         DOCKER IMAGE CONFIGURATION                      #
 ###########################################################################
 gateway_image = {
   image = "portkeyai/gateway_enterprise"
