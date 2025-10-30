@@ -38,7 +38,7 @@ module "gateway" {
     cpu    = var.gateway_config.cpu
     memory = var.gateway_config.memory
     task_role_policy_arns_map = local.gateway_task_role_policies
-    track_latest = true # If set to true ECS automatically updates the service to use the latest task definition revision whenever a new one is registered.
+    track_latest = true                                                 # If set to true ECS automatically updates the service to use the latest task definition revision whenever a new one is registered.
   }
 
 

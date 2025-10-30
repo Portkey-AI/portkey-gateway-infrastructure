@@ -20,7 +20,6 @@ num_az             = 2                                          # Number of Avai
 single_nat_gateway = true                                       # Set to true to create a single NAT Gateway shared across all private subnets in different AZs, false for one NAT Gateway per AZ.
 
 
-
 # # Provide following details if using existing VPC
 # create_new_vpc = false                                         # Set to true for creating new VPC, false for deploying Portkey in new VPC.
 
@@ -63,56 +62,47 @@ data_service_image = {
 }
 
 # Provide the Secret ARN obtained from output section of AWS CloudFormation Stack.
-docker_cred_secret_arn = "<DockerCredentialsSecretArn>"
+docker_cred_secret_arn =                                          # "<DockerCredentialsSecretArn>"
 
 # variable "redis_image" {
-#   description = "Container image to use for the data service."
+#   description = "Container image to use for the redis."
 #   type        = string
 #   default     = "redis:7.2-alpine"
-#}
+# }
 
 ###########################################################################
 #                     GATEWAY SERVICE CONFIGURATION                       #
 ###########################################################################
 
-gateway_config = {
-  desired_task_count = 1                                        # Set desired replica of gateway tasks to run in Gateway Service.
-  cpu                = 256                                      # Set the number of cpu units used by the tasks.
-  memory             = 1024                                     # Set the Amount (in MiB) of memory used by the tasks.
-}
 
-# (Optional) Configure autoscaling for gateway service
-gateway_autoscaling = {
-  enable_autoscaling        = true                               # Set to true to enable autoscaling for Gateway Service. Default false.
-  autoscaling_max_capacity  = 3                                  # Set maximum number of tasks to run in Gateway Service. 
-  autoscaling_min_capacity  = 1                                  # Set minimum number of tasks to run in Gateway Service.
-  target_cpu_utilization    = 70                                 # Set target CPU utilization % that ECS autoscaling should try to maintain for Gateway tasks.
-  target_memory_utilization = 70                                 # Set target Memory utilization that ECS autoscaling should try to maintain for Gateway tasks.
-  scale_in_cooldown         = 120                                # Amount of time (seconds) wait after a scale in activity before another scale in activity can start.
-  scale_out_cooldown        = 60                                 # Amount of time (seconds) wait after a scale out activity before another scale out activity can start.
-}
+# gateway_desired_task = 1                                            # Set desired replica of gateway tasks to run in Gateway Service.
+# gateway_cpu          = 256                                          # Set the number of cpu units used by the tasks.
+# gateway_memory       = 1024                                         # Set the Amount (in MiB) of memory used by the tasks.
+# gateway_enable_autoscaling = true                                 # Set to true to enable autoscaling for Gateway Service. Default false. 
+# gateway_min_capacity = 1                                          # Set minimum number of tasks to run in Gateway Service.
+# gateway_max_capacity = 3                                          # Set maximmum number of tasks to run in Gateway Service.
+# gateway_target_cpu_utilization = 70                               # Set target CPU utilization % that ECS autoscaling should try to maintain for Gateway tasks.
+# gateway_target_memory_utilization = 70                            # Set target Memory utilization that ECS autoscaling should try to maintain for Gateway tasks.
+# gateway_scale_in_cooldown = 120                                   # Amount of time (seconds) wait after a scale in activity before another scale in activity can start.
+# gateway_scale_out_cooldown = 60                                   # Amount of time (seconds) wait after a scale out activity before another scale out activity can start.
+
 
 ###########################################################################
-#                        Data Service Configuration                       #
+#                       DATA SERVICE CONFIGURATION                        #
 ###########################################################################
 
-dataservice_config = {
-  enable_dataservice = true                                      # Set to true to enable Data Service for deployment. Default false.
-  desired_task_count = 1                                         # Set desired replica of tasks to run in Data Service.
-  cpu                = 256                                       # Set the number of cpu units used by the tasks.
-  memory             = 1024                                      # Set the Amount (in MiB) of memory used by the tasks.
-}
+enable_dataservice = false
+# dataservice_desired_task = 1                                        # Set desired replica of dataservice tasks to run in Data Service.
+# dataservice_cpu          = 256                                      # Set the number of cpu units used by the tasks.
+# dataservice_memory       = 1024                                     # Set the Amount (in MiB) of memory used by the tasks.
+# dataservice_enable_autoscaling = true                               # Set to true to enable autoscaling for Data Service. Default false. 
+# dataservice_min_capacity = 1                                        # Set minimum number of tasks to run in Data Service.
+# dataservice_max_capacity = 3                                        # Set maximmum number of tasks to run in Data Service.
+# dataservice_target_cpu_utilization = 70                             # Set target CPU utilization % that ECS autoscaling should try to maintain for Data tasks.
+# dataservice_target_memory_utilization = 70                          # Set target Memory utilization that ECS autoscaling should try to maintain for Data tasks.
+# dataservice_scale_in_cooldown = 120                                 # Amount of time (seconds) wait after a scale in activity before another scale in activity can start.
+# dataservice_scale_out_cooldown = 60                                 # Amount of time (seconds) wait after a scale out activity before another scale out activity can start.
 
-# (Optional) Configure autoscaling for gateway service
-dataservice_autoscaling = {
-  enable_autoscaling        = true                               # Set to true to enable autoscaling for Data Service. Default false.
-  autoscaling_max_capacity  = 3                                  # Set maximum number of tasks to run in Gateway Service. 
-  autoscaling_min_capacity  = 1                                  # Set minimum number of tasks to run in Gateway Service.
-  target_cpu_utilization    = 70                                 # Set target CPU utilization % that ECS autoscaling should try to maintain for Gateway tasks.
-  target_memory_utilization = 70                                 # Set target Memory utilization that ECS autoscaling should try to maintain for Gateway tasks.
-  scale_in_cooldown         = 120                                # Amount of time (seconds) wait after a scale in activity before another scale in activity can start.
-  scale_out_cooldown        = 60                                 # Amount of time (seconds) wait after a scale out activity before another scale out activity can start.
-}
 
 ###########################################################################
 #                           REDIS CONFIGURATION                           #
@@ -143,14 +133,14 @@ object_storage = {
 #                            AMAZON BEDROCK ACCESS                        #
 ###########################################################################
 
-enable_bedrock_access = false
+# enable_bedrock_access = false
 
 ###########################################################################
 #                       LOAD BALANCER CONFIGURATION                       #
 ###########################################################################
 
-create_nlb = true                                              # Set to true to create a Network Load Balancer (NLB), or false to skip creating one. 
-internal_nlb = true                                            # Set to true to create an internal NLB, or false to create an internet-facing NLB.
-allowed_nlb_cidrs = ["X.X.X.X/Y"]                              # Provide a list of CIDR ranges to whitelist in NLB's Security Group.
-tls_certificate_arn = ""                                       # (Optional) Provide ACM certificate ARN to enable TLS-based listeners.
-enable_blue_green = true                                       # Set to true to enable blue-green deployment for Gateway Service.
+# create_nlb = true                                              # Set to true to create a Network Load Balancer (NLB), or false to skip creating one. 
+# internal_nlb = true                                            # Set to true to create an internal NLB, or false to create an internet-facing NLB.
+# allowed_nlb_cidrs = ["X.X.X.X/Y"]                              # Provide a list of CIDR ranges to whitelist in NLB's Security Group.
+# tls_certificate_arn = ""                                       # (Optional) Provide ACM certificate ARN to enable TLS-based listeners.
+# enable_blue_green = true                                       # Set to true to enable blue-green deployment for Gateway Service.

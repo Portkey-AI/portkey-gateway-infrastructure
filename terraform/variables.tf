@@ -211,61 +211,200 @@ variable "redis_image" {
 ###########################################################################
 #                     GATEWAY SERVICE CONFIGURATION                       #
 ###########################################################################
-variable "gateway_config" {
-  description = "Configure details of Gateway Service Tasks"
-  type = object({
-    desired_task_count = optional(number, 1) # Set desired number of task to run in Gateway Service.
-    cpu                = optional(number, 256)
-    memory             = optional(number, 1024)
-  })
+variable "gateway_desired_task" {
+  description = "Configure desired number of Gateway Service Tasks to run."
+  type = number
+  default = 1
 }
 
-variable "gateway_autoscaling" {
-  description = "Configure autoscaling for Gateway Service."
-  type = object({
-    enable_autoscaling        = optional(bool, false)
-    autoscaling_max_capacity  = optional(number, 1) # Maximum number of tasks to run in Gateway Service. 
-    autoscaling_min_capacity  = optional(number, 1)
-    target_cpu_utilization    = optional(number, null)
-    target_memory_utilization = optional(number, null)
-    scale_in_cooldown         = optional(number, 120)
-    scale_out_cooldown        = optional(number, 60)
-  })
+variable "gateway_cpu" {
+  description = "Configure cpu for Gateway Service Tasks."
+  type = number
+  default = 256
 }
 
-###########################################################################
-#                        Data Service Configuration                       #
-###########################################################################
-
-variable "dataservice_config" {
-  description = "Configure details of Data Service Tasks."
-  type = object({
-    enable_dataservice = optional(bool, false)
-    desired_task_count = optional(number, 1)
-    cpu                = optional(number, 256)
-    memory             = optional(number, 1024)
-  })
+variable "gateway_memory" {
+  description = "Configure memory for Gateway Service Tasks."
+  type = number
+  default = 1024
 }
 
-variable "dataservice_autoscaling" {
-  description = "Configure autoscaling for Data Service"
-  type = object({
-    enable_autoscaling        = optional(bool, false)
-    autoscaling_max_capacity  = optional(number, 1)
-    autoscaling_min_capacity  = optional(number, 1)
-    target_cpu_utilization    = optional(number, null)
-    target_memory_utilization = optional(number, null)
-    scale_in_cooldown         = optional(number, 120)
-    scale_out_cooldown        = optional(number, 60)
-  })
-  default = {
-    enable_autoscaling = false
+variable "gateway_enable_autoscaling" {
+  description = "Specify whether to enable autosclaing on Gateway tasks."
+  type = bool
+  default = false
+}
+
+variable "gateway_min_capacity" {
+  description = "Specify minimum number of task to run in Gateway Service."
+  type = number
+  default = 1
+}
+
+variable "gateway_max_capacity" {
+  description = "Specify maximum number of task to run in Gateway Service."
+  type = number
+  default = 3
+}
+
+variable "gateway_target_cpu_utilization" {
+  description = "Specify target cpu utilization % that ECS autoscaling should try to maintain for Gateway tasks."
+  type = number
+  default = null
+  validation {
+    condition = (
+      var.gateway_target_cpu_utilization == null || 
+      (var.gateway_target_cpu_utilization <= 100 && var.gateway_target_cpu_utilization > 0)
+    )
+    error_message = "'gateway_target_cpu_utilization' must be between 0-100."
   }
+  validation {
+    condition = (
+      !var.gateway_enable_autoscaling || 
+      var.gateway_target_cpu_utilization != null || 
+      var.gateway_target_memory_utilization != null
+    )
+    error_message = "When 'gateway_enable_autoscaling' is true, at least one of 'gateway_target_cpu_utilization' or 'gateway_target_memory_utilization' must be set."
+  }
+}
+
+variable "gateway_target_memory_utilization" {
+  description = "Specify target memory utilization % that ECS autoscaling should try to maintain for Gateway tasks."
+  type = number
+  default = null
+  validation {
+    condition = (
+      var.gateway_target_memory_utilization == null || 
+      (var.gateway_target_memory_utilization <= 100 && var.gateway_target_memory_utilization > 0)
+    )
+    error_message = "'gateway_target_memory_utilization' must be between 0-100."
+  }
+  validation {
+    condition = (
+      !var.gateway_enable_autoscaling || 
+      var.gateway_target_cpu_utilization != null || 
+      var.gateway_target_memory_utilization != null
+    )
+    error_message = "When 'gateway_enable_autoscaling' is true, at least one of 'gateway_target_cpu_utilization' or 'gateway_target_memory_utilization' must be set."
+  }
+}
+
+variable "gateway_scale_in_cooldown" {
+  description = "Specify scale in cooldown (seconds)"
+  type = number
+  default = 120
+}
+
+variable "gateway_scale_out_cooldown" {
+  description = "Specify scale out cooldown (seconds)"
+  type = number
+  default = 60
+}
+
+###########################################################################
+#                       DATA SERVICE CONFIGURATION                        #
+###########################################################################
+
+variable "enable_dataservice" {
+  description = "Specify whether to deploy Data Service"
+  type = bool
+  default = false
+}
+
+variable "dataservice_desired_task" {
+  description = "Configure desired number of Data Service Tasks to run."
+  type = number
+  default = 1
+}
+
+variable "dataservice_cpu" {
+  description = "Configure cpu for Data Service Tasks."
+  type = number
+  default = 256
+}
+
+variable "dataservice_memory" {
+  description = "Configure memory for Data Service Tasks."
+  type = number
+  default = 1024
+}
+
+variable "dataservice_enable_autoscaling" {
+  description = "Specify whether to enable autosclaing on Data Service."
+  type = bool
+  default = false
+}
+
+variable "dataservice_min_capacity" {
+  description = "Specify minimum number of task to run in Data Service."
+  type = number
+  default = 1
+}
+
+variable "dataservice_max_capacity" {
+  description = "Specify maximum number of task to run in Data Service."
+  type = number
+  default = 3
+}
+
+variable "dataservice_target_cpu_utilization" {
+  description = "Specify target cpu utilization % that ECS autoscaling should try to maintain for Data Tasks."
+  type = number
+  default = null
+  validation {
+    condition = (
+      var.dataservice_target_cpu_utilization == null || 
+      (var.dataservice_target_cpu_utilization <= 100 && var.dataservice_target_cpu_utilization > 0)
+    )
+    error_message = "'dataservice_target_cpu_utilization' must be between 0-100."
+  }
+  validation {
+    condition = (
+      !var.dataservice_enable_autoscaling || 
+      var.dataservice_target_cpu_utilization != null || 
+      var.dataservice_target_memory_utilization != null
+    )
+    error_message = "When 'dataservice_enable_autoscaling' is true, at least one of 'dataservice_target_cpu_utilization' or 'dataservice_target_memory_utilization' must be set."
+  }
+}
+
+variable "dataservice_target_memory_utilization" {
+  description = "Specify target memory utilization % that ECS autoscaling should try to maintain for dataservice tasks."
+  type = number
+  default = null
+  validation {
+    condition = (
+      var.dataservice_target_memory_utilization == null || 
+      (var.dataservice_target_memory_utilization <= 100 && var.dataservice_target_memory_utilization > 0)
+    )
+    error_message = "'dataservice_target_memory_utilization' must be between 0-100."
+  }
+  validation {
+    condition = (
+      !var.dataservice_enable_autoscaling || 
+      var.dataservice_target_cpu_utilization != null || 
+      var.dataservice_target_memory_utilization != null
+    )
+    error_message = "When 'dataservice_enable_autoscaling' is true, at least one of 'dataservice_target_cpu_utilization' or 'dataservice_target_memory_utilization' must be set."
+  }
+}
+
+variable "dataservice_scale_in_cooldown" {
+  description = "Specify scale in cooldown (seconds)"
+  type = number
+  default = 120
+}
+
+variable "dataservice_scale_out_cooldown" {
+  description = "Specify scale out cooldown (seconds)"
+  type = number
+  default = 60
 }
 
 ###########################################################################
 #                            REDIS CONFIGURATION                          #
 ###########################################################################
+
 
 variable "redis_configuration" {
   description = "Configure details of Redis to be used."
@@ -325,7 +464,7 @@ variable "enable_bedrock_access" {
 variable "create_nlb" {
   description = "Create internal load balancer?"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "internal_nlb" {

@@ -1,4 +1,4 @@
-# Portkey Gateway - ECS Deployment
+# Portkey Gateway - Amazon ECS Deployment
 
 This enterprise-focused deployment guide provides comprehensive instructions for deploying Portkey Gateway on Amazon ECS clusters. Designed to meet the needs of large-scale, mission-critical applications, this guide includes specific recommendations for component sizing, high availability, and integration with monitoring systems.
 
@@ -34,8 +34,8 @@ Ensure that following tools and resources are installed and available:
 Clone the Portkey repository containing the terraform project for deploying Portkey Gateway on ECS.
 
 ```bash
-git clone https://github.com/Portkey-AI/portkey-gateway
-cd portkey-gateway/terraform
+git clone https://github.com/Portkey-AI/portkey-gateway-infrastructure
+cd portkey-gateway-infrastructure/terraform
 ```
 
 ## Store Secrets in AWS Secrets Manager
@@ -43,7 +43,7 @@ cd portkey-gateway/terraform
 Use the AWS CloudFormation template to create secrets in AWS Secrets Manager. These secrets will store your Docker credentials, client authentication keys, and other sensitive information.
 
 1. Go [AWS CloudFormation Console](https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create) to create the stack.
-2. Under **Specify template**, select **Upload a template file**, then upload the `secrets.yaml` CloudFormation template located in the `portkey-gateway/cloudformation/` directory.
+2. Under **Specify template**, select **Upload a template file**, then upload the `secrets.yaml` template located in the `portkey-gateway-infrastructure/cloudformation/` directory.
 3. On the next page, provide the following parameters:
     - **Project Details**
         - Project Name — e.g., `portkey-gateway`
@@ -61,7 +61,7 @@ Use the AWS CloudFormation template to create secrets in AWS Secrets Manager. Th
 
 ## Configuration Variables
 
-Navigate to `portkey-gateway/terraform/environments/dev` and update the `dev.tfvars` file to specify your project configuration details. The table below describes all Terraform variables available in this deployment:
+Navigate to `portkey-gateway-infrastructure/terraform/environments/dev` and update the `dev.tfvars` file to specify your project configuration details. The table below describes all Terraform variables available in this deployment:
 
 | Variable Name | Default | Required | Description |
 |--------------|---------|----------|-------------|
@@ -69,36 +69,53 @@ Navigate to `portkey-gateway/terraform/environments/dev` and update the `dev.tfv
 | `project_name` | `"portkey"` | No | Name of the Project |
 | `environment` | `"dev"` | No | Deployment environment (e.g., dev, prod) |
 | `aws_region` | - | **Yes** | AWS region to deploy resources in |
-| `environment_variables_file_path` | - | **Yes** | Relative path for environment-variables.json |
-| `secrets_file_path` | - | **Yes** | Relative path for secrets.json |
+| `environment_variables_file_path` | - | **Yes** | Relative path to the `environment-variables.json` file containing environment variables for the services. <br>For example:    `"environments/dev/environment-variables.json"` |
+| `secrets_file_path` | - | **Yes** | Relative path to the `secrets.json` file containing environment variables for the services. <br>For example: `"environments/dev/secrets.json"` |
 | **Network Configuration** | | | |
 | `create_new_vpc` | - | **Yes** | Set to true to create a new VPC. Set to false to use an existing one |
-| `vpc_cidr` | `null` | Conditional* | CIDR block for the new VPC (required if create_new_vpc is true) |
-| `num_az` | `2` | No | Number of Availability Zones to use. Recommended: at least 2 for high availability |
-| `single_nat_gateway` | `true` | No | When true, creates a single NAT Gateway shared across all private subnets, otherwise 1 NAT Gateway per AZ |
-| `vpc_id` | `null` | Conditional* | ID of the existing VPC (required if create_new_vpc is false) |
-| `public_subnet_ids` | `[]` | Conditional* | List of public subnet IDs (required if create_new_vpc is false) |
-| `private_subnet_ids` | `[]` | Conditional* | List of private subnet IDs (required if create_new_vpc is false) |
+| `vpc_cidr` | `null` | Conditional* | CIDR block for the new VPC (required if `create_new_vpc = true`) |
+| `num_az` | `2` | No | Number of Availability Zones to use (relevant if `create_new_vpc = false`)<br>**Recommended:** at least 2 for high availability |
+| `single_nat_gateway` | `true` | No | When true, creates a single NAT Gateway shared across all private subnets, otherwise 1 NAT Gateway per AZ (relevant if `create_new_vpc = false`) |
+| `vpc_id` | `null` | Conditional* | ID of the existing VPC (required if `create_new_vpc = false`) |
+| `public_subnet_ids` | `[]` | Conditional* | List of public subnet IDs (required if `create_new_vpc = false`) |
+| `private_subnet_ids` | `[]` | Conditional* | List of private subnet IDs (required if `create_new_vpc = false`) |
 | **Cluster and Capacity Provider** | | | |
 | `create_cluster` | `true` | No | Set to true to create a new ECS cluster. Set to false to use an existing one |
-| `cluster_name` | `null` | Conditional* | Name of the cluster (must be provided if create_cluster = false) |
-| `capacity_provider_name` | `null` | Conditional* | Name of the cluster capacity provider (must be provided if create_cluster = false) |
-| `instance_type` | `"t4g.medium"` | No | EC2 instance type to associate with autoscaling group |
-| `max_asg_size` | `3` | No | Maximum number of EC2 in auto scaling group |
-| `min_asg_size` | `1` | No | Minimum number of EC2 in auto scaling group |
-| `desired_asg_size` | `2` | No | Desired number of EC2 in auto scaling group |
-| `target_capacity` | `70` | No | Desired percentage of cluster resources that ECS aims to maintain |
+| `cluster_name` | `null` | Conditional* | Name of the cluster (must be provided if `create_cluster = false`) |
+| `capacity_provider_name` | `null` | Conditional* | Name of the cluster capacity provider (must be provided if `create_cluster = false`) |
+| `instance_type` | `"t4g.medium"` | No | EC2 instance type to associate with autoscaling group (relevant if `create_cluster = true`) |
+| `max_asg_size` | `3` | No | Maximum number of EC2 in auto scaling group (relevant if `create_cluster = true`) |
+| `min_asg_size` | `1` | No | Minimum number of EC2 in auto scaling group (relevant if `create_cluster = true`) |
+| `desired_asg_size` | `2` | No | Desired number of EC2 in auto scaling group (relevant if `create_cluster = true`) |
+| `target_capacity` | `70` | No | Desired percentage of cluster resources that ECS aims to maintain (relevant if `create_cluster = true`) |
 | **Image Configuration** | | | |
 | `gateway_image` | `{image="portkeyai/gateway_enterprise", tag="latest"}` | No | Container image to use for the gateway |
 | `data_service_image` | `{image="portkeyai/data-service", tag="latest"}` | No | Container image to use for the data service |
 | `docker_cred_secret_arn` | - | **Yes** | ARN of AWS Secrets Manager's secret where docker credentials shared by Portkey is stored |
 | `redis_image` | `{image="redis", tag="7.2-alpine"}` | No | Container image to use for Redis |
 | **Gateway Service Configuration** | | | |
-| `gateway_config` | - | **Yes** | Configure details of Gateway Service Tasks (object with: desired_task_count, cpu, memory) |
-| `gateway_autoscaling` | - | **Yes** | Configure autoscaling for Gateway Service (object with: enable_autoscaling, autoscaling_max_capacity, autoscaling_min_capacity, target_cpu_utilization, target_memory_utilization, scale_in_cooldown, scale_out_cooldown) |
+| `gateway_desired_task` | 1 | No | Number of tasks to run in Gateway Service |
+| `gateway_cpu` | 256 | No | CPU associated with Gateway Service tasks |
+| `gateway_memory` | 1024 | No | Memory associated with Gateway Service tasks |
+| `gateway_enable_autoscaling` | false | No | Set to `true` to enable autoscaling on Gateway Service |
+| `gateway_min_capacity` | 1 | No | Minimum number of tasks to run Gateway Service (relevant if `gateway_enable_autoscaling = true`) |
+| `gateway_max_capacity` | 3 | No | Maximum number of tasks to run Gateway Service (relevant if `gateway_enable_autoscaling = true`) |
+| `gateway_target_cpu_utilization` | null | No | % CPU utilization that ECS autoscaling should try to maintain (relevant if `gateway_enable_autoscaling = true`) |
+| `gateway_target_memory_utilization` | null | No | % memory utilization that ECS autoscaling should try to maintain (relevant if `gateway_enable_autoscaling = true`) |
+| `gateway_scale_in_cooldown` | 120 | No |  Amount of time (seconds) wait after a scale in activity before another scale in activity can start (relevant if `gateway_enable_autoscaling = true`) |
+| `gateway_scale_out_cooldown` | 60 | No |  Amount of time (seconds) wait after a scale out activity before another scale out activity can start (relevant if `gateway_enable_autoscaling = true`) |
 | **Data Service Configuration** | | | |
-| `dataservice_config` | - | **Yes** | Configure details of Data Service Tasks (object with: enable_dataservice, desired_task_count, cpu, memory) |
-| `dataservice_autoscaling` | `{enable_autoscaling=false}` | No | Configure autoscaling for Data Service |
+| `enable_dataservice` | false | No | Set to true to deploy Data Service |
+| `dataservice_desired_task` | 1 | No | Number of tasks to run in Gateway Service |
+| `dataservice_cpu` | 256 | No | CPU associated with Gateway Service tasks |
+| `dataservice_memory` | 1024 | No | Memory associated with Gateway Service tasks |
+| `dataservice_enable_autoscaling` | false | No | Set to `true` to enable autoscaling on Gateway Service |
+| `dataservice_min_capacity` | 1 | No | Minimum number of tasks to run Gateway Service (relevant if `dataservice_enable_autoscaling = true`) |
+| `dataservice_max_capacity` | 3 | No | Maximum number of tasks to run Gateway Service (relevant if `dataservice_enable_autoscaling = true`) |
+| `dataservice_target_cpu_utilization` | null | No | % CPU utilization that ECS autoscaling should try to maintain (relevant if `dataservice_enable_autoscaling = true`) |
+| `dataservice_target_memory_utilization` | null | No | % memory utilization that ECS autoscaling should try to maintain (relevant if `dataservice_enable_autoscaling = true`) |
+| `dataservice_scale_in_cooldown` | 120 | No |  Amount of time (seconds) wait after a scale in activity before another scale in activity can start (relevant if `dataservice_enable_autoscaling = true`) |
+| `dataservice_scale_out_cooldown` | 60 | No |  Amount of time (seconds) wait after a scale out activity before another scale out activity can start (relevant if `dataservice_enable_autoscaling = true`) |
 | **Redis Configuration** | | | |
 | `redis_configuration` | `{redis_type="redis"}` | No | Configure details of Redis to be used (object with: redis_type, cpu, memory, endpoint, tls, mode) |
 | **Log Store Configuration** | | | |
