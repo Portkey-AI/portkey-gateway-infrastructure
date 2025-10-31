@@ -71,20 +71,19 @@ Gateway containers require certain configuration details to be provided through 
 Non-sensitive information can be supplied by updating the **environment-variables.json** file (for example `environments/dev/environment-variables.json`).
 ```JSON
 {
-    # Environment Variables for Data Service
    "data-service":{
       "SERVICE_NAME":"data-service",
       "GATEWAY_BASE_URL":"http://gateway:8787",
       "ANALYTICS_STORE":"control_plane",
       "LOG_STORE":"s3_assume",
       "ENABLE_LOKI":"true",
-      "ENABLE_PROMETHEUS":"true",                           # Set to "false" to disable prometheus metrics.
+      "ENABLE_PROMETHEUS":"true",                          
       "PROMETHEUS_PUSH_ENABLED":"true",
       "LOKI_PUSH_ENABLED":"true",
       "HYBRID_DEPLOYMENT":"ON",
       "NODE_DEBUG":"dataservice:*"
    },
-   # Environment Variables for Gateway Service
+   
    "gateway":{
       "SERVICE_NAME":"gateway",
       "DATASERVICE_BASEPATH":"http://data-service:8081",
