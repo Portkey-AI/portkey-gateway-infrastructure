@@ -63,7 +63,7 @@ Use the AWS CloudFormation template to create secrets in AWS Secrets Manager. Th
     - **DockerCredentialsSecretArn**
     - **ClientOrgSecretNameArn**
 
-## Update Environment and Secrets
+## Update Environment Variables
 Gateway containers require certain configuration details to be provided through environment variables — for example, ClientAuth, your Portkey account organization_id, the analytics store being used, and whether to push Prometheus metrics. Depending on the sensitivity of each variable, they can be provided in one of two ways:
 
 **Non-Sensitive Variables**
@@ -114,7 +114,7 @@ Sensitive variables like ClientAuthKey and Organisation ID should be stored secu
 }
 ```
 
-## Configuration Variables
+## Configure Terraform Variables
 
 Navigate to `portkey-gateway-infrastructure/terraform/environments/dev` and update the `dev.tfvars` file to specify your project configuration details. The table below describes all Terraform variables available in this deployment:
 
