@@ -63,6 +63,58 @@ Use the AWS CloudFormation template to create secrets in AWS Secrets Manager. Th
     - **DockerCredentialsSecretArn**
     - **ClientOrgSecretNameArn**
 
+## Update Environment and Secrets
+Gateway containers require certain configuration details to be provided through environment variables — for example, ClientAuth, your Portkey account organization_id, the analytics store being used, and whether to push Prometheus metrics. Depending on the sensitivity of each variable, they can be provided in one of two ways:
+
+**Non-Sensitive Variables**
+
+Non-sensitive information can be supplied by updating the **environment-variables.json** file (for example `environments/dev/environment-variables.json`).
+```JSON
+{
+    # Environment Variables for Data Service
+   "data-service":{
+      "SERVICE_NAME":"data-service",
+      "GATEWAY_BASE_URL":"http://gateway:8787",
+      "ANALYTICS_STORE":"control_plane",
+      "LOG_STORE":"s3_assume",
+      "ENABLE_LOKI":"true",
+      "ENABLE_PROMETHEUS":"true",                           # Set to "false" to disable prometheus metrics.
+      "PROMETHEUS_PUSH_ENABLED":"true",
+      "LOKI_PUSH_ENABLED":"true",
+      "HYBRID_DEPLOYMENT":"ON",
+      "NODE_DEBUG":"dataservice:*"
+   },
+   # Environment Variables for Gateway Service
+   "gateway":{
+      "SERVICE_NAME":"gateway",
+      "DATASERVICE_BASEPATH":"http://data-service:8081",
+      "ANALYTICS_STORE":"control_plane",
+      "LOG_STORE":"s3_assume"
+   }
+}
+```
+
+These variables can then be passed to Terraform by specifying the path to the `environment-variables.json` file in the `environment_variables_file_path` variable within the `dev.tfvars` file.
+
+**Sensitive Variables**
+
+Sensitive variables like ClientAuthKey and Organisation ID should be stored securely in AWS Secrets Manager, and their corresponding Secret ARNs can then be referenced in the **secrets**.json file (for example, `environments/dev/secrets.json`).
+
+```json
+{   
+    "_comment": "Replace <ClientOrgSecretNameArn> with the value of ClientOrgSecretNameArn obtained from the Outputs section of your CloudFormation stack.",
+
+   "gateway":{
+      "PORTKEY_CLIENT_AUTH":"<ClientOrgSecretNameArn>",       
+      "ORGANISATIONS_TO_SYNC":"<ClientOrgSecretNameArn>"
+   },
+   "data-service":{
+      "PORTKEY_CLIENT_AUTH":"<ClientOrgSecretNameArn>",
+      "ORGANISATIONS_TO_SYNC":"<ClientOrgSecretNameArn>"
+   }
+}
+```
+
 ## Configuration Variables
 
 Navigate to `portkey-gateway-infrastructure/terraform/environments/dev` and update the `dev.tfvars` file to specify your project configuration details. The table below describes all Terraform variables available in this deployment:
@@ -166,6 +218,7 @@ key = "<S3_KEY_PATH>"
 # Replace "<AWS_REGION>" with AWS region in which S3 bucket resides (e.g., us-east-1).
 region = "<AWS_REGION>"
 ```
+
 
 ### Initialize Terraform
 
