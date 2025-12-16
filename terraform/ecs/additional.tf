@@ -1,36 +1,46 @@
 ################################################################################
-# File: terraform/additonal-resources.tf
+# File: terraform/additional-resources.tf
 ################################################################################
 
 
 # Allow traffic to load balancer on prod port
-resource "aws_vpc_security_group_ingress_rule" "nlb_prod_listener_ingress" {
-  count             = length(local.allowed_nlb_cidrs)
-  security_group_id = module.gateway.load_balancer_security_group_id
+resource "aws_vpc_security_group_ingress_rule" "lb_prod_listener_ingress" {
+  count             = length(local.allowed_lb_cidrs)
+  security_group_id = module.gateway.lb_security_group_id
   ip_protocol       = "tcp"
   from_port         = var.tls_certificate_arn != "" ? 443 : 80
   to_port           = var.tls_certificate_arn != "" ? 443 : 80
-  cidr_ipv4         = local.allowed_nlb_cidrs[count.index]
+  cidr_ipv4         = local.allowed_lb_cidrs[count.index]
 }
 
 # Allow traffic to load balancer on test port
-resource "aws_vpc_security_group_ingress_rule" "nlb_test_listener_ingress" {
-  count             = var.create_nlb && var.enable_blue_green ? length(local.allowed_nlb_cidrs) : 0
-  security_group_id = module.gateway.load_balancer_security_group_id
+resource "aws_vpc_security_group_ingress_rule" "lb_test_listener_ingress" {
+  count             = var.create_lb && var.enable_blue_green ? length(local.allowed_lb_cidrs) : 0
+  security_group_id = module.gateway.lb_security_group_id
   ip_protocol       = "tcp"
   from_port         = var.tls_certificate_arn != "" ? 8443 : 8080
   to_port           = var.tls_certificate_arn != "" ? 8443 : 8080
-  cidr_ipv4         = local.allowed_nlb_cidrs[count.index]
+  cidr_ipv4         = local.allowed_lb_cidrs[count.index]
 }
 
 # Allow traffic from load balancer
-resource "aws_vpc_security_group_ingress_rule" "gateway_service_nlb_ingress" {
-  count                        = var.create_nlb ? 1 : 0
+resource "aws_vpc_security_group_ingress_rule" "gateway_service_lb_ingress" {
+  count                        = var.create_lb && (var.server_mode == "both" || var.server_mode == "llm_gateway") ? 1 : 0
   security_group_id            = module.gateway.ecs_service_security_group_id
   ip_protocol                  = "tcp"
   from_port                    = 8787
   to_port                      = 8787
-  referenced_security_group_id = module.gateway.load_balancer_security_group_id
+  referenced_security_group_id = module.gateway.lb_security_group_id
+}
+
+# Allow traffic from load balancer
+resource "aws_vpc_security_group_ingress_rule" "mcp_service_lb_ingress" {
+  count                        = var.create_lb && (var.server_mode == "both" || var.server_mode == "mcp_gateway") ? 1 : 0
+  security_group_id            = module.gateway.ecs_service_security_group_id
+  ip_protocol                  = "tcp"
+  from_port                    = 8788
+  to_port                      = 8788
+  referenced_security_group_id = module.gateway.lb_security_group_id
 }
 
 
@@ -57,7 +67,7 @@ resource "aws_vpc_security_group_ingress_rule" "gateway_from_dataservice_ingress
 
 # Allow traffic to redis from gateway service
 resource "aws_vpc_security_group_ingress_rule" "redis_lb_from_gateway_ingress" {
-  count                        = var.redis_configuration.redis_type == "redis" ? 1 : 0
+  count                        = var.redis_type == "redis" ? 1 : 0
   security_group_id            = module.redis[0].ecs_service_security_group_id
   ip_protocol                  = "tcp"
   from_port                    = 6379
@@ -67,7 +77,7 @@ resource "aws_vpc_security_group_ingress_rule" "redis_lb_from_gateway_ingress" {
 
 # Allow traffic to redis from data service
 resource "aws_vpc_security_group_ingress_rule" "redis_lb_from_dataservice_ingress" {
-  count                        = var.redis_configuration.redis_type == "redis" && var.dataservice_config.enable_dataservice ? 1 : 0
+  count                        = var.redis_type == "redis" && var.dataservice_config.enable_dataservice ? 1 : 0
   security_group_id            = module.redis[0].ecs_service_security_group_id
   ip_protocol                  = "tcp"
   from_port                    = 6379

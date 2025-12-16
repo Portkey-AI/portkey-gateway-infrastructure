@@ -74,18 +74,16 @@ docker_cred_secret_arn =                                          # "<DockerCred
 #                     GATEWAY SERVICE CONFIGURATION                       #
 ###########################################################################
 
-
 # gateway_desired_task = 1                                            # Set desired replica of gateway tasks to run in Gateway Service.
 # gateway_cpu          = 256                                          # Set the number of cpu units used by the tasks.
 # gateway_memory       = 1024                                         # Set the Amount (in MiB) of memory used by the tasks.
-# gateway_enable_autoscaling = true                                 # Set to true to enable autoscaling for Gateway Service. Default false. 
-# gateway_min_capacity = 1                                          # Set minimum number of tasks to run in Gateway Service.
-# gateway_max_capacity = 3                                          # Set maximmum number of tasks to run in Gateway Service.
-# gateway_target_cpu_utilization = 70                               # Set target CPU utilization % that ECS autoscaling should try to maintain for Gateway tasks.
-# gateway_target_memory_utilization = 70                            # Set target Memory utilization that ECS autoscaling should try to maintain for Gateway tasks.
-# gateway_scale_in_cooldown = 120                                   # Amount of time (seconds) wait after a scale in activity before another scale in activity can start.
-# gateway_scale_out_cooldown = 60                                   # Amount of time (seconds) wait after a scale out activity before another scale out activity can start.
-
+# gateway_enable_autoscaling = true                                   # Set to true to enable autoscaling for Gateway Service. Default false. 
+# gateway_min_capacity = 1                                            # Set minimum number of tasks to run in Gateway Service.
+# gateway_max_capacity = 3                                            # Set maximmum number of tasks to run in Gateway Service.
+# gateway_target_cpu_utilization = 70                                 # Set target CPU utilization % that ECS autoscaling should try to maintain for Gateway tasks.
+# gateway_target_memory_utilization = 70                              # Set target Memory utilization that ECS autoscaling should try to maintain for Gateway tasks.
+# gateway_scale_in_cooldown = 120                                     # Amount of time (seconds) wait after a scale in activity before another scale in activity can start.
+# gateway_scale_out_cooldown = 60                                     # Amount of time (seconds) wait after a scale out activity before another scale out activity can start.
 
 ###########################################################################
 #                       DATA SERVICE CONFIGURATION                        #
@@ -103,7 +101,6 @@ enable_dataservice = false
 # dataservice_scale_in_cooldown = 120                                 # Amount of time (seconds) wait after a scale in activity before another scale in activity can start.
 # dataservice_scale_out_cooldown = 60                                 # Amount of time (seconds) wait after a scale out activity before another scale out activity can start.
 
-
 ###########################################################################
 #                           REDIS CONFIGURATION                           #
 ###########################################################################
@@ -115,19 +112,15 @@ redis_type = "redis"                                                  # Set to '
 # redis_tls        = false                                              # Set to true if tls is enabled on Amazon ElastiCache
 # redis_mode       = "standalone"                                       # Set to 'cluster' if cluster mode is enabled on Amazon ElastiCache, otherwise set it to standalone.
 
-
-
 ###########################################################################
 #                           LOG STORE CONFIGURATION                       #
 ###########################################################################
 object_storage = {
   log_store_bucket   = "<BUCKET_NAME>"                               # Specify the S3 bucket where logs will be stored.
   bucket_region      = "<AWS_REGION>"                                # Specify AWS region where buckets exists.
-  # log_exports_bucket = ""                                          # (Optional) Specify bucket for logs, only required if using data service.
-  # finetune_bucket    = ""                                          # (Optional) Specify bucket for where dataset will be stored for finetuning LLM models.
+  # log_exports_bucket = ""                                          # (Optional) (Optional) Specify bucket for logs exports, if not specified `log_store_bucket` will be used for log exports.
+  # finetune_bucket    = ""                                          # (Optional) Specify bucket where dataset will be stored for finetuning LLM models.
 }
-
-
 
 ###########################################################################
 #                            AMAZON BEDROCK ACCESS                        #

@@ -24,10 +24,19 @@ variable "container_config" {
     docker_repository_name = optional(string, "")
     docker_cred_secret_arn = optional(string, "")
     image_tag              = optional(string, "latest")
-    app_protocol           = optional(string, null)
     container_name         = string
-    container_port         = number
-    container_port_name    = string
+
+    # Single port configuration (legacy - use container_ports for multiple ports)
+    container_port      = optional(number, null)
+    container_port_name = optional(string, null)
+    app_protocol        = optional(string, null)
+
+    # Multiple ports configuration
+    container_ports = optional(list(object({
+      container_port      = number
+      container_port_name = string
+      app_protocol        = optional(string, null)
+    })), [])
 
     # Environment variables and secrets
     environment_variables = optional(map(string), {})
@@ -110,25 +119,31 @@ variable "ecs_service_config" {
     enable_execute_command             = optional(bool, true)
 
     capacity_provider = string
+    
 
     # Deployment Strategy
     enable_blue_green = optional(bool, false)
-
+    lifecycle_hooks = optional(list(object({
+      hook_target_arn = string
+      role_arn = string
+      lifecycle_stages = list(string)
+      hook_details = optional(string, null)
+    })),[])
     log_config = object({
       enable_logging    = optional(bool, true)
       retention_in_days = optional(number, 14)
     })
 
-    service_connect_config = optional(object({
+    service_connect_config = optional(list(object({
       enabled        = bool
       namespace      = optional(string)
       discovery_name = optional(string)
       port_name      = optional(string)
       client_alias = optional(object({
-        port     = string
+        port     = number
         dns_name = string
       }))
-    }), { enabled = false })
+    })), [])
 
     service_autoscaling_config = optional(object({
       enable                    = optional(bool, false)
@@ -164,12 +179,8 @@ variable "load_balancer_config" {
     enable_cross_zone_load_balancing = optional(bool, false)
 
 
-    # Health Check
-    container_name        = optional(string, "app") # Name of container to associate with load balancer
-    container_port        = optional(number, 80)    # Port on the container to associate with the load balancer.
-    health_check_path     = optional(string, "/health")
-    health_check_matcher  = optional(string, "200")
-    health_check_protocol = optional(string, "HTTP")
+    # Container to associate with load balancer
+    container_name = optional(string, "app")
 
 
     # Production Listener Configuration
@@ -187,6 +198,20 @@ variable "load_balancer_config" {
       certificate_arn = optional(string, null) # Required only if HTTPS or TLS
       ssl_policy      = optional(string, "ELBSecurityPolicy-TLS13-1-2-2021-06")
     }), null)
+
+    # Access Logs Configuration
+    enable_access_logs = optional(bool, false)
+    access_logs_bucket = optional(string, "")
+    access_logs_prefix = optional(string, "")
+
+    # Routing Rules (host-based for ALB, single rule for NLB)
+    routing_rules = optional(list(object({
+      name              = string                          # Unique name for the rule
+      priority          = number                          # Priority of the rule (lower = higher priority)
+      container_port    = number                          # Container port to forward traffic to
+      health_check_path = optional(string, "/health")     # Health check path for the target group
+      host_headers      = optional(list(string), [])      # Host headers for ALB (e.g., ["api.example.com"])
+    })), [])
   })
   default = {
     create_lb = false

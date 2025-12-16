@@ -38,7 +38,7 @@ module "data_service" {
     cpu    = var.dataservice_config.cpu
     memory = var.dataservice_config.memory
     task_role_policy_arns_map = local.data_service_task_role_policies
-    track_latest = true # If set to true ECS automatically updates the service to use the latest task definition revision whenever a new one is registered.
+    track_latest = true 
   }
 
   # ECS Service Configuration
@@ -51,14 +51,15 @@ module "data_service" {
     health_check_grace_period_seconds  = 150
     enable_execute_command             = true
     capacity_provider                  = local.capacity_provider_name
-    enable_blue_green                  = false # Define where to ena
+    enable_blue_green                  = false
 
     log_config = {
       enable_logging    = true
       retention_in_days = 14
     }
 
-    service_connect_config = {
+    service_connect_config = [
+      {
       enabled        = true
       namespace      = local.namespace
       discovery_name = "data-service"
@@ -68,6 +69,7 @@ module "data_service" {
         dns_name = "data-service"
       }
     }
+    ]
 
     service_autoscaling_config = {
       enable                    = var.dataservice_autoscaling.enable_autoscaling

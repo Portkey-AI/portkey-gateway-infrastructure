@@ -20,7 +20,7 @@ data "aws_vpc" "vpc" {
 
 locals {
 
-  account_id = data.aws_caller_identity.current
+  account_id = data.aws_caller_identity.current.account_id
 
   region = var.aws_region
 
@@ -41,9 +41,9 @@ locals {
   cluster_name = var.create_cluster ? module.ecs_cluster[0].name : var.cluster_name
   cluster_arn  = var.create_cluster ? module.ecs_cluster[0].arn : "arn:aws:ecs:${local.region}:${local.account_id}:cluster/${local.cluster_name}"
 
-  capacity_provider_name = var.create_cluster ? module.ecs_cluster[0].autoscaling_capacity_providers["primary"].name : var.capacity_provider_name
+  capacity_provider_name = var.create_cluster ? module.ecs_cluster[0].autoscaling_capacity_providers["primary_provider"].name : var.capacity_provider_name
 
-  allowed_nlb_cidrs = length(var.allowed_nlb_cidrs) != 0 ? var.allowed_nlb_cidrs : (var.internal_nlb ? [local.vpc_cidr] : ["0.0.0.0/0"])
+  allowed_lb_cidrs = length(var.allowed_lb_cidrs) != 0 ? var.allowed_lb_cidrs : (var.internal_lb ? [local.vpc_cidr] : ["0.0.0.0/0"])
 
   # Object Storage
   log_store_bucket   = var.object_storage.log_store_bucket
@@ -58,18 +58,20 @@ locals {
   gateway_secrets = jsondecode(file("${path.module}/${var.secrets_file_path}")).gateway 
   dataservice_secrets = jsondecode(file("${path.module}/${var.secrets_file_path}")).data-service
   
-  # Contruct environement variables for gateway service
+  # Construct environment variables for gateway service
   common_env = {
     CACHE_STORE = var.redis_type
     REDIS_URL = var.redis_type == "redis" ? (
       "redis://redis:6379"
     ) : (var.redis_endpoint)
-    REDIS_TLS_ENABLED = var.redis_tls ? "true" : "false"
+    REDIS_TLS_ENABLED = var.redis_tls_enabled ? "true" : "false"
     REDIS_MODE        = var.redis_mode
     LOG_STORE_REGION  = var.object_storage.bucket_region
   }
 
   gateway_env = {
+    SERVER_MODE                  = var.server_mode == "both" ? "all" : (var.server_mode == "mcp_gateway" ? "mcp" : "")
+    MCP_PORT                    =  var.server_mode == "both" || var.server_mode == "mcp_gateway" ? 8788 : null
     LOG_STORE_GENERATIONS_BUCKET = var.object_storage.log_store_bucket
     DATASERVICE_BASEPATH         = var.dataservice_config.enable_dataservice ? "http://data-service:8081" : null
   }
@@ -79,6 +81,34 @@ locals {
     FINETUNES_BUCKET       = local.finetune_bucket != "" ? local.finetune_bucket : local.log_store_bucket
     AWS_S3_FINETUNE_BUCKET = local.finetune_bucket != "" ? local.finetune_bucket : local.log_store_bucket
   }
+
+  routing_rules = [
+    for rule in [
+      # For ALB: create host-based routing rules
+      var.lb_type == "application" && (var.server_mode == "both" || var.server_mode == "llm_gateway") && var.llm_gateway_host != "" ? {
+        name              = "gateway"
+        priority          = 100
+        container_port    = 8787
+        health_check_path = "/v1/health"
+        host_headers      = [ var.llm_gateway_host ]
+      } : null,
+      var.lb_type == "application" && (var.server_mode == "both" || var.server_mode == "mcp_gateway") && var.mcp_gateway_host != "" ? {
+        name              = "mcp"
+        priority          = 200
+        container_port    = 8788
+        health_check_path = "/v1/health"
+        host_headers      = [ var.mcp_gateway_host ]
+      } : null,
+      # For NLB: create a single default rule (NLB doesn't support host-based routing)
+      var.lb_type == "network" ? {
+        name              = "default"
+        priority          = 100
+        container_port    = var.server_mode == "both" || var.server_mode == "llm_gateway" ? 8787 : 8788
+        health_check_path = "/v1/health"
+        host_headers      = []
+      } : null,
+    ] : rule if rule != null
+  ] 
 
   namespace = "portkey"
 
@@ -90,7 +120,6 @@ locals {
       bedrock_access_policy_arn = aws_iam_policy.bedrock_access_policy[0].arn
     } : {}
   )
-
 
   data_service_task_role_policies = {
     s3_access_policy_arn      = aws_iam_policy.s3_access_policy.arn,

@@ -13,7 +13,7 @@ output "ecs_service_arn" {
 }
 
 output "ecs_service_security_group_id" {
-  description = "Security Group ID of the Load Balancer"
+  description = "Security Group ID of the Service"
   value       = aws_security_group.service_sg.id
 }
 
@@ -22,22 +22,18 @@ output "task_definition_arn" {
   value       = aws_ecs_task_definition.task_definition.arn
 }
 
-output "load_balancer_dns_name" {
+output "lb_dns_name" {
+
   description = "DNS name of the LB"
   value       = try(aws_lb.lb[0].dns_name, null)
 }
 
-output "load_balancer_arn" {
+output "lb_arn" {
   description = "ARN of the Load Balancer"
   value       = try(aws_lb.lb[0].arn, null)
 }
 
-output "load_balancer_security_group_id" {
+output "lb_security_group_id" {
   description = "Security Group ID of the Load Balancer"
   value       = try(aws_security_group.lb_sg[0].id, null)
-}
-
-output "service_connect_enabled" {
-  description = "Whether Service Connect is enabled"
-  value       = local.service_connect_enabled
 }

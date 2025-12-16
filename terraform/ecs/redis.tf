@@ -29,8 +29,8 @@ module "redis" {
 
   # Task Definition Configuration
   task_definition_config = {
-    cpu    = var.redis_cpu
-    memory = var.redis_memory 
+    cpu    = var.redis_configuration.cpu
+    memory = var.redis_configuration.memory 
   }
 
   # ECS Service Configuration
@@ -50,7 +50,8 @@ module "redis" {
       retention_in_days = 7
     }
 
-    service_connect_config = {
+    service_connect_config = [
+      {
       enabled        = true
       namespace      = local.namespace
       discovery_name = "redis"
@@ -60,6 +61,7 @@ module "redis" {
         dns_name = "redis"
       }
     }
+    ]
 
     service_autoscaling_config = {
       enable = false

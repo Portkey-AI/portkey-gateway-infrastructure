@@ -18,14 +18,14 @@ module "ecs_cluster" {
   }
 
   default_capacity_provider_strategy = {
-    primary = {
+    primary_provider = {
       weight = 100
       base   = 0
     }
   }
 
   autoscaling_capacity_providers = {
-    primary = {
+    primary_provider = {
       auto_scaling_group_arn         = module.autoscaling["primary_provider"].autoscaling_group_arn
       managed_draining               = "ENABLED"
       managed_termination_protection = "ENABLED"

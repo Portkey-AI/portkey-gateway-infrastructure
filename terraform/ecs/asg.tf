@@ -18,8 +18,10 @@ module "autoscaling" {
       mixed_instances_policy     = null
       user_data = (<<-EOF
         #!/bin/bash
+        aws ecs put-account-setting --name awsvpcTrunking --value enabled
         echo ECS_CLUSTER=${var.project_name}-cluster >> /etc/ecs/ecs.config
         echo ECS_ENABLE_CONTAINER_METADATA=true >> /etc/ecs/ecs.config
+        echo ECS_ENABLE_TASK_IAM_ROLE=true >> /etc/ecs/ecs.config
       EOF
       )
     }
@@ -54,6 +56,25 @@ module "autoscaling" {
   protect_from_scale_in = true
 }
 
+# Create Policy allowing EC2 to enabled VPC Trunking
+resource "aws_iam_role_policy" "ecs_instance_vpc_trunking_policy" {
+  name = "ecsInstanceVpcTrunkingPolicy-${var.project_name}-${var.environment}-policy"
+  role = module.autoscaling["primary_provider"].iam_role_name
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ecs:ListAccountSettings",
+          "ecs:ListAttributes",
+          "ecs:PutAccountSetting"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
 
 # Create security group for EC2 associated with autoscaling group.
 module "autoscaling_sg" {

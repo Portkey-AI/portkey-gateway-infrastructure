@@ -36,7 +36,7 @@ locals {
 
   service_name = var.ecs_service_config.service_name
 
-  service_namespace = var.ecs_service_config.service_connect_config.namespace != null ? var.ecs_service_config.service_connect_config.namespace : null
+  service_namespace = length(var.ecs_service_config.service_connect_config) > 0 ? var.ecs_service_config.service_connect_config[0].namespace : null
 
   # Extract namespace arn
   namespace_arn = data.aws_service_discovery_http_namespace.service_namespace[0].arn
@@ -65,7 +65,7 @@ locals {
   lb_type     = var.load_balancer_config.type
   lb_internal = var.load_balancer_config.lb_internal
 
-  service_connect_enabled = var.ecs_service_config.service_connect_config.enabled
+  service_connect_enabled = length(var.ecs_service_config.service_connect_config) > 0
 
   # Build container definition
   containers_definition = jsonencode([
@@ -82,8 +82,16 @@ locals {
         ) ? {
         credentialsParameter = container.docker_cred_secret_arn
       } : null
-      # Port mappings
-      portMappings = [
+      # Port mappings - supports both single port (legacy) and multiple ports
+      portMappings = length(container.container_ports) > 0 ? [
+        for port in container.container_ports : {
+          name          = port.container_port_name
+          appProtocol   = port.app_protocol
+          containerPort = port.container_port
+          hostPort      = port.container_port
+          protocol      = "tcp"
+        }
+      ] : container.container_port != null ? [
         {
           name          = container.container_port_name
           appProtocol   = container.app_protocol
@@ -91,7 +99,7 @@ locals {
           hostPort      = container.container_port
           protocol      = "tcp"
         }
-      ]
+      ] : []
 
       # Environment variables
       environment = [
@@ -159,6 +167,16 @@ resource "aws_ecs_service" "service" {
 
   deployment_configuration {
     strategy = local.enable_bg ? "BLUE_GREEN" : "ROLLING"
+    bake_time_in_minutes = 0
+    dynamic "lifecycle_hook" {
+      for_each = var.ecs_service_config.lifecycle_hooks != null ? var.ecs_service_config.lifecycle_hooks : []
+      content {
+        hook_target_arn  = lifecycle_hook.value.hook_target_arn
+        role_arn         = lifecycle_hook.value.role_arn
+        lifecycle_stages = lifecycle_hook.value.lifecycle_stages
+        hook_details     = lifecycle_hook.value.hook_details
+      }
+    }
   }
 
   dynamic "deployment_circuit_breaker" {
@@ -169,19 +187,35 @@ resource "aws_ecs_service" "service" {
     }
   }
 
+  # Load balancer blocks for each routing rule (with Blue/Green support)
   dynamic "load_balancer" {
-    for_each = local.create_lb ? [1] : []
+    for_each = local.create_lb ? {
+      for rule in var.load_balancer_config.routing_rules : rule.name => rule
+    } : {}
     content {
-      target_group_arn = aws_lb_target_group.blue_tg[0].arn
+      target_group_arn = aws_lb_target_group.blue_tg[load_balancer.key].arn
       container_name   = var.load_balancer_config.container_name
-      container_port   = var.load_balancer_config.container_port
+      container_port   = load_balancer.value.container_port
+      
+      # Blue/Green deployment advanced configuration for ALB (uses listener rule ARNs)
       dynamic "advanced_configuration" {
-        for_each = local.enable_bg ? [1] : []
+        for_each = local.enable_bg && local.lb_type == "application" ? [1] : []
         content {
-          alternate_target_group_arn = aws_lb_target_group.green_tg[0].arn
-          production_listener_rule   = local.lb_type == "application" ? aws_lb_listener_rule.prod_rule[0].arn : aws_lb_listener.prod[0].arn
+          alternate_target_group_arn = aws_lb_target_group.green_tg[load_balancer.key].arn
+          production_listener_rule   = aws_lb_listener_rule.prod_rules[load_balancer.key].arn
           role_arn                   = aws_iam_role.ecs_load_balancer_role[0].arn
-          test_listener_rule         = local.lb_type == "application" ? aws_lb_listener_rule.test_rule[0].arn : aws_lb_listener.test[0].arn
+          test_listener_rule         = aws_lb_listener_rule.test_rules[load_balancer.key].arn
+        }
+      }
+      
+      # Blue/Green deployment advanced configuration for NLB (uses listener ARNs directly)
+      dynamic "advanced_configuration" {
+        for_each = local.enable_bg && local.lb_type == "network" ? [1] : []
+        content {
+          alternate_target_group_arn = aws_lb_target_group.green_tg[load_balancer.key].arn
+          production_listener_rule   = aws_lb_listener.prod[0].arn
+          role_arn                   = aws_iam_role.ecs_load_balancer_role[0].arn
+          test_listener_rule         = aws_lb_listener.test[0].arn
         }
       }
     }
@@ -194,20 +228,23 @@ resource "aws_ecs_service" "service" {
   }
 
   dynamic "service_connect_configuration" {
-    for_each = try(var.ecs_service_config.service_connect_config.enabled, false) ? [1] : []
+    for_each = length(var.ecs_service_config.service_connect_config) > 0 ? [1] : []
     content {
       enabled   = true
       namespace = local.namespace_arn
 
-      service {
-        discovery_name = try(var.ecs_service_config.service_connect_config.discovery_name, null)
-        port_name      = try(var.ecs_service_config.service_connect_config.port_name, null)
+      dynamic "service" {
+        for_each = [for sc in var.ecs_service_config.service_connect_config : sc if sc.enabled]
+        content {
+          discovery_name = service.value.discovery_name
+          port_name      = service.value.port_name
 
         dynamic "client_alias" {
-          for_each = var.ecs_service_config.service_connect_config.client_alias != null ? [var.ecs_service_config.service_connect_config.client_alias] : []
+            for_each = service.value.client_alias != null ? [service.value.client_alias] : []
           content {
             dns_name = client_alias.value.dns_name
             port     = client_alias.value.port
+            }
           }
         }
       }

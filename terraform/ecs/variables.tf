@@ -178,7 +178,6 @@ variable "gateway_image" {
   }
 }
 
-
 variable "data_service_image" {
   description = "Container image to use for the data service."
   type = object({
@@ -211,199 +210,120 @@ variable "redis_image" {
 ###########################################################################
 #                     GATEWAY SERVICE CONFIGURATION                       #
 ###########################################################################
-variable "gateway_desired_task" {
-  description = "Configure desired number of Gateway Service Tasks to run."
-  type = number
-  default = 1
-}
 
-variable "gateway_cpu" {
-  description = "Configure cpu for Gateway Service Tasks."
-  type = number
-  default = 256
-}
-
-variable "gateway_memory" {
-  description = "Configure memory for Gateway Service Tasks."
-  type = number
-  default = 1024
-}
-
-variable "gateway_enable_autoscaling" {
-  description = "Specify whether to enable autosclaing on Gateway tasks."
-  type = bool
-  default = false
-}
-
-variable "gateway_min_capacity" {
-  description = "Specify minimum number of task to run in Gateway Service."
-  type = number
-  default = 1
-}
-
-variable "gateway_max_capacity" {
-  description = "Specify maximum number of task to run in Gateway Service."
-  type = number
-  default = 3
-}
-
-variable "gateway_target_cpu_utilization" {
-  description = "Specify target cpu utilization % that ECS autoscaling should try to maintain for Gateway tasks."
-  type = number
-  default = null
-  validation {
-    condition = (
-      var.gateway_target_cpu_utilization == null || 
-      (var.gateway_target_cpu_utilization <= 100 && var.gateway_target_cpu_utilization > 0)
-    )
-    error_message = "'gateway_target_cpu_utilization' must be between 0-100."
-  }
-  validation {
-    condition = (
-      !var.gateway_enable_autoscaling || 
-      var.gateway_target_cpu_utilization != null || 
-      var.gateway_target_memory_utilization != null
-    )
-    error_message = "When 'gateway_enable_autoscaling' is true, at least one of 'gateway_target_cpu_utilization' or 'gateway_target_memory_utilization' must be set."
+variable "gateway_config" {
+  description = "Gateway service configuration"
+  type = object({
+    desired_task_count = number
+    cpu                = number
+    memory             = number
+  })
+  default = {
+    desired_task_count = 1
+    cpu                = 256
+    memory             = 1024
   }
 }
 
-variable "gateway_target_memory_utilization" {
-  description = "Specify target memory utilization % that ECS autoscaling should try to maintain for Gateway tasks."
-  type = number
-  default = null
-  validation {
-    condition = (
-      var.gateway_target_memory_utilization == null || 
-      (var.gateway_target_memory_utilization <= 100 && var.gateway_target_memory_utilization > 0)
-    )
-    error_message = "'gateway_target_memory_utilization' must be between 0-100."
-  }
-  validation {
-    condition = (
-      !var.gateway_enable_autoscaling || 
-      var.gateway_target_cpu_utilization != null || 
-      var.gateway_target_memory_utilization != null
-    )
-    error_message = "When 'gateway_enable_autoscaling' is true, at least one of 'gateway_target_cpu_utilization' or 'gateway_target_memory_utilization' must be set."
+variable "gateway_autoscaling" {
+  description = "Gateway service autoscaling configuration"
+  type = object({
+    enable_autoscaling        = bool
+    autoscaling_min_capacity  = number
+    autoscaling_max_capacity  = number
+    target_cpu_utilization    = number
+    target_memory_utilization = number
+    scale_in_cooldown         = number
+    scale_out_cooldown        = number
+  })
+  default = {
+    enable_autoscaling        = false
+    autoscaling_min_capacity  = 1
+    autoscaling_max_capacity  = 3
+    target_cpu_utilization    = 70
+    target_memory_utilization = 70
+    scale_in_cooldown         = 120
+    scale_out_cooldown        = 60
   }
 }
 
-variable "gateway_scale_in_cooldown" {
-  description = "Specify scale in cooldown (seconds)"
-  type = number
-  default = 120
-}
-
-variable "gateway_scale_out_cooldown" {
-  description = "Specify scale out cooldown (seconds)"
-  type = number
-  default = 60
+variable "gateway_lifecycle_hook" {
+  description = "Lifecycle hook configuration for gateway service"
+  type        = object({
+    enable_lifecycle_hook = bool
+    lifecycle_hook_stages = list(string)
+  })
+  default = {
+    enable_lifecycle_hook = false
+    lifecycle_hook_stages = []
+  }
 }
 
 ###########################################################################
 #                       DATA SERVICE CONFIGURATION                        #
 ###########################################################################
 
-variable "enable_dataservice" {
-  description = "Specify whether to deploy Data Service"
-  type = bool
-  default = false
-}
-
-variable "dataservice_desired_task" {
-  description = "Configure desired number of Data Service Tasks to run."
-  type = number
-  default = 1
-}
-
-variable "dataservice_cpu" {
-  description = "Configure cpu for Data Service Tasks."
-  type = number
-  default = 256
-}
-
-variable "dataservice_memory" {
-  description = "Configure memory for Data Service Tasks."
-  type = number
-  default = 1024
-}
-
-variable "dataservice_enable_autoscaling" {
-  description = "Specify whether to enable autosclaing on Data Service."
-  type = bool
-  default = false
-}
-
-variable "dataservice_min_capacity" {
-  description = "Specify minimum number of task to run in Data Service."
-  type = number
-  default = 1
-}
-
-variable "dataservice_max_capacity" {
-  description = "Specify maximum number of task to run in Data Service."
-  type = number
-  default = 3
-}
-
-variable "dataservice_target_cpu_utilization" {
-  description = "Specify target cpu utilization % that ECS autoscaling should try to maintain for Data Tasks."
-  type = number
-  default = null
-  validation {
-    condition = (
-      var.dataservice_target_cpu_utilization == null || 
-      (var.dataservice_target_cpu_utilization <= 100 && var.dataservice_target_cpu_utilization > 0)
-    )
-    error_message = "'dataservice_target_cpu_utilization' must be between 0-100."
-  }
-  validation {
-    condition = (
-      !var.dataservice_enable_autoscaling || 
-      var.dataservice_target_cpu_utilization != null || 
-      var.dataservice_target_memory_utilization != null
-    )
-    error_message = "When 'dataservice_enable_autoscaling' is true, at least one of 'dataservice_target_cpu_utilization' or 'dataservice_target_memory_utilization' must be set."
+variable "dataservice_config" {
+  description = "Data service configuration"
+  type = object({
+    enable_dataservice = bool
+    desired_task_count = number
+    cpu                = number
+    memory             = number
+  })
+  default = {
+    enable_dataservice = false
+    desired_task_count = 1
+    cpu                = 256
+    memory             = 1024
   }
 }
 
-variable "dataservice_target_memory_utilization" {
-  description = "Specify target memory utilization % that ECS autoscaling should try to maintain for dataservice tasks."
-  type = number
-  default = null
-  validation {
-    condition = (
-      var.dataservice_target_memory_utilization == null || 
-      (var.dataservice_target_memory_utilization <= 100 && var.dataservice_target_memory_utilization > 0)
-    )
-    error_message = "'dataservice_target_memory_utilization' must be between 0-100."
+variable "dataservice_autoscaling" {
+  description = "Data service autoscaling configuration"
+  type = object({
+    enable_autoscaling        = bool
+    autoscaling_min_capacity  = number
+    autoscaling_max_capacity  = number
+    target_cpu_utilization    = number
+    target_memory_utilization = number
+    scale_in_cooldown         = number
+    scale_out_cooldown        = number
+  })
+  default = {
+    enable_autoscaling        = false
+    autoscaling_min_capacity  = 1
+    autoscaling_max_capacity  = 3
+    target_cpu_utilization    = 70
+    target_memory_utilization = 70
+    scale_in_cooldown         = 120
+    scale_out_cooldown        = 60
   }
-  validation {
-    condition = (
-      !var.dataservice_enable_autoscaling || 
-      var.dataservice_target_cpu_utilization != null || 
-      var.dataservice_target_memory_utilization != null
-    )
-    error_message = "When 'dataservice_enable_autoscaling' is true, at least one of 'dataservice_target_cpu_utilization' or 'dataservice_target_memory_utilization' must be set."
-  }
-}
-
-variable "dataservice_scale_in_cooldown" {
-  description = "Specify scale in cooldown (seconds)"
-  type = number
-  default = 120
-}
-
-variable "dataservice_scale_out_cooldown" {
-  description = "Specify scale out cooldown (seconds)"
-  type = number
-  default = 60
 }
 
 ###########################################################################
 #                            REDIS CONFIGURATION                          #
 ###########################################################################
+
+variable "redis_configuration" {
+  description = "Redis configuration object"
+  type = object({
+    redis_type = string
+    cpu        = number
+    memory     = number
+    endpoint   = string
+    tls        = bool
+    mode       = string
+  })
+  default = {
+    redis_type = "redis"
+    cpu        = 256
+    memory     = 512
+    endpoint   = ""
+    tls        = false
+    mode       = "standalone"
+  }
+}
 
 variable "redis_type" {
   description = "Specify Redis type."
@@ -438,20 +358,20 @@ variable "redis_cpu" {
       var.redis_type != "redis" ||
       (
       var.redis_type == "redis" && var.redis_cpu > 0
-    )
+    ))
     error_message = "A valid Redis CPU > 0 must be provided if 'type' = 'redis'."
   }
 }
 variable "redis_memory" {
   description = "Specify Redis memory."
   type        = number
-  default     = 256
+  default     = 512
   validation {
     condition = (
       var.redis_type != "redis" ||
       (
       var.redis_type == "redis" && var.redis_memory > 0
-    )
+    ))
     error_message = "A valid Redis memory > 0 must be provided if 'type' = 'redis'."
   }
 }
@@ -487,6 +407,10 @@ variable "object_storage" {
   })
 }
 
+###########################################################################
+#                           BEDROCK CONFIGURATION                       #
+###########################################################################
+
 variable "enable_bedrock_access" {
   description = "Enable access to bedrock"
   type        = bool
@@ -497,20 +421,34 @@ variable "enable_bedrock_access" {
 #                       LOAD BALANCER CONFIGURATION                       #
 ###########################################################################
 
-variable "create_nlb" {
+variable "create_lb" {
   description = "Create internal load balancer?"
   type        = bool
   default     = false
 }
 
-variable "internal_nlb" {
-  description = "Create internal load balancer or interet-facing."
+variable "internal_lb" {
+  description = "Create internal load balancer or internet-facing."
   type        = bool
   default     = true
 }
 
-variable "allowed_nlb_cidrs" {
-  description = "Provide IP ranges to whitelist in NLB security group. Default 0.0.0.0/0 for internet-facing NLB and VPC_CIDR for internal NLB."
+variable "lb_type" {
+  description = "Specify load balancer type."
+  type        = string
+  default     = "network"
+  validation {
+    condition     = contains(["application", "network"], var.lb_type)
+    error_message = "'lb_type' must be one of: 'application', 'network'."
+  }
+  validation {
+    condition     = var.server_mode != "both" || var.lb_type == "application"
+    error_message = "When server_mode is 'both', lb_type must be 'application' to support host-based routing for multiple services."
+  }
+}
+
+variable "allowed_lb_cidrs" {
+  description = "Provide IP ranges to whitelist in LB security group. Default 0.0.0.0/0 for internet-facing LB and VPC_CIDR for internal LB."
   type        = list(string)
   default     = []
 }
@@ -526,9 +464,53 @@ variable "enable_blue_green" {
   type        = bool
   default     = false
   validation {
-    condition     = !(var.enable_blue_green && !var.create_nlb)
-    error_message = "Must set create_nlb to true for enabling blue green deployment."
+    condition     = !(var.enable_blue_green && !var.create_lb)
+    error_message = "Must set create_lb to true for enabling blue green deployment."
   }
 }
 
+variable "enable_lb_access_logs" {
+  description = "Enable access logs for the Load Balancer. Requires lb_access_logs_bucket to be set."
+  type        = bool
+  default     = false
+}
 
+variable "lb_access_logs_bucket" {
+  description = "S3 bucket name for storing Load Balancer access logs. Required if enable_lb_access_logs is true."
+  type        = string
+  default     = ""
+  validation {
+    condition     = !var.enable_lb_access_logs || (var.lb_access_logs_bucket != null && var.lb_access_logs_bucket != "")
+    error_message = "lb_access_logs_bucket must be provided when enable_lb_access_logs is set to true."
+  }
+}
+
+variable "lb_access_logs_prefix" {
+  description = "S3 bucket prefix for Load Balancer access logs (optional)."
+  type        = string
+  default     = ""
+}
+###########################################################################
+#                       GATEWAY MODULE CONFIGURATION                       #
+###########################################################################
+variable "server_mode" {
+  description = "Specify server mode for gateway"
+  type        = string
+  default     = "llm_gateway"
+  validation {
+    condition     = contains(["llm_gateway", "mcp_gateway", "both"], var.server_mode)
+    error_message = "'server_mode' must be one of: 'llm_gateway', 'mcp_gateway', 'both'."
+  }
+}
+
+variable "mcp_gateway_host" {
+  description = "Specify domain on which MCP gateway will be accessible."
+  type        = string
+  default     = ""
+}
+
+variable "llm_gateway_host" {
+  description = "Specify domain on which LLM gateway will be accessible."
+  type        = string
+  default     = ""
+}
