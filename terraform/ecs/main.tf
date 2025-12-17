@@ -6,7 +6,7 @@
 data "aws_caller_identity" "current" {}
 
 resource "random_id" "suffix" {
-  byte_length = 6 
+  byte_length = 6
 }
 
 # Fetch availability zones in selected region
@@ -49,15 +49,15 @@ locals {
   log_store_bucket   = var.object_storage.log_store_bucket
   log_exports_bucket = var.object_storage.log_exports_bucket != null ? var.object_storage.log_exports_bucket : local.log_store_bucket
   finetune_bucket    = var.object_storage.finetune_bucket != null ? var.object_storage.finetune_bucket : local.log_store_bucket
-  
+
   # Read Environment Variables
-  gateway_variables = jsondecode(file("${path.module}/${var.environment_variables_file_path}")).gateway 
+  gateway_variables     = jsondecode(file("${path.module}/${var.environment_variables_file_path}")).gateway
   dataservice_variables = jsondecode(file("${path.module}/${var.environment_variables_file_path}")).data-service
 
   # Read Secrets
-  gateway_secrets = jsondecode(file("${path.module}/${var.secrets_file_path}")).gateway 
+  gateway_secrets     = jsondecode(file("${path.module}/${var.secrets_file_path}")).gateway
   dataservice_secrets = jsondecode(file("${path.module}/${var.secrets_file_path}")).data-service
-  
+
   # Construct environment variables for gateway service
   common_env = {
     CACHE_STORE = var.redis_type
@@ -70,8 +70,8 @@ locals {
   }
 
   gateway_env = {
-    SERVER_MODE                  = var.server_mode == "both" ? "all" : (var.server_mode == "mcp_gateway" ? "mcp" : "")
-    MCP_PORT                    =  var.server_mode == "both" || var.server_mode == "mcp_gateway" ? 8788 : null
+    SERVER_MODE                  = var.server_mode == "both" ? "all" : (var.server_mode == "mcp" ? "mcp" : "")
+    MCP_PORT                     = var.server_mode == "both" || var.server_mode == "mcp" ? 8788 : null
     LOG_STORE_GENERATIONS_BUCKET = var.object_storage.log_store_bucket
     DATASERVICE_BASEPATH         = var.dataservice_config.enable_dataservice ? "http://data-service:8081" : null
   }
@@ -85,34 +85,35 @@ locals {
   routing_rules = [
     for rule in [
       # For ALB: create host-based routing rules
-      var.lb_type == "application" && (var.server_mode == "both" || var.server_mode == "llm_gateway") && var.llm_gateway_host != "" ? {
+      var.lb_type == "application" && (var.server_mode == "both" || var.server_mode == "gateway") ? {
         name              = "gateway"
         priority          = 100
         container_port    = 8787
         health_check_path = "/v1/health"
-        host_headers      = [ var.llm_gateway_host ]
+        host      = var.alb_routing_configuration.enable_host_based_routing && var.alb_routing_configuration.gateway_host != "" ? var.alb_routing_configuration.gateway_host : null
+        path     = var.alb_routing_configuration.enable_path_based_routing ? var.alb_routing_configuration.gateway_path : ""
       } : null,
-      var.lb_type == "application" && (var.server_mode == "both" || var.server_mode == "mcp_gateway") && var.mcp_gateway_host != "" ? {
+      var.lb_type == "application" && (var.server_mode == "both" || var.server_mode == "mcp") ? {
         name              = "mcp"
         priority          = 200
         container_port    = 8788
         health_check_path = "/v1/health"
-        host_headers      = [ var.mcp_gateway_host ]
+        host      = var.alb_routing_configuration.enable_host_based_routing && var.alb_routing_configuration.mcp_host != "" ? var.alb_routing_configuration.mcp_host : null
+        path     = var.alb_routing_configuration.enable_path_based_routing ? var.alb_routing_configuration.mcp_path : ""
       } : null,
       # For NLB: create a single default rule (NLB doesn't support host-based routing)
       var.lb_type == "network" ? {
         name              = "default"
         priority          = 100
-        container_port    = var.server_mode == "both" || var.server_mode == "llm_gateway" ? 8787 : 8788
+        container_port    = var.server_mode == "both" || var.server_mode == "gateway" ? 8787 : 8788
         health_check_path = "/v1/health"
-        host_headers      = []
       } : null,
     ] : rule if rule != null
-  ] 
+  ]
 
   namespace = "portkey"
 
-  gateway_task_role_policies  = merge(
+  gateway_task_role_policies = merge(
     {
       s3_access_policy_arn = aws_iam_policy.s3_access_policy.arn
     },
@@ -122,6 +123,6 @@ locals {
   )
 
   data_service_task_role_policies = {
-    s3_access_policy_arn      = aws_iam_policy.s3_access_policy.arn,
+    s3_access_policy_arn = aws_iam_policy.s3_access_policy.arn,
   }
 }

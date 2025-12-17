@@ -25,7 +25,7 @@ resource "aws_vpc_security_group_ingress_rule" "lb_test_listener_ingress" {
 
 # Allow traffic from load balancer
 resource "aws_vpc_security_group_ingress_rule" "gateway_service_lb_ingress" {
-  count                        = var.create_lb && (var.server_mode == "both" || var.server_mode == "llm_gateway") ? 1 : 0
+  count                        = var.create_lb && (var.server_mode == "both" || var.server_mode == "gateway") ? 1 : 0
   security_group_id            = module.gateway.ecs_service_security_group_id
   ip_protocol                  = "tcp"
   from_port                    = 8787
@@ -35,7 +35,7 @@ resource "aws_vpc_security_group_ingress_rule" "gateway_service_lb_ingress" {
 
 # Allow traffic from load balancer
 resource "aws_vpc_security_group_ingress_rule" "mcp_service_lb_ingress" {
-  count                        = var.create_lb && (var.server_mode == "both" || var.server_mode == "mcp_gateway") ? 1 : 0
+  count                        = var.create_lb && (var.server_mode == "both" || var.server_mode == "mcp") ? 1 : 0
   security_group_id            = module.gateway.ecs_service_security_group_id
   ip_protocol                  = "tcp"
   from_port                    = 8788

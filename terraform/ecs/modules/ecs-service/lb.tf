@@ -148,6 +148,10 @@ resource "aws_lb_target_group" "blue_tg" {
     Rule  = each.key
     Color = "blue"
   }
+  lifecycle {
+    ignore_changes = [action]
+    create_before_destroy = true
+  }
 }
 
 # Green Target Groups for each routing rule (for Blue/Green deployment)
@@ -201,11 +205,33 @@ resource "aws_lb_listener_rule" "prod_rules" {
   }
 
   # Host-based routing condition
-  condition {
-    host_header {
-      values = each.value.host_headers
+  dynamic "condition" {
+    for_each = each.value.host != null ? [1] : []
+    content {
+      host_header {
+        values = [each.value.host]
+      }
     }
   }
+
+  condition {
+    path_pattern {
+        values = ["${each.value.path}/*"]
+    }
+  }
+  dynamic "transform" {
+    for_each = each.value.path != "" ? [1] : []
+    content {
+      type = "url-rewrite"
+      url_rewrite_config {
+        rewrite {
+          regex = "^${each.value.path}/(.*)$"
+          replace = "/$1"
+        }
+      }
+    }
+  }
+
 
   tags = {
     Name = "${local.service_name}-${each.key}-prod-rule"
@@ -236,9 +262,30 @@ resource "aws_lb_listener_rule" "test_rules" {
   }
 
   # Host-based routing condition
+  dynamic "condition" {
+    for_each = each.value.host != null ? [1] : []
+    content {
+      host_header {
+        values = [each.value.host]
+      }
+    }
+  }
+
   condition {
-    host_header {
-      values = each.value.host_headers
+    path_pattern {
+        values = ["${each.value.path}/*"]
+    }
+  }
+  dynamic "transform" {
+    for_each = each.value.path != "" ? [1] : []
+    content {
+      type = "url-rewrite"
+      url_rewrite_config {
+        rewrite {
+          regex = "^${each.value.path}/(.*)$"
+          replace = "/$1"
+        }
+      }
     }
   }
 

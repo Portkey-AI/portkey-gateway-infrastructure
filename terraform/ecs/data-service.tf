@@ -35,10 +35,10 @@ module "data_service" {
 
   # Task Definition Configuration
   task_definition_config = {
-    cpu    = var.dataservice_config.cpu
-    memory = var.dataservice_config.memory
+    cpu                       = var.dataservice_config.cpu
+    memory                    = var.dataservice_config.memory
     task_role_policy_arns_map = local.data_service_task_role_policies
-    track_latest = true 
+    track_latest              = true
   }
 
   # ECS Service Configuration
@@ -60,15 +60,15 @@ module "data_service" {
 
     service_connect_config = [
       {
-      enabled        = true
-      namespace      = local.namespace
-      discovery_name = "data-service"
-      port_name      = "data-service-port"
-      client_alias = {
-        port     = 8081
-        dns_name = "data-service"
+        enabled        = true
+        namespace      = local.namespace
+        discovery_name = "data-service"
+        port_name      = "data-service-port"
+        client_alias = {
+          port     = 8081
+          dns_name = "data-service"
+        }
       }
-    }
     ]
 
     service_autoscaling_config = {
@@ -90,9 +90,9 @@ module "data_service" {
   load_balancer_config = {
     create_lb = false
   }
-  depends_on = [ 
+  depends_on = [
     aws_service_discovery_http_namespace.service_discovery_namespace,
-    module.redis 
+    module.redis
   ]
 }
 

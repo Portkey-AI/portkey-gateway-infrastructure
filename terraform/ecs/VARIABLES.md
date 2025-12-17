@@ -64,7 +64,7 @@ gateway_config = {
 
 | Variable | Default | Required | Description |
 |----------|---------|----------|-------------|
-| `server_mode` | `"llm_gateway"` | No | Gateway mode: `llm_gateway` (8787), `mcp_gateway` (8788), or `both`. When `both`, requires `lb_type = "application"` |
+| `server_mode` | `"gateway"` | No | Gateway mode: `gateway` (8787), `mcp` (8788), or `both`. When `both`, requires `lb_type = "application"` |
 | `gateway_config.desired_task_count` | `1` | No | Number of Gateway tasks |
 | `gateway_config.cpu` | `256` | No | CPU units (256 = 0.25 vCPU, 1024 = 1 vCPU) |
 | `gateway_config.memory` | `1024` | No | Memory in MiB |
@@ -133,8 +133,8 @@ gateway_config = {
 
 | Variable | Default | Required | Description |
 |----------|---------|----------|-------------|
-| `llm_gateway_host` | `""` | Conditional | Domain for LLM Gateway (required when `lb_type = "application"` and `server_mode` includes `llm_gateway`) |
-| `mcp_gateway_host` | `""` | Conditional | Domain for MCP Gateway (required when `lb_type = "application"` and `server_mode` includes `mcp_gateway`) |
+| `llm_gateway_host` | `""` | Conditional | Domain for LLM Gateway (required when `lb_type = "application"` and `server_mode` is `gateway` or `both`) |
+| `mcp_gateway_host` | `""` | Conditional | Domain for MCP Gateway (required when `lb_type = "application"` and `server_mode` is `mcp` or `both`) |
 
 ## Important Notes
 
@@ -149,8 +149,8 @@ gateway_config = {
   - Set `enable_blue_green = false` for NLB
 
 ### Server Modes
-- `llm_gateway`: Gateway listens on port 8787 only
-- `mcp_gateway`: Gateway listens on port 8788 only (MCP protocol)
+- `gateway`: Gateway listens on port 8787 only (LLM Gateway)
+- `mcp`: Gateway listens on port 8788 only (MCP protocol)
 - `both`: Gateway listens on both ports (requires ALB with host-based routing)
 
 ### Validation Rules

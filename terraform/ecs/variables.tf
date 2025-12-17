@@ -249,7 +249,7 @@ variable "gateway_autoscaling" {
 
 variable "gateway_lifecycle_hook" {
   description = "Lifecycle hook configuration for gateway service"
-  type        = object({
+  type = object({
     enable_lifecycle_hook = bool
     lifecycle_hook_stages = list(string)
   })
@@ -348,7 +348,7 @@ variable "redis_endpoint" {
     error_message = "A valid AWS ElastiCache endpoint must be provided if 'type' = 'aws-elastic-cache'."
   }
 }
-  
+
 variable "redis_cpu" {
   description = "Specify Redis CPU."
   type        = number
@@ -357,7 +357,7 @@ variable "redis_cpu" {
     condition = (
       var.redis_type != "redis" ||
       (
-      var.redis_type == "redis" && var.redis_cpu > 0
+        var.redis_type == "redis" && var.redis_cpu > 0
     ))
     error_message = "A valid Redis CPU > 0 must be provided if 'type' = 'redis'."
   }
@@ -370,7 +370,7 @@ variable "redis_memory" {
     condition = (
       var.redis_type != "redis" ||
       (
-      var.redis_type == "redis" && var.redis_memory > 0
+        var.redis_type == "redis" && var.redis_memory > 0
     ))
     error_message = "A valid Redis memory > 0 must be provided if 'type' = 'redis'."
   }
@@ -384,14 +384,14 @@ variable "redis_tls_enabled" {
 
 variable "redis_mode" {
   description = "Specify if cluster mode is enabled on AWS ElastiCache."
-  type = string
-  default = "standalone"
+  type        = string
+  default     = "standalone"
   validation {
     condition     = contains(["standalone", "cluster"], var.redis_mode)
     error_message = "'redis_mode' must be one of: 'standalone', 'cluster'."
   }
 }
-  
+
 
 
 ###########################################################################
@@ -496,21 +496,21 @@ variable "lb_access_logs_prefix" {
 variable "server_mode" {
   description = "Specify server mode for gateway"
   type        = string
-  default     = "llm_gateway"
+  default     = "gateway"
   validation {
-    condition     = contains(["llm_gateway", "mcp_gateway", "both"], var.server_mode)
-    error_message = "'server_mode' must be one of: 'llm_gateway', 'mcp_gateway', 'both'."
+    condition     = contains(["gateway", "mcp", "both"], var.server_mode)
+    error_message = "'server_mode' must be one of: 'gateway', 'mcp', 'both'."
   }
 }
-
-variable "mcp_gateway_host" {
-  description = "Specify domain on which MCP gateway will be accessible."
-  type        = string
-  default     = ""
+variable "alb_routing_configuration" {  
+  description = "ALB routing configuration"
+  type = object({
+    enable_path_based_routing = bool
+    enable_host_based_routing = bool
+    mcp_path = optional(string, "/mcp")
+    gateway_path = optional(string, "/gateway")
+    mcp_host = optional(string, "")
+    gateway_host = optional(string, "")
+  })
 }
 
-variable "llm_gateway_host" {
-  description = "Specify domain on which LLM gateway will be accessible."
-  type        = string
-  default     = ""
-}

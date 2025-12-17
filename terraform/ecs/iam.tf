@@ -70,27 +70,27 @@ resource "aws_iam_role" "ecs_hook_lambda_execution_role" {
 }
 
 # Attach CloudWatch Logs Policy to ecs hook lambda role.
- resource "aws_iam_role_policy" "cloudwatch_log_access_policy" {
+resource "aws_iam_role_policy" "cloudwatch_log_access_policy" {
   count = var.gateway_lifecycle_hook.enable_lifecycle_hook ? 1 : 0
-  name       = "${var.project_name}-ecs-hook-lambda-cloudwatch-log-access-policy-${var.environment}"
-  role       = aws_iam_role.ecs_hook_lambda_execution_role[0].id
+  name  = "${var.project_name}-ecs-hook-lambda-cloudwatch-log-access-policy-${var.environment}"
+  role  = aws_iam_role.ecs_hook_lambda_execution_role[0].id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-          Effect = "Allow",
-          Action = "logs:CreateLogGroup",
-          Resource = "arn:aws:logs:${local.region}:${local.account_id}:*"
+        Effect   = "Allow",
+        Action   = "logs:CreateLogGroup",
+        Resource = "arn:aws:logs:${local.region}:${local.account_id}:*"
       },
       {
-          Effect = "Allow",
-          Action = [
-              "logs:CreateLogStream",
-              "logs:PutLogEvents"
-          ],
-          Resource = [
-              "arn:aws:logs:${local.region}:${local.account_id}:log-group:/aws/lambda/${var.project_name}-lifecycle-hook-lambda-${var.environment}:*"
-          ]
+        Effect = "Allow",
+        Action = [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        Resource = [
+          "arn:aws:logs:${local.region}:${local.account_id}:log-group:/aws/lambda/${var.project_name}-lifecycle-hook-lambda-${var.environment}:*"
+        ]
       }
     ]
   })
@@ -99,7 +99,7 @@ resource "aws_iam_role" "ecs_hook_lambda_execution_role" {
 # Role for ECS to trigger Lifecycle hooks
 resource "aws_iam_role" "ecs_hook_role" {
   count = var.gateway_lifecycle_hook.enable_lifecycle_hook ? 1 : 0
-  name = "${var.project_name}-ecs-hook-role-${var.environment}"
+  name  = "${var.project_name}-ecs-hook-role-${var.environment}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -119,19 +119,19 @@ resource "aws_iam_role" "ecs_hook_role" {
 }
 
 # LambdaInvoke policy to ECS Role
- resource "aws_iam_role_policy" "lambda_access_policy" {
-  name       = "LambdaAccessPolicy"
-  role       = aws_iam_role.ecs_hook_role[0].id
+resource "aws_iam_role_policy" "lambda_access_policy" {
+  name = "LambdaAccessPolicy"
+  role = aws_iam_role.ecs_hook_role[0].id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-          Effect = "Allow",
-          Action = [
-            "lambda:InvokeFunction",
-            "lambda:InvokeAsync"
-          ],
-          Resource = aws_lambda_function.ecs_hook_lambda[0].arn
+        Effect = "Allow",
+        Action = [
+          "lambda:InvokeFunction",
+          "lambda:InvokeAsync"
+        ],
+        Resource = aws_lambda_function.ecs_hook_lambda[0].arn
       }
     ]
   })

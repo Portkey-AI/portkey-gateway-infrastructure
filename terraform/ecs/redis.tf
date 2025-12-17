@@ -30,7 +30,7 @@ module "redis" {
   # Task Definition Configuration
   task_definition_config = {
     cpu    = var.redis_configuration.cpu
-    memory = var.redis_configuration.memory 
+    memory = var.redis_configuration.memory
   }
 
   # ECS Service Configuration
@@ -43,7 +43,7 @@ module "redis" {
     health_check_grace_period_seconds  = 150
     enable_execute_command             = true
     capacity_provider                  = local.capacity_provider_name
-    enable_blue_green                  = false  
+    enable_blue_green                  = false
 
     log_config = {
       enable_logging    = true
@@ -52,15 +52,15 @@ module "redis" {
 
     service_connect_config = [
       {
-      enabled        = true
-      namespace      = local.namespace
-      discovery_name = "redis"
-      port_name      = "redis-port"
-      client_alias = {
-        port     = 6379
-        dns_name = "redis"
+        enabled        = true
+        namespace      = local.namespace
+        discovery_name = "redis"
+        port_name      = "redis-port"
+        client_alias = {
+          port     = 6379
+          dns_name = "redis"
+        }
       }
-    }
     ]
 
     service_autoscaling_config = {
@@ -73,7 +73,7 @@ module "redis" {
 
   # Load Balancer Configuration
   load_balancer_config = {
-    create_lb             = false
+    create_lb = false
   }
-  depends_on = [ aws_service_discovery_http_namespace.service_discovery_namespace ]
+  depends_on = [aws_service_discovery_http_namespace.service_discovery_namespace]
 }

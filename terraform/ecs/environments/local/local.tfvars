@@ -156,7 +156,7 @@ enable_bedrock_access = true
 
 create_lb = true                                               # Set to true to create a Load Balancer, or false to skip creating one. 
 internal_lb = false                                             # Set to true to create an internal LB, or false to create an internet-facing LB.
-lb_type = "network"                                          # Set to "application" to use Application Load Balancer, or "network" to use Network Load Balancer.
+lb_type = "application"                                          # Set to "application" to use Application Load Balancer, or "network" to use Network Load Balancer.
 allowed_lb_cidrs = ["0.0.0.0/0", "44.221.117.129/32"]           # Provide a list of CIDR ranges to whitelist in LB's Security Group.
 tls_certificate_arn = ""                                       # (Optional) Provide ACM certificate ARN to enable TLS-based listeners.
 enable_blue_green = true                                       # Set to true to enable blue-green deployment for Gateway Service.
@@ -167,13 +167,19 @@ lb_access_logs_bucket = ""                                     # (Required if en
 lb_access_logs_prefix = ""                                     # (Optional) S3 bucket prefix for LB access logs.
 
 ###########################################################################
-#                          HOST-BASED ROUTING                             #
+#                           ROUTING  CONFIGURATION                           #
 ###########################################################################
 # When server_mode = "both", ALB with host-based routing is used.
 # Define routing rules to route traffic based on host headers.
 # Each rule maps specific hosts to a container port.
 # Example configuration:
-server_mode = "llm_gateway"
+server_mode = "gateway"
 
-mcp_gateway_host = "mcp.hungrymango.in"
-llm_gateway_host = "gateway.hungrymango.in"
+alb_routing_configuration = {
+  enable_path_based_routing = true
+  enable_host_based_routing = false
+  mcp_path = "/mcp"
+  gateway_path = "/gateway"
+  mcp_host = "mcp.hungrymango.in"
+  gateway_host = "gateway.hungrymango.in"
+}

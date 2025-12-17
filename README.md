@@ -4,7 +4,7 @@ Infrastructure-as-Code for deploying **Portkey Hybrid Gateway** across multiple 
 
 ## Overview
 
-This repository contains Terraform configurations for deploying the Portkey AI Gateway across in hybrid deployment mode.
+This repository contains Terraform configurations for deploying the Portkey AI Gateway in hybrid deployment mode across multiple cloud platforms.
 
 
 ## Supported Platforms
@@ -30,7 +30,6 @@ portkey-gateway-infrastructure/
         ├── modules/                  # Reusable Terraform modules
         └── *.tf                      # Terraform configuration
 ```
-
 
 ## Getting Help
 

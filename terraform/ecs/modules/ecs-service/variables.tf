@@ -210,16 +210,10 @@ variable "load_balancer_config" {
       priority          = number                          # Priority of the rule (lower = higher priority)
       container_port    = number                          # Container port to forward traffic to
       health_check_path = optional(string, "/health")     # Health check path for the target group
-      host_headers      = optional(list(string), [])      # Host headers for ALB (e.g., ["api.example.com"])
+      host      = optional(string, null)          # Host headers for ALB (e.g., ["mcp.example.com"])
+      path      = optional(string, "")          # Path pattern for ALB (e.g., "/mcp/*")
     })), [])
   })
-  default = {
-    create_lb = false
-    prod_listener = {
-      protocol = "HTTP"
-      port     = 80
-    }
-  }
   validation {
     condition = (
       var.load_balancer_config.type == null ||

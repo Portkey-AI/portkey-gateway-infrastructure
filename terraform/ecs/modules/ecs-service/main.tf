@@ -38,8 +38,10 @@ locals {
 
   service_namespace = length(var.ecs_service_config.service_connect_config) > 0 ? var.ecs_service_config.service_connect_config[0].namespace : null
 
+  service_connect_enabled = length(var.ecs_service_config.service_connect_config) > 0
+
   # Extract namespace arn
-  namespace_arn = data.aws_service_discovery_http_namespace.service_namespace[0].arn
+  namespace_arn = local.service_connect_enabled && local.service_namespace != null ? data.aws_service_discovery_http_namespace.service_namespace[0].arn : null
 
   enable_bg = var.ecs_service_config.enable_blue_green
   # Extract all secret ARNs from the secrets map
@@ -64,8 +66,6 @@ locals {
   create_lb   = var.load_balancer_config.create_lb
   lb_type     = var.load_balancer_config.type
   lb_internal = var.load_balancer_config.lb_internal
-
-  service_connect_enabled = length(var.ecs_service_config.service_connect_config) > 0
 
   # Build container definition
   containers_definition = jsonencode([

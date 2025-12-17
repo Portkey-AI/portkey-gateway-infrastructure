@@ -3,8 +3,8 @@
 This guide provides comprehensive instructions for deploying Portkey Gateway on Amazon ECS clusters with support for high availability, auto-scaling, and blue/green deployments.
 
 ## Table of Contents
-- [Architecture](#architecture)
 - [Components and Sizing](#components-and-sizing-recommendations)
+- [Architecture](#architecture)
 - [Prerequisites](#prerequisites)
 - [Deployment Guide](#deployment-guide)
 - [Integration with Control Plane](#integration-with-control-plane)
@@ -82,7 +82,7 @@ cd portkey-gateway-infrastructure/terraform/ecs
 
 Use the AWS CloudFormation template to create secrets in AWS Secrets Manager. These secrets will store your Docker credentials, client authentication keys, and other sensitive information.
 
-1. Go [AWS CloudFormation Console](https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create) to create the stack.
+1. Go to the [AWS CloudFormation Console](https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create) to create the stack.
 2. Under **Specify template**, select **Upload a template file**, then upload the `secrets.yaml` template located in the `portkey-gateway-infrastructure/cloudformation/` directory.
 3. On the next page, provide the following parameters:
     - **Project Details**
@@ -134,7 +134,7 @@ These variables can then be passed to Terraform by specifying the path to the `e
 
 **Sensitive Variables**
 
-Sensitive variables like ClientAuthKey and Organisation ID should be stored securely in AWS Secrets Manager, and their corresponding Secret ARNs can then be referenced in the **secrets**.json file (for example, `environments/dev/secrets.json`).
+Sensitive variables like ClientAuthKey and Organisation ID should be stored securely in AWS Secrets Manager, and their corresponding Secret ARNs can then be referenced in the **secrets.json** file (for example, `environments/dev/secrets.json`).
 
 ```json
 {   
@@ -186,16 +186,23 @@ gateway_autoscaling = {
 | `secrets_file_path` | - | **Yes** | Path to secrets.json |
 | `docker_cred_secret_arn` | - | **Yes** | Docker credentials secret ARN |
 | **Server Mode** | | | |
-| `server_mode` | `"llm_gateway"` | No | Gateway mode: `llm_gateway`, `mcp_gateway`, or `both` |
+| `server_mode` | `"gateway"` | No | Gateway mode: `gateway` (port 8787), `mcp` (port 8788), or `both` |
 | **Load Balancer** | | | |
 | `create_lb` | `true` | No | Create load balancer |
-| `lb_type` | `"network"` | No | `network` (NLB) or `application` (ALB). Use ALB when `server_mode="both"` |
+| `lb_type` | `"network"` | No | `network` (NLB) or `application` (ALB). **ALB requires host headers** |
+| `llm_gateway_host` | `""` | **Conditional** | Required if `lb_type="application"` and `server_mode` is `gateway` or `both` |
+| `mcp_gateway_host` | `""` | **Conditional** | Required if `lb_type="application"` and `server_mode` is `mcp` or `both` |
 | `enable_blue_green` | `false` | No | Enable Blue/Green deployment (ALB only) |
 | **Gateway Resources** | | | |
 | `gateway_config.cpu` | `256` | No | Gateway CPU units (256 = 0.25 vCPU) |
 | `gateway_config.memory` | `1024` | No | Gateway memory (MiB) |
 | **Redis** | | | |
 | `redis_type` | `"redis"` | No | `redis` (containerized) or `aws-elasti-cache` |
+
+**Important Notes:**
+- **Application Load Balancer (ALB) always requires host headers** for routing
+- **Network Load Balancer (NLB)** works without host headers using default routing
+- When `server_mode = "both"`, you **must** use ALB with both host values configured
 
 ### Step 6: Setup Remote S3 Backend (Recommended)
 
@@ -237,28 +244,39 @@ terraform apply environments/dev/tfplan
 ### Step 9: Verify the Deployment
 
 **Check ECS Service Status:**
-- Navigate to AWS Console → ECS → Clusters → `portkey-gateway-cluster`
+- Navigate to AWS Console → ECS → Clusters → `<project_name>-<environment>-cluster`
 - Verify that tasks for gateway (and data-service if enabled) are running and healthy
 - **If unhealthy**: Check CloudWatch logs for errors
 
 **Test the Gateway:**
 
-  ```bash
-  # Specify LLM provider and Portkey API keys
-  export OPENAI_API_KEY=<OPENAI_API_KEY>
-  export PORTKEY_API_KEY=<PORTKEY_API_KEY>
-  
-  # Replace <LOAD_BALANCER_DNS> and <LB_LISTENER_PORT_NUMBER> with the DNS name and listener port of the created load balancer, respectively.
-  curl 'http://<LOAD_BALANCER_DNS>:<LB_LISTENER_PORT_NUMBER>/v1/chat/completions' \
+```bash
+# Set your API keys
+export OPENAI_API_KEY="<YOUR_OPENAI_API_KEY>"
+export PORTKEY_API_KEY="<YOUR_PORTKEY_API_KEY>"
+
+# For NLB or internet-facing ALB: Use the load balancer DNS name
+# For ALB with host-based routing: Use your configured domain (e.g., gateway.yourdomain.com)
+export GATEWAY_URL="http://<LOAD_BALANCER_DNS_OR_DOMAIN>:<PORT>"
+
+# Test the gateway
+curl "${GATEWAY_URL}/v1/chat/completions" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $OPENAI_API_KEY"  \
+  -H "Authorization: Bearer ${OPENAI_API_KEY}" \
   -H "x-portkey-provider: openai" \
-  -H "x-portkey-api-key: $PORTKEY_API_KEY"  \
+  -H "x-portkey-api-key: ${PORTKEY_API_KEY}" \
   -d '{
-      "model": "gpt-4o-mini",
-      "messages": [{"role": "user","content": "What is a fractal?"}]
+    "model": "gpt-4o-mini",
+    "messages": [{"role": "user", "content": "What is a fractal?"}]
   }'
-  ```
+```
+
+**Notes:**
+- **For NLB**: Use the load balancer DNS directly (e.g., `gateway-xxx-lb.elb.us-east-1.amazonaws.com`)
+- **For ALB**: Use your configured domain name (e.g., `gateway.yourdomain.com` or `mcp.yourdomain.com`)
+- Replace `<PORT>` with the listener port (default: `80` for HTTP, `443` for HTTPS)
+- ALB requires proper DNS configuration pointing to the load balancer
+- For HTTPS, change the URL scheme to `https://` and use port `443`
 
 ## Integration with Control Plane
 
