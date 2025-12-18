@@ -38,7 +38,7 @@ instance_type    = "t4g.medium"                                 # Provide EC2 in
 max_asg_size     = 2                                            # Maximum size of the Auto Scaling Group.
 min_asg_size     = 1                                            # Minimum size of the Auto Scaling Group.
 desired_asg_size = 1                                            # Desired size of the Autoscaling Group.
-target_capacity  = 70                                           # Provide the capacity which ECS should try to maintain - (0-100)
+target_capacity  = 100                                          # Provide the capacity which ECS should try to maintain - (0-100)
 
 
 
@@ -62,13 +62,12 @@ data_service_image = {
 }
 
 # Provide the Secret ARN obtained from output section of AWS CloudFormation Stack.
-docker_cred_secret_arn =                                          # "<DockerCredentialsSecretArn>"
+docker_cred_secret_arn = "<DockerCredentialsSecretArn>"            # Replace with your AWS Secrets Manager Secret ARN containing Docker Hub credentials for pulling Portkey private images.
 
-# variable "redis_image" {
-#   description = "Container image to use for the redis."
-#   type        = string
-#   default     = "redis:7.2-alpine"
-# }
+redis_image = {
+  image = "redis"
+  tag   = "7.2-alpine"
+}
 
 ###########################################################################
 #                     GATEWAY SERVICE CONFIGURATION                       #

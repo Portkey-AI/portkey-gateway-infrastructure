@@ -20,7 +20,7 @@ This guide provides comprehensive instructions for deploying Portkey Gateway on 
 
 ## Architecture
 
-![Portkey Gateway Architecture](../../architecture/portkey-gateway.png)
+![Portkey Gateway Architecture](../../architecture/portkey-gateway-ecs-deployment.png)
 
 *Figure 1: Portkey Gateway hybrid deployment architecture on AWS ECS*
 
@@ -155,7 +155,7 @@ Sensitive variables like ClientAuthKey and Organisation ID should be stored secu
 
 Update the `environments/dev/dev.tfvars` file to specify your project configuration details.
 
-📖 **For complete variable documentation, see [VARIABLES.md](VARIABLES.md)**
+📖 **For complete variable documentation, see [VARIABLES.md](docs/VARIABLES.md)**
 
 **Quick Reference - Key Variables:**
 

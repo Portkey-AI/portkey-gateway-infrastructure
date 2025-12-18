@@ -3,7 +3,7 @@
 ################################################################################
 
 module "redis" {
-  count        = var.redis_type == "redis" ? 1 : 0
+  count        = var.redis_configuration.redis_type == "redis" ? 1 : 0
   source       = "./modules/ecs-service"
   project_name = var.project_name
   environment  = var.environment

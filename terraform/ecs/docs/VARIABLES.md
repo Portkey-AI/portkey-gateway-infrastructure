@@ -13,14 +13,14 @@ gateway_config = {
 }
 ```
 
-##Project Details
+## Project Details
 
 | Variable | Default | Required | Description |
 |----------|---------|----------|-------------|
 | `project_name` | `"portkey"` | No | Project name used in resource naming |
 | `environment` | `"dev"` | No | Deployment environment (dev, prod, etc.) |
 | `aws_region` | - | **Yes** | AWS region for deployment |
-| `environment_variables_file_path` | - | **Yes** | Path to environment-variables.json file |
+| `environment_variables_file_path` | - | **Yes** | Relative path to environment-variables.json file |
 | `secrets_file_path` | - | **Yes** | Path to secrets.json file with AWS Secrets Manager ARNs |
 
 ## Network Configuration
@@ -46,7 +46,7 @@ gateway_config = {
 | `max_asg_size` | `3` | No | Maximum EC2 instances in Auto Scaling Group |
 | `min_asg_size` | `1` | No | Minimum EC2 instances in Auto Scaling Group |
 | `desired_asg_size` | `2` | No | Desired EC2 instances in Auto Scaling Group |
-| `target_capacity` | `70` | No | Target percentage of cluster resources ECS should maintain |
+| `target_capacity` | `100` | No | Target percentage of cluster resources ECS should maintain |
 
 ## Docker Image Configuration
 
@@ -64,7 +64,6 @@ gateway_config = {
 
 | Variable | Default | Required | Description |
 |----------|---------|----------|-------------|
-| `server_mode` | `"gateway"` | No | Gateway mode: `gateway` (8787), `mcp` (8788), or `both`. When `both`, requires `lb_type = "application"` |
 | `gateway_config.desired_task_count` | `1` | No | Number of Gateway tasks |
 | `gateway_config.cpu` | `256` | No | CPU units (256 = 0.25 vCPU, 1024 = 1 vCPU) |
 | `gateway_config.memory` | `1024` | No | Memory in MiB |
@@ -103,7 +102,7 @@ gateway_config = {
 | `redis_tls_enabled` | `false` | No | Enable TLS for Redis connections |
 | `redis_mode` | `"standalone"` | No | Redis mode: `standalone` or `cluster` |
 
-*For cluster mode, use Configuration Endpoint. For standalone, use Primary Endpoint. See [AWS ElastiCache Endpoints](https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Endpoints.html).
+*For cluster mode, use Configuration Endpoint. For standalone, use Primary Endpoint. See [AWS ElastiCache Endpoints](https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Endpoints.html) for more information.
 
 ## Log Store Configuration
 
@@ -112,7 +111,7 @@ gateway_config = {
 | `object_storage.log_store_bucket` | - | **Yes** | S3 bucket for log storage |
 | `object_storage.log_exports_bucket` | - | **Yes** | S3 bucket for log exports |
 | `object_storage.finetune_bucket` | - | **Yes** | S3 bucket for fine-tuning data |
-| `object_storage.bucket_region` | - | **Yes** | AWS region for S3 buckets |
+| `object_storage.bucket_region` | - | **Yes** | AWS region for S3 bucket |
 | `enable_bedrock_access` | `false` | No | Enable AWS Bedrock API access |
 
 ## Load Balancer Configuration
@@ -127,35 +126,35 @@ gateway_config = {
 | `lb_access_logs_bucket` | `""` | Conditional | S3 bucket for access logs (required if `enable_lb_access_logs = true`) |
 | `lb_access_logs_prefix` | `""` | No | S3 prefix for access logs |
 | `tls_certificate_arn` | `""` | No | ACM certificate ARN for TLS/HTTPS |
-| `enable_blue_green` | `false` | No | Enable Blue/Green deployment. **Only works with ALB** (`lb_type = "application"`). NLB uses rolling updates |
+| `enable_blue_green` | `true` | No | Enable Blue/Green deployment. |
 
-## Host-Based Routing (ALB Only)
+## Server Mode and Routing Configuration (ALB Only)
 
 | Variable | Default | Required | Description |
 |----------|---------|----------|-------------|
-| `llm_gateway_host` | `""` | Conditional | Domain for LLM Gateway (required when `lb_type = "application"` and `server_mode` is `gateway` or `both`) |
-| `mcp_gateway_host` | `""` | Conditional | Domain for MCP Gateway (required when `lb_type = "application"` and `server_mode` is `mcp` or `both`) |
+| `server_mode` | `"gateway"` | No | Gateway mode: `gateway` (8787), `mcp` (8788), or `both`. When `both`, requires `lb_type = "application"` |
+| `alb_routing_configuration.enable_path_based_routing` | `false` | Conditional | Set to `true` to enable path-based routing for accessing Gateway or/and MCP |
+| `alb_routing_configuration.enable_host_based_routing` | `false` | Conditional | Set to `true` to enable host-based routing for accessing Gateway or/and MCP |
+| `mcp_path` | `"/gateway"` | No | Path at which Gateway will be accessible (for example https://example.com/gateway) |
+| `gateway_path` | `"/mcp"` | No | Path at which MCP will be accessible (for example https://example.com/mcp) |
+| `mcp_host` | `""` | Conditional | Domain for accessing MCP (for example https://mcp.example.com/) |
+| `gateway_host` | `""` | Conditional | Domain for accessing Gateway (for example https://gateway.example.com/) |
 
 ## Important Notes
 
-### Blue/Green Deployment
-- **ALB**: Fully supported with CodeDeploy-style Blue/Green deployment
-  - Creates blue and green target groups
-  - Uses test listener (port 8080) for validation
-  - Automatic traffic shifting after validation
-- **NLB**: Uses standard ECS rolling updates (Blue/Green not supported in current implementation)
-  - Gradual task replacement
-  - No separate test listener
-  - Set `enable_blue_green = false` for NLB
-
 ### Server Modes
-- `gateway`: Gateway listens on port 8787 only (LLM Gateway)
-- `mcp`: Gateway listens on port 8788 only (MCP protocol)
-- `both`: Gateway listens on both ports (requires ALB with host-based routing)
+- `gateway`: Gateway listens on port 8787 only (Gateway)
+- `mcp`: MCP listens on port 8788 only (MCP)
+- `both`: Both Gateway and MCP listens on ports 8787 and 8788 respectively (**ALB required** with host-based or path-based routing to be enabled)
+
+### Blue/Green Deployment
+- Supported for Gateway service with [ECS native Blue/Green deployment](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-blue-green.html).
+- For more details on configuring refer to following doc.
+-
+
 
 ### Validation Rules
 - When `server_mode = "both"`, `lb_type` must be `"application"`
-- When `lb_type = "application"` and `server_mode` includes services, host variables are required
 - When `enable_lb_access_logs = true`, `lb_access_logs_bucket` is required
 - ElastiCache endpoint required when `redis_type = "aws-elasti-cache"`
 

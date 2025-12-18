@@ -21,6 +21,7 @@ variable "environment" {
 variable "aws_region" {
   type        = string
   description = "AWS region to deploy resources in"
+  default     = "us-west-2"
 }
 
 variable "environment_variables_file_path" {
@@ -160,7 +161,7 @@ variable "desired_asg_size" {
 variable "target_capacity" {
   description = "Desired percentage of cluster resources that ECS aims to maintain."
   type        = number
-  default     = 70
+  default     = 100
 }
 
 ###########################################################################
@@ -462,7 +463,7 @@ variable "tls_certificate_arn" {
 variable "enable_blue_green" {
   description = "Define whether to configure blue-green deployment for gateway with load balancer"
   type        = bool
-  default     = false
+  default     = true
   validation {
     condition     = !(var.enable_blue_green && !var.create_lb)
     error_message = "Must set create_lb to true for enabling blue green deployment."
@@ -505,8 +506,8 @@ variable "server_mode" {
 variable "alb_routing_configuration" {  
   description = "ALB routing configuration"
   type = object({
-    enable_path_based_routing = bool
-    enable_host_based_routing = bool
+    enable_path_based_routing = optional(bool, false)
+    enable_host_based_routing = optional(bool, false)
     mcp_path = optional(string, "/mcp")
     gateway_path = optional(string, "/gateway")
     mcp_host = optional(string, "")

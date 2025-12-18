@@ -39,7 +39,7 @@ instance_type    = "t4g.medium"                                 # Provide EC2 in
 max_asg_size     = 2                                            # Maximum size of the Auto Scaling Group.
 min_asg_size     = 1                                            # Minimum size of the Auto Scaling Group.
 desired_asg_size = 1                                            # Desired size of the Autoscaling Group.
-target_capacity  = 70                                           # Provide the capacity which ECS should try to maintain - (0-100)
+target_capacity  = 100                                           # Provide the capacity which ECS should try to maintain - (0-100)
 
 
 
@@ -65,11 +65,10 @@ data_service_image = {
 # Provide the Secret ARN obtained from output section of AWS CloudFormation Stack.
 docker_cred_secret_arn = "arn:aws:secretsmanager:us-east-1:551171829295:secret:portkey-gateway/dev/docker-credentials-en9419"
 
-# variable "redis_image" {
-#   description = "Container image to use for the data service."
-#   type        = string
-#   default     = "redis:7.2-alpine"
-#}
+redis_image = {
+  image = "redis"
+  tag   = "7.2-alpine"
+}
 
 ###########################################################################
 #                     GATEWAY SERVICE CONFIGURATION                       #
@@ -155,9 +154,9 @@ enable_bedrock_access = true
 ###########################################################################
 
 create_lb = true                                               # Set to true to create a Load Balancer, or false to skip creating one. 
-internal_lb = false                                             # Set to true to create an internal LB, or false to create an internet-facing LB.
-lb_type = "application"                                          # Set to "application" to use Application Load Balancer, or "network" to use Network Load Balancer.
-allowed_lb_cidrs = ["0.0.0.0/0", "44.221.117.129/32"]           # Provide a list of CIDR ranges to whitelist in LB's Security Group.
+internal_lb = false                                            # Set to true to create an internal LB, or false to create an internet-facing LB.
+lb_type = "application"                                        # Set to "application" to use Application Load Balancer, or "network" to use Network Load Balancer.
+allowed_lb_cidrs = ["0.0.0.0/0", "44.221.117.129/32"]          # Provide a list of CIDR ranges to whitelist in LB's Security Group.
 tls_certificate_arn = ""                                       # (Optional) Provide ACM certificate ARN to enable TLS-based listeners.
 enable_blue_green = true                                       # Set to true to enable blue-green deployment for Gateway Service.
 
@@ -167,7 +166,7 @@ lb_access_logs_bucket = ""                                     # (Required if en
 lb_access_logs_prefix = ""                                     # (Optional) S3 bucket prefix for LB access logs.
 
 ###########################################################################
-#                           ROUTING  CONFIGURATION                           #
+#                           ROUTING  CONFIGURATION                        #
 ###########################################################################
 # When server_mode = "both", ALB with host-based routing is used.
 # Define routing rules to route traffic based on host headers.
