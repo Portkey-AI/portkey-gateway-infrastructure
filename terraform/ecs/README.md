@@ -155,7 +155,7 @@ Sensitive variables like ClientAuthKey and Organisation ID should be stored secu
 
 Update the `environments/dev/dev.tfvars` file to specify your project configuration details.
 
-📖 **For complete variable documentation, see [VARIABLES.md](docs/VARIABLES.md)**
+📖 **For complete variable documentation, see [Variables.md](docs/Variables.md)**
 
 **Quick Reference - Key Variables:**
 

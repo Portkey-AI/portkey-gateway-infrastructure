@@ -101,7 +101,7 @@ locals {
         host      = var.alb_routing_configuration.enable_host_based_routing && var.alb_routing_configuration.mcp_host != "" ? var.alb_routing_configuration.mcp_host : null
         path     = var.alb_routing_configuration.enable_path_based_routing ? var.alb_routing_configuration.mcp_path : ""
       } : null,
-      # For NLB: create a single default rule (NLB doesn't support host-based routing)
+      # For NLB: create a single default rule (NLB doesn't support host/path-based routing)
       var.lb_type == "network" ? {
         name              = "default"
         priority          = 100

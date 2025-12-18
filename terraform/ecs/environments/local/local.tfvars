@@ -166,12 +166,12 @@ lb_access_logs_bucket = ""                                     # (Required if en
 lb_access_logs_prefix = ""                                     # (Optional) S3 bucket prefix for LB access logs.
 
 ###########################################################################
-#                           ROUTING  CONFIGURATION                        #
+#                           ROUTING CONFIGURATION                         #
 ###########################################################################
-# When server_mode = "both", ALB with host-based routing is used.
-# Define routing rules to route traffic based on host headers.
-# Each rule maps specific hosts to a container port.
-# Example configuration:
+
+# When server_mode = "both", ALB with host-based or path-based routing must be enabled.
+# Define routing rules to route traffic based on host headers and paths.
+
 server_mode = "gateway"
 
 alb_routing_configuration = {

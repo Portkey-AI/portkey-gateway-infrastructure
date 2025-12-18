@@ -248,6 +248,16 @@ variable "gateway_autoscaling" {
   }
 }
 
+variable "enable_blue_green" {
+  description = "Define whether to configure blue-green deployment for gateway with load balancer"
+  type        = bool
+  default     = false
+  validation {
+    condition     = !(var.enable_blue_green && !var.create_lb)
+    error_message = "Must set create_lb to true for enabling blue green deployment."
+  }
+}
+
 variable "gateway_lifecycle_hook" {
   description = "Lifecycle hook configuration for gateway service"
   type = object({
@@ -460,16 +470,6 @@ variable "tls_certificate_arn" {
   default     = ""
 }
 
-variable "enable_blue_green" {
-  description = "Define whether to configure blue-green deployment for gateway with load balancer"
-  type        = bool
-  default     = true
-  validation {
-    condition     = !(var.enable_blue_green && !var.create_lb)
-    error_message = "Must set create_lb to true for enabling blue green deployment."
-  }
-}
-
 variable "enable_lb_access_logs" {
   description = "Enable access logs for the Load Balancer. Requires lb_access_logs_bucket to be set."
   type        = bool
@@ -492,8 +492,9 @@ variable "lb_access_logs_prefix" {
   default     = ""
 }
 ###########################################################################
-#                       GATEWAY MODULE CONFIGURATION                       #
+#                         ROUTING CONFIGURATION                           #
 ###########################################################################
+
 variable "server_mode" {
   description = "Specify server mode for gateway"
   type        = string
@@ -514,4 +515,3 @@ variable "alb_routing_configuration" {
     gateway_host = optional(string, "")
   })
 }
-

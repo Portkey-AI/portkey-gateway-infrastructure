@@ -62,7 +62,7 @@ data_service_image = {
 }
 
 # Provide the Secret ARN obtained from output section of AWS CloudFormation Stack.
-docker_cred_secret_arn = "<DockerCredentialsSecretArn>"            # Replace with your AWS Secrets Manager Secret ARN containing Docker Hub credentials for pulling Portkey private images.
+docker_cred_secret_arn = "<DockerCredentialsSecretArn>"               # Replace with your AWS Secrets Manager Secret ARN containing Docker Hub credentials for pulling Portkey private images.
 
 redis_image = {
   image = "redis"
@@ -77,15 +77,18 @@ redis_image = {
 # gateway_desired_task = 1                                            # Set desired replica of gateway tasks to run in Gateway Service.
 # gateway_cpu          = 256                                          # Set the number of cpu units used by the tasks.
 # gateway_memory       = 1024                                         # Set the Amount (in MiB) of memory used by the tasks.
-# gateway_enable_autoscaling = true                                 # Set to true to enable autoscaling for Gateway Service. Default false. 
-# gateway_min_capacity = 1                                          # Set minimum number of tasks to run in Gateway Service.
-# gateway_max_capacity = 3                                          # Set maximmum number of tasks to run in Gateway Service.
-# gateway_target_cpu_utilization = 70                               # Set target CPU utilization % that ECS autoscaling should try to maintain for Gateway tasks.
-# gateway_target_memory_utilization = 70                            # Set target Memory utilization that ECS autoscaling should try to maintain for Gateway tasks.
-# gateway_scale_in_cooldown = 120                                   # Amount of time (seconds) wait after a scale in activity before another scale in activity can start.
-# gateway_scale_out_cooldown = 60                                   # Amount of time (seconds) wait after a scale out activity before another scale out activity can start.
-
-
+# gateway_enable_autoscaling = true                                   # Set to true to enable autoscaling for Gateway Service. Default false. 
+# gateway_min_capacity = 1                                            # Set minimum number of tasks to run in Gateway Service.
+# gateway_max_capacity = 3                                            # Set maximum number of tasks to run in Gateway Service.
+# gateway_target_cpu_utilization = 70                                 # Set target CPU utilization % that ECS autoscaling should try to maintain for Gateway tasks.
+# gateway_target_memory_utilization = 70                              # Set target Memory utilization that ECS autoscaling should try to maintain for Gateway tasks.
+# gateway_scale_in_cooldown = 120                                     # Amount of time (seconds) wait after a scale in activity before another scale in activity can start.
+# gateway_scale_out_cooldown = 60                                     # Amount of time (seconds) wait after a scale out activity before another scale out activity can start.
+# enable_blue_green      = true                                       # Set to true to enable blue-green deployment for Gateway Service.
+# gateway_lifecycle_hook = {
+#   enable_lifecycle_hook = true                                      # Set to true to enable lifecycle hook for Gateway Service.
+#   lifecycle_hook_stages = []                                        # Specify lifecycle hook stages (e.g., ["PRE_SCALE_UP", "POST_TEST_TRAFFIC_SHIFT"])
+# }
 ###########################################################################
 #                       DATA SERVICE CONFIGURATION                        #
 ###########################################################################
@@ -138,8 +141,31 @@ object_storage = {
 #                       LOAD BALANCER CONFIGURATION                       #
 ###########################################################################
 
-# create_nlb = true                                              # Set to true to create a Network Load Balancer (NLB), or false to skip creating one. 
-# internal_nlb = true                                            # Set to true to create an internal NLB, or false to create an internet-facing NLB.
+create_lb               = false                                  # Set to true to create a Load Balancer, or false to skip creating one.
+internal_lb             = true                                   # Set to true to create an internal LB, or false to create an internet-facing LB.
+lb_type                 = "network"                              # Set to 'application' or 'network' to specify load balancer type.
 # allowed_nlb_cidrs = ["X.X.X.X/Y"]                              # Provide a list of CIDR ranges to whitelist in NLB's Security Group.
 # tls_certificate_arn = ""                                       # (Optional) Provide ACM certificate ARN to enable TLS-based listeners.
-# enable_blue_green = true                                       # Set to true to enable blue-green deployment for Gateway Service.
+
+# Access Logs Configuration
+# enable_lb_access_logs   = false                                # Set to true to enable access logs for the Load Balancer.
+# lb_access_logs_bucket   = ""                                   # S3 bucket name for storing Load Balancer access logs (required if enable_lb_access_logs is true).
+# lb_access_logs_prefix   = ""                                   # S3 bucket prefix for Load Balancer access logs (optional).
+
+###########################################################################
+#                           ROUTING CONFIGURATION                         #
+###########################################################################
+
+# When server_mode = "both", ALB with host-based or path-based routing must be enabled.
+# Define routing rules to route traffic based on host headers and paths.
+
+# server_mode = "gateway"                                           # Specify server mode: 'gateway', 'mcp', or 'both'.
+
+# alb_routing_configuration = {
+#   enable_path_based_routing = false                              # Set to true to enable path-based routing.
+#   enable_host_based_routing = false                              # Set to true to enable host-based routing.
+#   mcp_path                  = "/mcp"                             # Path for MCP service (relevant if path-based routing is enabled).
+#   gateway_path              = "/gateway"                         # Path for Gateway service (relevant if path-based routing is enabled).
+#   mcp_host                  = ""                                 # Host for MCP service (relevant if host-based routing is enabled).
+#   gateway_host              = ""                                 # Host for Gateway service (relevant if host-based routing is enabled).
+# }

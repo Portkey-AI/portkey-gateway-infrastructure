@@ -49,3 +49,9 @@ terraform/environments/local
 
 # Ignore local backend config
 terraform/backend.local.tf
+
+# Ignore lambda archive files
+terraform/lambda/lifecycle-hook/function.zip
+
+# Ignore local test environment
+terraform/ecs/environments/local
