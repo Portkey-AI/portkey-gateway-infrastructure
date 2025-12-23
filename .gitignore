@@ -55,3 +55,6 @@ terraform/lambda/lifecycle-hook/function.zip
 
 # Ignore local test environment
 terraform/ecs/environments/local
+
+
+*.DS_Store
