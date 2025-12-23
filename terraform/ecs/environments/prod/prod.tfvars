@@ -84,8 +84,9 @@ redis_image = {
 # gateway_target_memory_utilization = 70                              # Set target Memory utilization that ECS autoscaling should try to maintain for Gateway tasks.
 # gateway_scale_in_cooldown = 120                                     # Amount of time (seconds) wait after a scale in activity before another scale in activity can start.
 # gateway_scale_out_cooldown = 60                                     # Amount of time (seconds) wait after a scale out activity before another scale out activity can start.
-# enable_blue_green      = true                                       # Set to true to enable blue-green deployment for Gateway Service.
-# gateway_lifecycle_hook = {
+
+# enable_blue_green       = true                                      # Set to true to enable blue-green deployment for Gateway Service.
+# gateway_lifecycle_hook  = {
 #   enable_lifecycle_hook = true                                      # Set to true to enable lifecycle hook for Gateway Service.
 #   lifecycle_hook_stages = []                                        # Specify lifecycle hook stages (e.g., ["PRE_SCALE_UP", "POST_TEST_TRAFFIC_SHIFT"])
 # }
@@ -159,7 +160,7 @@ lb_type                 = "network"                              # Set to 'appli
 # When server_mode = "both", ALB with host-based or path-based routing must be enabled.
 # Define routing rules to route traffic based on host headers and paths.
 
-# server_mode = "gateway"                                           # Specify server mode: 'gateway', 'mcp', or 'both'.
+server_mode = "gateway"                                            # Specify server mode: 'gateway', 'mcp', or 'both'.
 
 # alb_routing_configuration = {
 #   enable_path_based_routing = false                              # Set to true to enable path-based routing.

@@ -186,17 +186,13 @@ gateway_autoscaling = {
 | `lb_type` | `"network"` | No | `network` (NLB) or `application` (ALB). **ALB requires host headers** |
 | `llm_gateway_host` | `""` | **Conditional** | Required if `lb_type="application"` and `server_mode` is `gateway` or `both` |
 | `mcp_gateway_host` | `""` | **Conditional** | Required if `lb_type="application"` and `server_mode` is `mcp` or `both` |
-| `enable_blue_green` | `false` | No | Enable Blue/Green deployment (ALB only) |
-| **Gateway Resources** | | | |
-| `gateway_config.cpu` | `256` | No | Gateway CPU units (256 = 0.25 vCPU) |
-| `gateway_config.memory` | `1024` | No | Gateway memory (MiB) |
-| **Redis** | | | |
-| `redis_type` | `"redis"` | No | `redis` (containerized) or `aws-elasti-cache` |
+| `enable_blue_green` | `false` | No | Enable Blue/Green deployment |
 
 **Important Notes:**
 - **Application Load Balancer (ALB) always requires host headers** for routing
 - **Network Load Balancer (NLB)** works without host headers using default routing
-- When `server_mode = "both"`, you **must** use ALB with both host values configured
+- When `server_mode = "both"`, you **must** either use ALB with either host based or path based routing configured.
+- Currently, after completing a deployment with a specific `server_mode` and `lb_type`, these settings cannot be modified in subsequent Terraform deployments. The only allowed change is updating `server_mode` from `gateway` or `mcp` to `both`.
 
 ### Step 6: Setup Remote S3 Backend (Recommended)
 

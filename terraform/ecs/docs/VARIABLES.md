@@ -145,20 +145,11 @@ gateway_config = {
 | `alb_routing_configuration.mcp_host` | `""` | Conditional | Domain for accessing MCP (for example https://mcp.example.com/) |
 | `alb_routing_configuration.gateway_host` | `""` | Conditional | Domain for accessing Gateway (for example https://gateway.example.com/) |
 
-## Important Notes
-
 ### Server Modes
 - `gateway`: Gateway listens on port 8787 only (Gateway)
 - `mcp`: MCP listens on port 8788 only (MCP)
-- `both`: Both Gateway and MCP listens on ports 8787 and 8788 respectively (**ALB required** with host-based or path-based routing to be enabled)
+- `both`: Both Gateway and MCP listens on ports 8787 and 8788 respectively (**ALB required** either host-based or path-based routing to be enabled when `server_mode = "both"`)
 
 ### Blue/Green Deployment
 - Supported for Gateway service with [ECS native Blue/Green deployment](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-blue-green.html).
 - For more details on configuring refer to [BlueGreenDeployment.md](BlueGreenDeployment.md).
--
-
-
-### Validation Rules
-- When `server_mode = "both"`, `lb_type` must be `"application"`
-- When `enable_lb_access_logs = true`, `lb_access_logs_bucket` is required
-- ElastiCache endpoint required when `redis_type = "aws-elasti-cache"`

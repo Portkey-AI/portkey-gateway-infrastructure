@@ -89,7 +89,7 @@ gateway_config = {
 #   scale_out_cooldown        = 60                                    # Amount of time (seconds) wait after a scale out activity before another scale out activity can start.
 # }
 
-enable_blue_green      = true                                     # Set to true to enable blue-green deployment for Gateway Service.
+enable_blue_green      = true                                         # Set to true to enable blue-green deployment for Gateway Service.
 
 # gateway_lifecycle_hook = {
 #   enable_lifecycle_hook = false                                     # Set to true to enable lifecycle hook for Gateway Service.
@@ -170,11 +170,11 @@ lb_type                 = "network"                              # Set to 'appli
 
 server_mode = "gateway"                                          # Specify server mode: 'gateway', 'mcp', or 'both'.
 
-alb_routing_configuration = {
-  enable_path_based_routing = false                              # Set to true to enable path-based routing.
-  enable_host_based_routing = false                              # Set to true to enable host-based routing.
-  mcp_path                  = "/mcp"                             # Path for MCP service (relevant if path-based routing is enabled).
-  gateway_path              = "/gateway"                         # Path for Gateway service (relevant if path-based routing is enabled).
-  mcp_host                  = ""                                 # Host for MCP service (relevant if host-based routing is enabled).
-  gateway_host              = ""                                 # Host for Gateway service (relevant if host-based routing is enabled).
-}
+# alb_routing_configuration = {
+#   enable_path_based_routing = false                              # Set to true to enable path-based routing.
+#   enable_host_based_routing = false                              # Set to true to enable host-based routing.
+#   mcp_path                  = "/mcp"                             # Path for MCP service (relevant if path-based routing is enabled).
+#   gateway_path              = "/gateway"                         # Path for Gateway service (relevant if path-based routing is enabled).
+#   mcp_host                  = ""                                 # Host for MCP service (relevant if host-based routing is enabled).
+#   gateway_host              = ""                                 # Host for Gateway service (relevant if host-based routing is enabled).
+# }

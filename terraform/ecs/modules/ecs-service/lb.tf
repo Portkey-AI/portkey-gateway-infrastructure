@@ -123,7 +123,7 @@ resource "aws_lb_target_group" "blue_tg" {
     for rule in var.load_balancer_config.routing_rules : rule.name => rule
   } : {}
 
-  name        = "${local.service_name}-${random_id.suffix.hex}-${each.key}-b"
+  name        = "${substr(local.service_name, 0, 10)}-${random_id.suffix.hex}-${each.key}-b"
   port        = each.value.container_port
   protocol    = local.lb_type == "network" ? "TCP" : "HTTP"
   vpc_id      = local.vpc_id
@@ -159,7 +159,7 @@ resource "aws_lb_target_group" "green_tg" {
     for rule in var.load_balancer_config.routing_rules : rule.name => rule
   } : {}
 
-  name        = "${local.service_name}-${random_id.suffix.hex}-${each.key}-g"
+  name        = "${substr(local.service_name, 0, 10)}-${random_id.suffix.hex}-${each.key}-g"
   port        = each.value.container_port
   protocol    = local.lb_type == "network" ? "TCP" : "HTTP"
   vpc_id      = local.vpc_id
