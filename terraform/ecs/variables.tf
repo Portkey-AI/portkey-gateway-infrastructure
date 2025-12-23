@@ -504,14 +504,14 @@ variable "server_mode" {
     error_message = "'server_mode' must be one of: 'gateway', 'mcp', 'both'."
   }
 }
-variable "alb_routing_configuration" {  
+variable "alb_routing_configuration" {
   description = "ALB routing configuration"
   type = object({
     enable_path_based_routing = optional(bool, false)
     enable_host_based_routing = optional(bool, false)
-    mcp_path = optional(string, "/mcp")
-    gateway_path = optional(string, "/gateway")
-    mcp_host = optional(string, "")
-    gateway_host = optional(string, "")
+    mcp_path                  = optional(string, "/mcp")
+    gateway_path              = optional(string, "/gateway")
+    mcp_host                  = optional(string, "")
+    gateway_host              = optional(string, "")
   })
 }

@@ -149,7 +149,6 @@ resource "aws_lb_target_group" "blue_tg" {
     Color = "blue"
   }
   lifecycle {
-    ignore_changes = [action]
     create_before_destroy = true
   }
 }

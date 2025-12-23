@@ -90,16 +90,16 @@ locals {
         priority          = 100
         container_port    = 8787
         health_check_path = "/v1/health"
-        host      = var.alb_routing_configuration.enable_host_based_routing && var.alb_routing_configuration.gateway_host != "" ? var.alb_routing_configuration.gateway_host : null
-        path     = var.alb_routing_configuration.enable_path_based_routing ? var.alb_routing_configuration.gateway_path : ""
+        host              = var.alb_routing_configuration.enable_host_based_routing && var.alb_routing_configuration.gateway_host != "" ? var.alb_routing_configuration.gateway_host : null
+        path              = var.alb_routing_configuration.enable_path_based_routing ? var.alb_routing_configuration.gateway_path : ""
       } : null,
       var.lb_type == "application" && (var.server_mode == "both" || var.server_mode == "mcp") ? {
         name              = "mcp"
         priority          = 200
         container_port    = 8788
         health_check_path = "/v1/health"
-        host      = var.alb_routing_configuration.enable_host_based_routing && var.alb_routing_configuration.mcp_host != "" ? var.alb_routing_configuration.mcp_host : null
-        path     = var.alb_routing_configuration.enable_path_based_routing ? var.alb_routing_configuration.mcp_path : ""
+        host              = var.alb_routing_configuration.enable_host_based_routing && var.alb_routing_configuration.mcp_host != "" ? var.alb_routing_configuration.mcp_host : null
+        path              = var.alb_routing_configuration.enable_path_based_routing ? var.alb_routing_configuration.mcp_path : ""
       } : null,
       # For NLB: create a single default rule (NLB doesn't support host/path-based routing)
       var.lb_type == "network" ? {

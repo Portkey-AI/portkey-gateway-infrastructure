@@ -26,4 +26,7 @@ gateway_lifecycle_hook = {
 
 The Lambda function will be invoked by ECS at each stage specified in the `lifecycle_hook_stages` field. For more details refer following [AWS ECS documentation](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-lifecycle-hooks.html).
 
-**Note**: Blue-Green deployment is supported for Gateway service deployment only.
+**Important Notes:**
+* Blue-green deployment is supported only for the Gateway service and is not applicable to the data service.
+* When blue-green deployment is enabled, the production deployment is exposed on port 443 (or port 80 if SSL is disabled), while the test deployment is exposed on port 8443 (or port 8080 when SSL is disabled).
+

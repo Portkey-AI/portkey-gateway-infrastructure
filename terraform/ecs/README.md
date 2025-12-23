@@ -255,9 +255,18 @@ terraform apply environments/dev/tfplan
 export OPENAI_API_KEY="<YOUR_OPENAI_API_KEY>"
 export PORTKEY_API_KEY="<YOUR_PORTKEY_API_KEY>"
 
-# For NLB or internet-facing ALB: Use the load balancer DNS name
-# For ALB with host-based routing: Use your configured domain (e.g., gateway.yourdomain.com)
-export GATEWAY_URL="http://<LOAD_BALANCER_DNS_OR_DOMAIN>:<PORT>"
+# For NLB: Use the load balancer DNS name
+# For ALB with host-based routing enabled: Use your configured domain (e.g., gateway.yourdomain.com)
+# For ALB without host-based routing enabled: You can use ALB DNS name
+# For HTTPs: Prod listener port - 443
+# For HTTP: Prod listener port - 80
+ 
+
+# If SSL is enabled on listener
+export GATEWAY_URL="https://<HOST_OR_LB_DNS>"
+
+#If SSL is disabled on listener
+export GATEWAY_URL="http://<HOST_OR_LB_DNS>
 
 # Test the gateway
 curl "${GATEWAY_URL}/v1/chat/completions" \
@@ -272,21 +281,24 @@ curl "${GATEWAY_URL}/v1/chat/completions" \
 ```
 
 **Notes:**
-- **For NLB**: Use the load balancer DNS directly (e.g., `gateway-xxx-lb.elb.us-east-1.amazonaws.com`)
-- **For ALB**: Use your configured domain name (e.g., `gateway.yourdomain.com` or `mcp.yourdomain.com`)
-- Replace `<PORT>` with the listener port (default: `80` for HTTP, `443` for HTTPS)
-- ALB requires proper DNS configuration pointing to the load balancer
-- For HTTPS, change the URL scheme to `https://` and use port `443`
+- **For ALB**: When path-based routing is enabled on the Application Load Balancer, you must include the paths defined in the **tfvars** file when accessing the Gateway and MCP server.
+For example, if `alb_routing_configuration.gateway_path` is set to `/gateway` and `alb_routing_configuration.mcp_path` is set to `/mcp`, the endpoints would be:
+`https://gateway.example.com/gateway/v1/xyz` and `https://gateway.example.com/mcp/v1/xyz`.
+- If you don’t have access to an LLM provider API key, you can still validate connectivity by sending a request with a dummy key, for example:
+
+   `export OPENAI_API_KEY="myrandomkey"`
+
+   Then check the Logs section in the Portkey portal of your account. If you see entries for failed requests, it indicates that the data plane is successfully communicating with the control plane.
 
 ## Integration with Control Plane
 
-The gateway automatically syncs configuration from Portkey Control Plane. Supported integration methods:
+The Gateway Data Plane automatically syncs configuration from Portkey Control Plane. Supported integration methods:
 
 **Integration Methods:**
 - **AWS PrivateLink**: Secure private connectivity (recommended for production)
 - **IP Whitelisting**: Allow Portkey Control Plane IPs to reach your gateway
 
-For detailed integration setup instructions, refer to the [full documentation](https://portkey.ai/docs).
+For detailed integration setup instructions, refer to the [full documentation](https://portkey.ai/docs/self-hosting/hybrid-deployments/aws/eks#integrating-gateway-with-control-plane).
 
 ## Uninstalling Portkey Gateway
 
