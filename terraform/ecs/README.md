@@ -46,14 +46,8 @@ Before deploying Portkey Gateway on AWS ECS, ensure you have:
   - IAM (Identity and Access Management)
   - S3 (for logs and state storage)
   - CloudWatch (for logging)
-* **Terraform CLI**: [Install Terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli) (v1.0+)
+* **Terraform CLI**: [Install Terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli) (v1.13+)
 * **AWS CLI**: [Install and configure](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) with credentials
-
-### Recommended
-* **S3 Bucket** for Terraform state management (remote backend)
-* **S3 Buckets** for gateway logs storage
-* **Domain/DNS** (if using ALB with custom domains)
-* **ACM Certificate** (if enabling TLS/HTTPS)
 
 ## Deployment Guide
 

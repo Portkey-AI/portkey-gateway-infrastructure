@@ -162,4 +162,3 @@ gateway_config = {
 - When `server_mode = "both"`, `lb_type` must be `"application"`
 - When `enable_lb_access_logs = true`, `lb_access_logs_bucket` is required
 - ElastiCache endpoint required when `redis_type = "aws-elasti-cache"`
-
