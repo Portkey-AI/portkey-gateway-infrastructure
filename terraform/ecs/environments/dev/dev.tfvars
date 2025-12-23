@@ -77,6 +77,8 @@ gateway_config = {
   desired_task_count = 1                                            # Set desired replica of gateway tasks to run in Gateway Service.
   cpu                = 256                                          # Set the number of cpu units used by the tasks.
   memory             = 1024                                         # Set the Amount (in MiB) of memory used by the tasks.
+  gateway_port       = 8787                                          # Port on which Gateway application will listen (internally).
+  mcp_port           = 8788                                          # Port on which MCP application will listen (internally).
 }
 
 # gateway_autoscaling = {
@@ -165,10 +167,10 @@ lb_type                 = "network"                              # Set to 'appli
 #                           ROUTING CONFIGURATION                         #
 ###########################################################################
 
-# When server_mode = "both", ALB with host-based or path-based routing must be enabled.
+# When server_mode = "all", ALB with host-based or path-based routing must be enabled.
 # Define routing rules to route traffic based on host headers and paths.
 
-server_mode = "gateway"                                          # Specify server mode: 'gateway', 'mcp', or 'both'.
+server_mode = "gateway"                                          # Specify server mode: 'gateway', 'mcp', or 'all'.
 
 # alb_routing_configuration = {
 #   enable_path_based_routing = false                              # Set to true to enable path-based routing.

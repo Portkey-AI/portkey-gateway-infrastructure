@@ -62,7 +62,7 @@ data_service_image = {
 }
 
 # Provide the Secret ARN obtained from output section of AWS CloudFormation Stack.
-docker_cred_secret_arn = "<DockerCredentialsSecretArn>"               # Replace with your AWS Secrets Manager Secret ARN containing Docker Hub credentials for pulling Portkey private images.
+docker_cred_secret_arn = "<DockerCredentialsSecretArn>"            # Replace with your AWS Secrets Manager Secret ARN containing Docker Hub credentials for pulling Portkey private images.
 
 redis_image = {
   image = "redis"
@@ -73,52 +73,64 @@ redis_image = {
 #                     GATEWAY SERVICE CONFIGURATION                       #
 ###########################################################################
 
+gateway_config = {
+  desired_task_count = 1                                             # Set desired replica of gateway tasks to run in Gateway Service.
+  cpu                = 256                                           # Set the number of cpu units used by the tasks.
+  memory             = 1024                                          # Set the Amount (in MiB) of memory used by the tasks.
+  gateway_port       = 8787                                          # Port on which Gateway application will listen (internally).
+  mcp_port           = 8788                                          # Port on which MCP application will listen (internally).
+}
 
-# gateway_desired_task = 1                                            # Set desired replica of gateway tasks to run in Gateway Service.
-# gateway_cpu          = 256                                          # Set the number of cpu units used by the tasks.
-# gateway_memory       = 1024                                         # Set the Amount (in MiB) of memory used by the tasks.
-# gateway_enable_autoscaling = true                                   # Set to true to enable autoscaling for Gateway Service. Default false. 
-# gateway_min_capacity = 1                                            # Set minimum number of tasks to run in Gateway Service.
-# gateway_max_capacity = 3                                            # Set maximum number of tasks to run in Gateway Service.
-# gateway_target_cpu_utilization = 70                                 # Set target CPU utilization % that ECS autoscaling should try to maintain for Gateway tasks.
-# gateway_target_memory_utilization = 70                              # Set target Memory utilization that ECS autoscaling should try to maintain for Gateway tasks.
-# gateway_scale_in_cooldown = 120                                     # Amount of time (seconds) wait after a scale in activity before another scale in activity can start.
-# gateway_scale_out_cooldown = 60                                     # Amount of time (seconds) wait after a scale out activity before another scale out activity can start.
-
-# enable_blue_green       = true                                      # Set to true to enable blue-green deployment for Gateway Service.
-# gateway_lifecycle_hook  = {
-#   enable_lifecycle_hook = true                                      # Set to true to enable lifecycle hook for Gateway Service.
-#   lifecycle_hook_stages = []                                        # Specify lifecycle hook stages (e.g., ["PRE_SCALE_UP", "POST_TEST_TRAFFIC_SHIFT"])
+# gateway_autoscaling = {
+#   enable_autoscaling        = false                                 # Set to true to enable autoscaling for Gateway Service. Default false.
+#   autoscaling_min_capacity  = 1                                     # Set minimum number of tasks to run in Gateway Service.
+#   autoscaling_max_capacity  = 3                                     # Set maximum number of tasks to run in Gateway Service.
+#   target_cpu_utilization    = 70                                    # Set target CPU utilization % that ECS autoscaling should try to maintain for Gateway tasks.
+#   target_memory_utilization = 70                                    # Set target Memory utilization that ECS autoscaling should try to maintain for Gateway tasks.
+#   scale_in_cooldown         = 120                                   # Amount of time (seconds) wait after a scale in activity before another scale in activity can start.
+#   scale_out_cooldown        = 60                                    # Amount of time (seconds) wait after a scale out activity before another scale out activity can start.
 # }
+
+enable_blue_green      = true                                         # Set to true to enable blue-green deployment for Gateway Service.
+
+# gateway_lifecycle_hook = {
+#   enable_lifecycle_hook = false                                     # Set to true to enable lifecycle hook for Gateway Service.
+#   lifecycle_hook_stages = []                                        # Specify lifecycle hook stages (e.g., ["PRE_SCALE_UP", "PRE_SCALE_DOWN"])
+# }
+
 ###########################################################################
 #                       DATA SERVICE CONFIGURATION                        #
 ###########################################################################
 
-enable_dataservice = false
-# dataservice_desired_task = 1                                        # Set desired replica of dataservice tasks to run in Data Service.
-# dataservice_cpu          = 256                                      # Set the number of cpu units used by the tasks.
-# dataservice_memory       = 1024                                     # Set the Amount (in MiB) of memory used by the tasks.
-# dataservice_enable_autoscaling = true                               # Set to true to enable autoscaling for Data Service. Default false. 
-# dataservice_min_capacity = 1                                        # Set minimum number of tasks to run in Data Service.
-# dataservice_max_capacity = 3                                        # Set maximmum number of tasks to run in Data Service.
-# dataservice_target_cpu_utilization = 70                             # Set target CPU utilization % that ECS autoscaling should try to maintain for Data tasks.
-# dataservice_target_memory_utilization = 70                          # Set target Memory utilization that ECS autoscaling should try to maintain for Data tasks.
-# dataservice_scale_in_cooldown = 120                                 # Amount of time (seconds) wait after a scale in activity before another scale in activity can start.
-# dataservice_scale_out_cooldown = 60                                 # Amount of time (seconds) wait after a scale out activity before another scale out activity can start.
+dataservice_config = {
+  enable_dataservice = false                                        # Set to true to enable Data Service.
+  desired_task_count = 1                                            # Set desired replica of dataservice tasks to run in Data Service.
+  cpu                = 256                                          # Set the number of cpu units used by the tasks.
+  memory             = 1024                                         # Set the Amount (in MiB) of memory used by the tasks.
+}
 
+# dataservice_autoscaling = {
+#   enable_autoscaling        = false                                 # Set to true to enable autoscaling for Data Service. Default false.
+#   autoscaling_min_capacity  = 1                                     # Set minimum number of tasks to run in Data Service.
+#   autoscaling_max_capacity  = 3                                     # Set maximum number of tasks to run in Data Service.
+#   target_cpu_utilization    = 70                                    # Set target CPU utilization % that ECS autoscaling should try to maintain for Data tasks.
+#   target_memory_utilization = 70                                    # Set target Memory utilization that ECS autoscaling should try to maintain for Data tasks.
+#   scale_in_cooldown         = 120                                   # Amount of time (seconds) wait after a scale in activity before another scale in activity can start.
+#   scale_out_cooldown        = 60                                    # Amount of time (seconds) wait after a scale out activity before another scale out activity can start.
+# }
 
 ###########################################################################
 #                           REDIS CONFIGURATION                           #
 ###########################################################################
 
-redis_type = "redis"                                                  # Set to 'redis' to use 'container' based redis, set to 'aws-elastic-cache' to use AWS ElastiCache as cache store.
-# redis_cpu        = 256                                                # Relevant if using built-in container based redis.
-# redis_memory     = 1024                                               # Relevant if using built-in container based redis.
-# redis_endpoint   = ""                                                 # Only required if using Amazon ElastiCache.
-# redis_tls        = false                                              # Set to true if tls is enabled on Amazon ElastiCache
-# redis_mode       = "standalone"                                       # Set to 'cluster' if cluster mode is enabled on Amazon ElastiCache, otherwise set it to standalone.
-
-
+redis_configuration = {
+  redis_type = "redis"                                              # Set to 'redis' to use 'container' based redis, set to 'aws-elastic-cache' to use AWS ElastiCache as cache store.
+  cpu        = 256                                                  # Relevant if using built-in container based redis.
+  memory     = 512                                                  # Relevant if using built-in container based redis.
+  endpoint   = ""                                                   # Only required if using Amazon ElastiCache.
+  tls        = false                                                # Set to true if tls is enabled on Amazon ElastiCache
+  mode       = "standalone"                                         # Set to 'cluster' if cluster mode is enabled on Amazon ElastiCache, otherwise set it to standalone.
+}
 
 ###########################################################################
 #                           LOG STORE CONFIGURATION                       #
@@ -126,14 +138,12 @@ redis_type = "redis"                                                  # Set to '
 object_storage = {
   log_store_bucket   = "<BUCKET_NAME>"                               # Specify the S3 bucket where logs will be stored.
   bucket_region      = "<AWS_REGION>"                                # Specify AWS region where buckets exists.
-  # log_exports_bucket = ""                                          # (Optional) Specify bucket for logs, only required if using data service.
-  # finetune_bucket    = ""                                          # (Optional) Specify bucket for where dataset will be stored for finetuning LLM models.
+  # log_exports_bucket = ""                                          # (Optional) (Optional) Specify bucket for logs exports, if not specified `log_store_bucket` will be used for log exports.
+  # finetune_bucket    = ""                                          # (Optional) Specify bucket where dataset will be stored for finetuning LLM models.
 }
 
-
-
 ###########################################################################
-#                            AMAZON BEDROCK ACCESS                        #
+#                   AMAZON BEDROCK ACCESS CONFIGURATION                   #
 ###########################################################################
 
 # enable_bedrock_access = false
@@ -145,8 +155,8 @@ object_storage = {
 create_lb               = false                                  # Set to true to create a Load Balancer, or false to skip creating one.
 internal_lb             = true                                   # Set to true to create an internal LB, or false to create an internet-facing LB.
 lb_type                 = "network"                              # Set to 'application' or 'network' to specify load balancer type.
-# allowed_nlb_cidrs = ["X.X.X.X/Y"]                              # Provide a list of CIDR ranges to whitelist in NLB's Security Group.
-# tls_certificate_arn = ""                                       # (Optional) Provide ACM certificate ARN to enable TLS-based listeners.
+# allowed_lb_cidrs        = ["X.X.X.X/Y"]                        # Provide a list of CIDR ranges to whitelist in LB's Security Group.
+# tls_certificate_arn     = ""                                   # (Optional) Provide ACM certificate ARN to enable TLS-based listeners.
 
 # Access Logs Configuration
 # enable_lb_access_logs   = false                                # Set to true to enable access logs for the Load Balancer.
@@ -157,10 +167,10 @@ lb_type                 = "network"                              # Set to 'appli
 #                           ROUTING CONFIGURATION                         #
 ###########################################################################
 
-# When server_mode = "both", ALB with host-based or path-based routing must be enabled.
+# When server_mode = "all", ALB with host-based or path-based routing must be enabled.
 # Define routing rules to route traffic based on host headers and paths.
 
-server_mode = "gateway"                                            # Specify server mode: 'gateway', 'mcp', or 'both'.
+server_mode = "gateway"                                            # Specify server mode: 'gateway', 'mcp', or 'all'.
 
 # alb_routing_configuration = {
 #   enable_path_based_routing = false                              # Set to true to enable path-based routing.

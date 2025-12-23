@@ -67,7 +67,8 @@ gateway_config = {
 | `gateway_config.desired_task_count` | `1` | No | Number of Gateway tasks |
 | `gateway_config.cpu` | `256` | No | CPU units (256 = 0.25 vCPU, 1024 = 1 vCPU) |
 | `gateway_config.memory` | `1024` | No | Memory in MiB |
-| `server_mode` | `"gateway"` | No | Gateway mode: `gateway` (8787), `mcp` (8788), or `both`. When `both`, requires `lb_type = "application"` |
+| `gateway_config.gateway_port` | `8787`| No | Port on which gateway will be running in ECS task |
+| `gateway_config.mcp_port` | `8788`| No | Port on which mcp will be running in ECS task |
 | `gateway_autoscaling.enable_autoscaling` | `false` | No | Enable ECS autoscaling |
 | `gateway_autoscaling.min_capacity` | `1` | No | Minimum tasks when autoscaling |
 | `gateway_autoscaling.max_capacity` | `3` | No | Maximum tasks when autoscaling |
@@ -126,7 +127,7 @@ gateway_config = {
 | Variable | Default | Required | Description |
 |----------|---------|----------|-------------|
 | `create_lb` | `true` | No | Create load balancer for Gateway |
-| `lb_type` | `"network"` | No | Load balancer type: `network` (NLB) or `application` (ALB). Use `application` when `server_mode = "both"` |
+| `lb_type` | `"network"` | No | Load balancer type: `network` (NLB) or `application` (ALB). Use `application` when `server_mode = "all"` |
 | `internal_lb` | `true` | No | Internal LB (true) or internet-facing (false) |
 | `allowed_lb_cidrs` | `[]` | No | IP ranges for LB security group. Defaults to VPC CIDR (internal) or 0.0.0.0/0 (internet-facing) |
 | `enable_lb_access_logs` | `false` | No | Enable LB access logs to S3 |
@@ -148,7 +149,7 @@ gateway_config = {
 ### Server Modes
 - `gateway`: Gateway listens on port 8787 only (Gateway)
 - `mcp`: MCP listens on port 8788 only (MCP)
-- `both`: Both Gateway and MCP listens on ports 8787 and 8788 respectively (**ALB required** either host-based or path-based routing to be enabled when `server_mode = "both"`)
+- `all`: Both Gateway and MCP listens on ports 8787 and 8788 respectively (**ALB required** either host-based or path-based routing to be enabled when `server_mode = "all"`)
 
 ### Blue/Green Deployment
 - Supported for Gateway service with [ECS native Blue/Green deployment](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-blue-green.html).

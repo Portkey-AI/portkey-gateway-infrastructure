@@ -218,11 +218,15 @@ variable "gateway_config" {
     desired_task_count = number
     cpu                = number
     memory             = number
+    gateway_port       = number
+    mcp_port           = number
   })
   default = {
     desired_task_count = 1
     cpu                = 256
     memory             = 1024
+    gateway_port       = 8787
+    mcp_port           = 8788
   }
 }
 
@@ -453,8 +457,8 @@ variable "lb_type" {
     error_message = "'lb_type' must be one of: 'application', 'network'."
   }
   validation {
-    condition     = var.server_mode != "both" || var.lb_type == "application"
-    error_message = "When server_mode is 'both', lb_type must be 'application' to support host-based routing for multiple services."
+    condition     = var.server_mode != "all" || var.lb_type == "application"
+    error_message = "When server_mode is 'all', lb_type must be 'application' to support host-based routing for multiple services."
   }
 }
 
@@ -500,8 +504,8 @@ variable "server_mode" {
   type        = string
   default     = "gateway"
   validation {
-    condition     = contains(["gateway", "mcp", "both"], var.server_mode)
-    error_message = "'server_mode' must be one of: 'gateway', 'mcp', 'both'."
+    condition     = contains(["gateway", "mcp", "all"], var.server_mode)
+    error_message = "'server_mode' must be one of: 'gateway', 'mcp', 'all'."
   }
 }
 variable "alb_routing_configuration" {
@@ -510,7 +514,7 @@ variable "alb_routing_configuration" {
     enable_path_based_routing = optional(bool, false)
     enable_host_based_routing = optional(bool, false)
     mcp_path                  = optional(string, "/mcp")
-    gateway_path              = optional(string, "/gateway")
+    gateway_path              = optional(string, "/gateway") 
     mcp_host                  = optional(string, "")
     gateway_host              = optional(string, "")
   })

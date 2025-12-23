@@ -23,13 +23,13 @@ module "gateway" {
       # List of ports/protocols exposed by this container
       container_ports = [
         for port in [
-          var.server_mode == "both" || var.server_mode == "gateway" ? {
-            container_port      = 8787
+          var.server_mode == "all" || var.server_mode == "gateway" ? {
+            container_port      = var.gateway_config.gateway_port
             container_port_name = "gateway"
             app_protocol        = "http"
           } : null,
-          var.server_mode == "both" || var.server_mode == "mcp" ? {
-            container_port      = 8788
+          var.server_mode == "all" || var.server_mode == "mcp" ? {
+            container_port      = var.gateway_config.mcp_port
             container_port_name = "mcp"
             app_protocol        = "http"
           } : null
@@ -37,7 +37,7 @@ module "gateway" {
       ]
 
       health_check = {
-        command      = ["CMD-SHELL", var.server_mode == "both" || var.server_mode == "gateway" ? "wget -qO- http://localhost:8787/v1/health || exit 1" : "wget -qO- http://localhost:8788/v1/health || exit 1"]
+        command      = ["CMD-SHELL", var.server_mode == "all" || var.server_mode == "gateway" ? "wget -qO- http://localhost:${var.gateway_config.gateway_port}/v1/health || exit 1" : "wget -qO- http://localhost:${var.gateway_config.mcp_port}/v1/health || exit 1"]
         interval     = 30
         timeout      = 5
         retries      = 3
@@ -80,23 +80,23 @@ module "gateway" {
 
     service_connect_config = [
       for config in [
-        var.server_mode == "both" || var.server_mode == "gateway" ? {
+        var.server_mode == "all" || var.server_mode == "gateway" ? {
           enabled        = true
           namespace      = local.namespace
           discovery_name = "gateway"
           port_name      = "gateway"
           client_alias = {
-            port     = 8787
+            port     = var.gateway_config.gateway_port
             dns_name = "gateway"
           }
         } : null,
-        var.server_mode == "both" || var.server_mode == "mcp" ? {
+        var.server_mode == "all" || var.server_mode == "mcp" ? {
           enabled        = true
           namespace      = local.namespace
           discovery_name = "mcp"
           port_name      = "mcp"
           client_alias = {
-            port     = 8788
+            port     = var.gateway_config.mcp_port
             dns_name = "mcp"
           }
         } : null

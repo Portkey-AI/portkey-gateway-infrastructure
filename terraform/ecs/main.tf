@@ -70,8 +70,9 @@ locals {
   }
 
   gateway_env = {
-    SERVER_MODE                  = var.server_mode == "both" ? "all" : (var.server_mode == "mcp" ? "mcp" : "")
-    MCP_PORT                     = var.server_mode == "both" || var.server_mode == "mcp" ? 8788 : null
+    SERVER_MODE                  = var.server_mode == "all" ? "all" : (var.server_mode == "mcp" ? "mcp" : "")
+    PORT                         = var.gateway_config.gateway_port
+    MCP_PORT                     = var.server_mode == "all" || var.server_mode == "mcp" ? var.gateway_config.mcp_port : null
     LOG_STORE_GENERATIONS_BUCKET = var.object_storage.log_store_bucket
     DATASERVICE_BASEPATH         = var.dataservice_config.enable_dataservice ? "http://data-service:8081" : null
   }
@@ -80,23 +81,24 @@ locals {
     LOG_EXPORTS_BUCKET     = local.log_exports_bucket != "" ? local.log_exports_bucket : local.log_store_bucket
     FINETUNES_BUCKET       = local.finetune_bucket != "" ? local.finetune_bucket : local.log_store_bucket
     AWS_S3_FINETUNE_BUCKET = local.finetune_bucket != "" ? local.finetune_bucket : local.log_store_bucket
+    GATEWAY_BASE_URL       = "http://gateway:${var.gateway_config.gateway_port}"
   }
 
   routing_rules = [
     for rule in [
       # For ALB: create host-based routing rules
-      var.lb_type == "application" && (var.server_mode == "both" || var.server_mode == "gateway") ? {
+      var.lb_type == "application" && (var.server_mode == "all" || var.server_mode == "gateway") ? {
         name              = "gateway"
         priority          = 100
-        container_port    = 8787
+        container_port    = var.gateway_config.gateway_port
         health_check_path = "/v1/health"
         host              = var.alb_routing_configuration.enable_host_based_routing && var.alb_routing_configuration.gateway_host != "" ? var.alb_routing_configuration.gateway_host : null
         path              = var.alb_routing_configuration.enable_path_based_routing ? var.alb_routing_configuration.gateway_path : ""
       } : null,
-      var.lb_type == "application" && (var.server_mode == "both" || var.server_mode == "mcp") ? {
+      var.lb_type == "application" && (var.server_mode == "all" || var.server_mode == "mcp") ? {
         name              = "mcp"
         priority          = 200
-        container_port    = 8788
+        container_port    = var.gateway_config.mcp_port
         health_check_path = "/v1/health"
         host              = var.alb_routing_configuration.enable_host_based_routing && var.alb_routing_configuration.mcp_host != "" ? var.alb_routing_configuration.mcp_host : null
         path              = var.alb_routing_configuration.enable_path_based_routing ? var.alb_routing_configuration.mcp_path : ""
@@ -105,7 +107,7 @@ locals {
       var.lb_type == "network" ? {
         name              = "default"
         priority          = 100
-        container_port    = var.server_mode == "both" || var.server_mode == "gateway" ? 8787 : 8788
+        container_port    = var.server_mode == "all" || var.server_mode == "gateway" ? var.gateway_config.gateway_port : var.gateway_config.mcp_port
         health_check_path = "/v1/health"
       } : null,
     ] : rule if rule != null
@@ -115,7 +117,8 @@ locals {
 
   gateway_task_role_policies = merge(
     {
-      s3_access_policy_arn = aws_iam_policy.s3_access_policy.arn
+      s3_access_policy_arn = aws_iam_policy.s3_access_policy.arn,
+      assume_role_policy_arn = aws_iam_policy.assume_role_policy.arn,
     },
     var.enable_bedrock_access ? {
       bedrock_access_policy_arn = aws_iam_policy.bedrock_access_policy[0].arn

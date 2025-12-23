@@ -25,21 +25,21 @@ resource "aws_vpc_security_group_ingress_rule" "lb_test_listener_ingress" {
 
 # Allow traffic from load balancer
 resource "aws_vpc_security_group_ingress_rule" "gateway_service_lb_ingress" {
-  count                        = var.create_lb && (var.server_mode == "both" || var.server_mode == "gateway") ? 1 : 0
+  count                        = var.create_lb && (var.server_mode == "all" || var.server_mode == "gateway") ? 1 : 0
   security_group_id            = module.gateway.ecs_service_security_group_id
   ip_protocol                  = "tcp"
-  from_port                    = 8787
-  to_port                      = 8787
+  from_port                    = var.gateway_config.gateway_port
+  to_port                      = var.gateway_config.gateway_port
   referenced_security_group_id = module.gateway.lb_security_group_id
 }
 
 # Allow traffic from load balancer
 resource "aws_vpc_security_group_ingress_rule" "mcp_service_lb_ingress" {
-  count                        = var.create_lb && (var.server_mode == "both" || var.server_mode == "mcp") ? 1 : 0
+  count                        = var.create_lb && (var.server_mode == "all" || var.server_mode == "mcp") ? 1 : 0
   security_group_id            = module.gateway.ecs_service_security_group_id
   ip_protocol                  = "tcp"
-  from_port                    = 8788
-  to_port                      = 8788
+  from_port                    = var.gateway_config.mcp_port
+  to_port                      = var.gateway_config.mcp_port
   referenced_security_group_id = module.gateway.lb_security_group_id
 }
 
@@ -60,8 +60,8 @@ resource "aws_vpc_security_group_ingress_rule" "gateway_from_dataservice_ingress
   count                        = var.dataservice_config.enable_dataservice ? 1 : 0
   security_group_id            = module.gateway.ecs_service_security_group_id
   ip_protocol                  = "tcp"
-  from_port                    = 8787
-  to_port                      = 8787
+  from_port                    = var.gateway_config.gateway_port
+  to_port                      = var.gateway_config.gateway_port
   referenced_security_group_id = module.data_service[0].ecs_service_security_group_id
 }
 

@@ -180,19 +180,19 @@ gateway_autoscaling = {
 | `secrets_file_path` | - | **Yes** | Path to secrets.json |
 | `docker_cred_secret_arn` | - | **Yes** | Docker credentials secret ARN |
 | **Server Mode** | | | |
-| `server_mode` | `"gateway"` | No | Gateway mode: `gateway` (port 8787), `mcp` (port 8788), or `both` |
+| `server_mode` | `"gateway"` | No | Gateway mode: `gateway` (port 8787), `mcp` (port 8788), or `all` |
 | **Load Balancer** | | | |
 | `create_lb` | `true` | No | Create load balancer |
 | `lb_type` | `"network"` | No | `network` (NLB) or `application` (ALB). **ALB requires host headers** |
-| `llm_gateway_host` | `""` | **Conditional** | Required if `lb_type="application"` and `server_mode` is `gateway` or `both` |
-| `mcp_gateway_host` | `""` | **Conditional** | Required if `lb_type="application"` and `server_mode` is `mcp` or `both` |
+| `llm_gateway_host` | `""` | **Conditional** | Required if `lb_type="application"` and `server_mode` is `gateway` or `all` |
+| `mcp_gateway_host` | `""` | **Conditional** | Required if `lb_type="application"` and `server_mode` is `mcp` or `all` |
 | `enable_blue_green` | `false` | No | Enable Blue/Green deployment |
 
 **Important Notes:**
 - **Application Load Balancer (ALB) always requires host headers** for routing
 - **Network Load Balancer (NLB)** works without host headers using default routing
-- When `server_mode = "both"`, you **must** either use ALB with either host based or path based routing configured.
-- Currently, after completing a deployment with a specific `server_mode` and `lb_type`, these settings cannot be modified in subsequent Terraform deployments. The only allowed change is updating `server_mode` from `gateway` or `mcp` to `both`.
+- When `server_mode = "all"`, you **must** either use ALB with either host based or path based routing configured.
+- Currently, after completing a deployment with a specific `server_mode` and `lb_type`, these settings cannot be modified in subsequent Terraform deployments. The only allowed change is updating `server_mode` from `gateway` or `mcp` to `all`.
 
 ### Step 6: Setup Remote S3 Backend (Recommended)
 

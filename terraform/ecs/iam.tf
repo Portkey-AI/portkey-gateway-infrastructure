@@ -1,7 +1,23 @@
 ################################################################################
 # File: terraform/iam.tf
 ################################################################################
-
+resource "aws_iam_policy" "assume_role_policy" {
+  name        = "${var.project_name}-gateway-assume-role-policy-${var.environment}"
+  path        = "/"
+  description = "Policy allowing ECS tasks to assume roles" 
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Resource = [
+          "*"
+        ]
+      }
+    ]
+  })
+}
 resource "aws_iam_policy" "s3_access_policy" {
   name        = "${var.project_name}-gateway-s3-access-policy-${var.environment}"
   path        = "/"

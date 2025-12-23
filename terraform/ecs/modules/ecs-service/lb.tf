@@ -148,8 +148,10 @@ resource "aws_lb_target_group" "blue_tg" {
     Rule  = each.key
     Color = "blue"
   }
+  
   lifecycle {
     create_before_destroy = true
+    ignore_changes = [ name ]
   }
 }
 
@@ -183,6 +185,12 @@ resource "aws_lb_target_group" "green_tg" {
     Name  = "${local.service_name}-${each.key}-tg-green"
     Rule  = each.key
     Color = "green"
+  }
+  
+
+  lifecycle {
+      create_before_destroy = true
+      ignore_changes = [ name ]
   }
 }
 

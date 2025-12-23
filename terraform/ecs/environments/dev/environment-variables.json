@@ -1,7 +1,6 @@
 {
    "data-service":{
       "SERVICE_NAME":"data-service",
-      "GATEWAY_BASE_URL":"http://gateway:8787",
       "ANALYTICS_STORE":"control_plane",
       "LOG_STORE":"s3_assume",
       "ENABLE_LOKI":"true",
