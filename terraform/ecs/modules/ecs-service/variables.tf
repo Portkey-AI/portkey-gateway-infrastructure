@@ -119,16 +119,16 @@ variable "ecs_service_config" {
     enable_execute_command             = optional(bool, true)
 
     capacity_provider = string
-    
+
 
     # Deployment Strategy
     enable_blue_green = optional(bool, false)
     lifecycle_hooks = optional(list(object({
-      hook_target_arn = string
-      role_arn = string
+      hook_target_arn  = string
+      role_arn         = string
       lifecycle_stages = list(string)
-      hook_details = optional(string, null)
-    })),[])
+      hook_details     = optional(string, null)
+    })), [])
     log_config = object({
       enable_logging    = optional(bool, true)
       retention_in_days = optional(number, 14)
@@ -206,12 +206,12 @@ variable "load_balancer_config" {
 
     # Routing Rules (host-based for ALB, single rule for NLB)
     routing_rules = optional(list(object({
-      name              = string                          # Unique name for the rule
-      priority          = number                          # Priority of the rule (lower = higher priority)
-      container_port    = number                          # Container port to forward traffic to
-      health_check_path = optional(string, "/health")     # Health check path for the target group
-      host      = optional(string, null)          # Host headers for ALB (e.g., ["mcp.example.com"])
-      path      = optional(string, "")          # Path pattern for ALB (e.g., "/mcp/*")
+      name              = string                      # Unique name for the rule
+      priority          = number                      # Priority of the rule (lower = higher priority)
+      container_port    = number                      # Container port to forward traffic to
+      health_check_path = optional(string, "/health") # Health check path for the target group
+      host              = optional(string, null)      # Host headers for ALB (e.g., ["mcp.example.com"])
+      path              = optional(string, "")        # Path pattern for ALB (e.g., "/mcp/*")
     })), [])
   })
   validation {

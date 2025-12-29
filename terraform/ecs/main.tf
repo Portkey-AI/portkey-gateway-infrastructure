@@ -117,7 +117,7 @@ locals {
 
   gateway_task_role_policies = merge(
     {
-      s3_access_policy_arn = aws_iam_policy.s3_access_policy.arn,
+      s3_access_policy_arn   = aws_iam_policy.s3_access_policy.arn,
       assume_role_policy_arn = aws_iam_policy.assume_role_policy.arn,
     },
     var.enable_bedrock_access ? {

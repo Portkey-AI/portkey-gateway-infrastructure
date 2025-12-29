@@ -25,4 +25,3 @@ module "vpc" {
   default_vpc_enable_dns_support = true
 
 }
-

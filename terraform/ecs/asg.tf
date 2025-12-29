@@ -11,7 +11,7 @@ module "autoscaling" {
   source  = "terraform-aws-modules/autoscaling/aws"
   version = "~> 9.0"
 
-  for_each = {
+  for_each = var.create_cluster ? {
     primary_provider = {
       instance_type              = var.instance_type
       use_mixed_instances_policy = false
@@ -25,14 +25,14 @@ module "autoscaling" {
       EOF
       )
     }
-  }
+  } : {}
 
   name = "${var.project_name}-${each.key}-asg"
 
   image_id      = jsondecode(data.aws_ssm_parameter.ecs_optimized_ami.value)["image_id"]
   instance_type = each.value.instance_type
 
-  security_groups                 = [module.autoscaling_sg.security_group_id] # To be updated
+  security_groups                 = [module.autoscaling_sg[0].security_group_id]
   user_data                       = base64encode(each.value.user_data)
   ignore_desired_capacity_changes = true
 
@@ -58,8 +58,9 @@ module "autoscaling" {
 
 # Create Policy allowing EC2 to enabled VPC Trunking
 resource "aws_iam_role_policy" "ecs_instance_vpc_trunking_policy" {
-  name = "ecsInstanceVpcTrunkingPolicy-${var.project_name}-${var.environment}-policy"
-  role = module.autoscaling["primary_provider"].iam_role_name
+  count = var.create_cluster ? 1 : 0
+  name  = "ecsInstanceVpcTrunkingPolicy-${var.project_name}-${var.environment}-policy"
+  role  = module.autoscaling["primary_provider"].iam_role_name
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -80,6 +81,8 @@ resource "aws_iam_role_policy" "ecs_instance_vpc_trunking_policy" {
 module "autoscaling_sg" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "~> 5.0"
+
+  count = var.create_cluster ? 1 : 0
 
   name        = "${var.project_name}-primary-sg"
   description = "Autoscaling group security group for ${var.project_name}"

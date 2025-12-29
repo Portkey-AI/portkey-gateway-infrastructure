@@ -52,6 +52,7 @@ resource "aws_vpc_security_group_ingress_rule" "dataservice_from_gateway_ingress
   from_port                    = 8081
   to_port                      = 8081
   referenced_security_group_id = module.gateway.ecs_service_security_group_id
+  depends_on                   = [module.gateway.ecs_service_security_group_id]
 }
 
 
@@ -63,6 +64,7 @@ resource "aws_vpc_security_group_ingress_rule" "gateway_from_dataservice_ingress
   from_port                    = var.gateway_config.gateway_port
   to_port                      = var.gateway_config.gateway_port
   referenced_security_group_id = module.data_service[0].ecs_service_security_group_id
+  depends_on                   = [module.data_service[0].ecs_service_security_group_id]
 }
 
 # Allow traffic to redis from gateway service
@@ -73,6 +75,7 @@ resource "aws_vpc_security_group_ingress_rule" "redis_lb_from_gateway_ingress" {
   from_port                    = 6379
   to_port                      = 6379
   referenced_security_group_id = module.gateway.ecs_service_security_group_id
+  depends_on                   = [module.gateway.ecs_service_security_group_id]
 }
 
 # Allow traffic to redis from data service
@@ -83,6 +86,7 @@ resource "aws_vpc_security_group_ingress_rule" "redis_lb_from_dataservice_ingres
   from_port                    = 6379
   to_port                      = 6379
   referenced_security_group_id = module.data_service[0].ecs_service_security_group_id
+  depends_on                   = [module.data_service[0].ecs_service_security_group_id]
 }
 
 # ============================================================================
@@ -98,4 +102,3 @@ resource "aws_service_discovery_http_namespace" "service_discovery_namespace" {
     ]
   }
 }
-

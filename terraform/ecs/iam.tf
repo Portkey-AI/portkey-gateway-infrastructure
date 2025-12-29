@@ -4,7 +4,7 @@
 resource "aws_iam_policy" "assume_role_policy" {
   name        = "${var.project_name}-gateway-assume-role-policy-${var.environment}"
   path        = "/"
-  description = "Policy allowing ECS tasks to assume roles" 
+  description = "Policy allowing ECS tasks to assume roles"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [

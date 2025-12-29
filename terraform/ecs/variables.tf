@@ -514,7 +514,7 @@ variable "alb_routing_configuration" {
     enable_path_based_routing = optional(bool, false)
     enable_host_based_routing = optional(bool, false)
     mcp_path                  = optional(string, "/mcp")
-    gateway_path              = optional(string, "/gateway") 
+    gateway_path              = optional(string, "/gateway")
     mcp_host                  = optional(string, "")
     gateway_host              = optional(string, "")
   })

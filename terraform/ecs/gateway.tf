@@ -144,10 +144,8 @@ module "gateway" {
   }
   depends_on = [
     aws_service_discovery_http_namespace.service_discovery_namespace,
-    module.redis
+    module.redis,
+    module.autoscaling,
+    module.vpc
   ]
 }
-
-
-
-

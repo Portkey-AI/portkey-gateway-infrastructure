@@ -13,7 +13,7 @@ resource "aws_lb" "lb" {
   security_groups                  = [aws_security_group.lb_sg[0].id]
   subnets                          = var.load_balancer_config.lb_subnets
   drop_invalid_header_fields       = local.lb_type == "application" ? true : null
-  
+
   dynamic "access_logs" {
     for_each = var.load_balancer_config.enable_access_logs ? [1] : []
     content {
@@ -22,7 +22,7 @@ resource "aws_lb" "lb" {
       enabled = true
     }
   }
-  
+
   tags = {
     Name = "${local.service_name}-${random_id.suffix.hex}-load-balancer"
   }
@@ -148,10 +148,10 @@ resource "aws_lb_target_group" "blue_tg" {
     Rule  = each.key
     Color = "blue"
   }
-  
+
   lifecycle {
     create_before_destroy = true
-    ignore_changes = [ name ]
+    ignore_changes        = [name]
   }
 }
 
@@ -176,7 +176,7 @@ resource "aws_lb_target_group" "green_tg" {
     protocol            = local.lb_type == "network" ? "TCP" : "HTTP"
     healthy_threshold   = 2
     unhealthy_threshold = 3
-    timeout             = local.lb_type == "network" ? 10 : 5
+    timeout             = local.lb_type == "network" ? 10 : 10
     interval            = 30
     matcher             = local.lb_type == "application" ? "200" : null
   }
@@ -186,11 +186,11 @@ resource "aws_lb_target_group" "green_tg" {
     Rule  = each.key
     Color = "green"
   }
-  
+
 
   lifecycle {
-      create_before_destroy = true
-      ignore_changes = [ name ]
+    create_before_destroy = true
+    ignore_changes        = [name]
   }
 }
 
@@ -223,7 +223,7 @@ resource "aws_lb_listener_rule" "prod_rules" {
 
   condition {
     path_pattern {
-        values = ["${each.value.path}/*"]
+      values = ["${each.value.path}/*"]
     }
   }
   dynamic "transform" {
@@ -232,7 +232,7 @@ resource "aws_lb_listener_rule" "prod_rules" {
       type = "url-rewrite"
       url_rewrite_config {
         rewrite {
-          regex = "^${each.value.path}/(.*)$"
+          regex   = "^${each.value.path}/(.*)$"
           replace = "/$1"
         }
       }
@@ -280,7 +280,7 @@ resource "aws_lb_listener_rule" "test_rules" {
 
   condition {
     path_pattern {
-        values = ["${each.value.path}/*"]
+      values = ["${each.value.path}/*"]
     }
   }
   dynamic "transform" {
@@ -289,7 +289,7 @@ resource "aws_lb_listener_rule" "test_rules" {
       type = "url-rewrite"
       url_rewrite_config {
         rewrite {
-          regex = "^${each.value.path}/(.*)$"
+          regex   = "^${each.value.path}/(.*)$"
           replace = "/$1"
         }
       }

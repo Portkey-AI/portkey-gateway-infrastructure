@@ -292,6 +292,18 @@ For detailed integration setup instructions, refer to the [full documentation](h
 
 ## Uninstalling Portkey Gateway
 
+Scale down all ECS services to zero before running `terraform destroy` to prevent tasks from getting stuck in the draining state.
+
+```bash
+# Replace <cluster-name> and <service-name> with the name of ECS cluster and services respectively.
+# <service-name> - redis, gateway, data-service
+aws ecs update-service \
+  --cluster <cluster-name> \
+  --service <service-name> \
+  --desired-count 0
+```
+
+
 From this directory (where this README is located), run:
 
 ```bash
