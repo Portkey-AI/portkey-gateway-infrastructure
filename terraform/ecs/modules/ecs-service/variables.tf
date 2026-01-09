@@ -122,7 +122,24 @@ variable "ecs_service_config" {
 
 
     # Deployment Strategy
-    enable_blue_green = optional(bool, false)
+    deployment_configuration = optional(object({
+      enable_blue_green = optional(bool, false)
+      canary_configuration = optional(object({
+        canary_percent              = optional(number, 200) # Percentage of traffic to route to canary
+        canary_bake_time_in_minutes = optional(number, 100) # Time to wait run canary deployment before full traffic shift to new version
+      }), null)
+      linear_configuration = optional(object({
+        step_bake_time_in_minutes = optional(number, 100) # Time to wait after each step before the next step starts
+        step_percent              = optional(number, 10)  # Percentage of traffic to shift per step (3-100%) 
+      }), null)
+
+    }), null)
+
+    deployment_circuit_breaker = optional(object({
+      enable   = optional(bool, true)
+      rollback = optional(bool, true)
+    }))
+
     lifecycle_hooks = optional(list(object({
       hook_target_arn  = string
       role_arn         = string

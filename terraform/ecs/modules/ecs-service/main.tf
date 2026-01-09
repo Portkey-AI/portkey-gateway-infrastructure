@@ -42,8 +42,8 @@ locals {
   # Extract namespace arn
   namespace_arn = local.service_connect_enabled && local.service_namespace != null ? data.aws_service_discovery_http_namespace.service_namespace[0].arn : null
 
-  enable_bg = var.ecs_service_config.enable_blue_green
-  # Extract all secret ARNs from the secrets map
+  enable_test_listener = var.ecs_service_config.deployment_configuration.enable_blue_green || var.ecs_service_config.deployment_configuration.linear_configuration != null || var.ecs_service_config.deployment_configuration.canary_configuration != null
+  strategy             = var.ecs_service_config.deployment_configuration.enable_blue_green ? "BLUE_GREEN" : var.ecs_service_config.deployment_configuration.linear_configuration != null ? "LINEAR" : var.ecs_service_config.deployment_configuration.canary_configuration != null ? "CANARY" : "ROLLING"
 
   secret_arns = tolist(toset(flatten([
     for c in var.container_config : values(c.secrets)
@@ -165,8 +165,8 @@ resource "aws_ecs_service" "service" {
   }
 
   deployment_configuration {
-    strategy             = local.enable_bg ? "BLUE_GREEN" : "ROLLING"
-    bake_time_in_minutes = 0
+    strategy             = local.strategy
+    bake_time_in_minutes = 1
     dynamic "lifecycle_hook" {
       for_each = var.ecs_service_config.lifecycle_hooks != null ? var.ecs_service_config.lifecycle_hooks : []
       content {
@@ -176,14 +176,25 @@ resource "aws_ecs_service" "service" {
         hook_details     = lifecycle_hook.value.hook_details
       }
     }
+    dynamic "linear_configuration" {
+      for_each = local.strategy == "LINEAR" ? [1] : []
+      content {
+        step_bake_time_in_minutes = var.ecs_service_config.deployment_configuration.linear_configuration.step_bake_time_in_minutes
+        step_percent              = var.ecs_service_config.deployment_configuration.linear_configuration.step_percent
+      }
+    }
+    dynamic "canary_configuration" {
+      for_each = local.strategy == "CANARY" ? [1] : []
+      content {
+        canary_bake_time_in_minutes = var.ecs_service_config.deployment_configuration.canary_configuration.canary_bake_time_in_minutes
+        canary_percent              = var.ecs_service_config.deployment_configuration.canary_configuration.canary_percent
+      }
+    }
   }
 
-  dynamic "deployment_circuit_breaker" {
-    for_each = !local.enable_bg ? [1] : []
-    content {
-      enable   = true
-      rollback = true
-    }
+  deployment_circuit_breaker {
+    enable   = var.ecs_service_config.deployment_circuit_breaker.enable
+    rollback = var.ecs_service_config.deployment_circuit_breaker.rollback
   }
 
   # Load balancer blocks for each routing rule (with Blue/Green support)
@@ -198,7 +209,7 @@ resource "aws_ecs_service" "service" {
 
       # Blue/Green deployment advanced configuration for ALB (uses listener rule ARNs)
       dynamic "advanced_configuration" {
-        for_each = local.enable_bg && local.lb_type == "application" ? [1] : []
+        for_each = local.enable_test_listener && local.lb_type == "application" ? [1] : []
         content {
           alternate_target_group_arn = aws_lb_target_group.green_tg[load_balancer.key].arn
           production_listener_rule   = aws_lb_listener_rule.prod_rules[load_balancer.key].arn
@@ -209,7 +220,7 @@ resource "aws_ecs_service" "service" {
 
       # Blue/Green deployment advanced configuration for NLB (uses listener ARNs directly)
       dynamic "advanced_configuration" {
-        for_each = local.enable_bg && local.lb_type == "network" ? [1] : []
+        for_each = local.enable_test_listener && local.lb_type == "network" ? [1] : []
         content {
           alternate_target_group_arn = aws_lb_target_group.green_tg[load_balancer.key].arn
           production_listener_rule   = aws_lb_listener.prod[0].arn
@@ -257,7 +268,7 @@ resource "aws_ecs_service" "service" {
 
   lifecycle {
     ignore_changes = [
-      desired_count, load_balancer
+      desired_count
     ]
   }
 

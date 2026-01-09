@@ -76,7 +76,7 @@ resource "aws_lb_listener" "prod" {
 # ============================================================================
 
 resource "aws_lb_listener" "test" {
-  count = local.create_lb && local.enable_bg ? 1 : 0
+  count = local.create_lb && local.enable_test_listener ? 1 : 0
 
   load_balancer_arn = aws_lb.lb[0].arn
   port              = var.load_balancer_config.test_listener.port
@@ -157,7 +157,7 @@ resource "aws_lb_target_group" "blue_tg" {
 
 # Green Target Groups for each routing rule (for Blue/Green deployment)
 resource "aws_lb_target_group" "green_tg" {
-  for_each = local.create_lb && local.enable_bg ? {
+  for_each = local.create_lb && local.enable_test_listener ? {
     for rule in var.load_balancer_config.routing_rules : rule.name => rule
   } : {}
 
@@ -256,7 +256,7 @@ resource "aws_lb_listener_rule" "prod_rules" {
 # ============================================================================
 
 resource "aws_lb_listener_rule" "test_rules" {
-  for_each = local.create_lb && local.lb_type == "application" && local.enable_bg ? {
+  for_each = local.create_lb && local.lb_type == "application" && local.enable_test_listener ? {
     for rule in var.load_balancer_config.routing_rules : rule.name => rule
   } : {}
 
