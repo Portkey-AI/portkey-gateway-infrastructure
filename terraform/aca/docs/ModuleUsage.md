@@ -175,7 +175,7 @@ portkey-gateway-deployment/
 ```
 
 ## Remote Backend Configuration
-Create Azure Blob Storage abd container to store terraform state.
+Create Azure Blob Storage and Blob Container to store terraform state.
 ```sh
 rg=portkey-rg                                        # Resource group to create remote backend blob store
 backend_sa=tfstatesa                                 # Storage account for Terraform state (must be globally unique)

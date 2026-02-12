@@ -118,7 +118,7 @@ output "app_gateway_public_ip" {
 
 output "app_gateway_private_ip" {
   description = "Private IP address of the Application Gateway (if deployed with VNET)"
-  value       = length(azurerm_application_gateway.main) > 0 && local.use_vnet ? cidrhost(azurerm_subnet.app_gateway[0].address_prefixes[0], 10) : null
+  value       = length(azurerm_application_gateway.main) > 0 && local.use_vnet ? azurerm_application_gateway.main[0].frontend_ip_configuration[index(azurerm_application_gateway.main[0].frontend_ip_configuration[*].name, "private-frontend")].private_ip_address : null
 }
 
 #########################################################################
@@ -199,7 +199,7 @@ output "control_plane_private_ip" {
 
 output "control_plane_private_fqdn" {
   description = "FQDN to reach Portkey Control Plane over Private Link"
-  value       = length(azurerm_private_dns_a_record.control_plane) > 0 ? "aws-cp.privatelink-az.portkey.ai" : null
+  value       = length(azurerm_private_dns_a_record.control_plane) > 0 ? "azure-cp.privatelink-az.portkey.ai" : null
 }
 
 #########################################################################

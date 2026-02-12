@@ -59,6 +59,15 @@ resource "azurerm_subnet" "app_gateway" {
   address_prefixes     = [cidrsubnet(var.vnet_cidr, 8, 4)] # /24 from /16
 }
 
+# Data source for existing app gateway subnet (when network_mode = "existing")
+data "azurerm_subnet" "app_gateway_existing" {
+  count = var.network_mode == "existing" && var.app_gateway_subnet_id != null ? 1 : 0
+
+  name                 = split("/", var.app_gateway_subnet_id)[10]
+  virtual_network_name = split("/", var.app_gateway_subnet_id)[8]
+  resource_group_name  = split("/", var.app_gateway_subnet_id)[4]
+}
+
 # Subnet for Private Endpoints (Storage, Key Vault, etc.)
 # Private subnet - no default outbound access
 resource "azurerm_subnet" "private_endpoints" {

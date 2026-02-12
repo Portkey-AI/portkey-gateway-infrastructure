@@ -151,7 +151,7 @@ Phase 2: After bake time - Full rollout (100% traffic)
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `canary_bake_time_in_minutes` | `100` | Time to wait and monitor canary before proceeding |
-| `canary_percent` | `200` | Percentage of traffic routed to canary (Note: verify valid range with AWS) |
+| `canary_percent` | `20` | Percentage of traffic routed to canary |
 
 ---
 

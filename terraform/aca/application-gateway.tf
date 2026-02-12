@@ -10,6 +10,12 @@ locals {
   appgw_ssl_enabled  = var.app_gateway_config.ssl_cert_key_vault_secret_id != null
   appgw_host_routing = var.app_gateway_config.routing_mode == "host"
   appgw_path_routing = var.app_gateway_config.routing_mode == "path"
+  
+  # Compute app gateway private IP based on subnet (works for both new and existing VNET)
+  appgw_subnet_prefix = local.create_new_vnet ? azurerm_subnet.app_gateway[0].address_prefixes[0] : (
+    var.network_mode == "existing" && var.app_gateway_subnet_id != null ? data.azurerm_subnet.app_gateway_existing[0].address_prefixes[0] : null
+  )
+  appgw_private_ip = local.appgw_subnet_prefix != null ? cidrhost(local.appgw_subnet_prefix, 10) : null
 }
 
 # Managed Identity for App Gateway (needed to access Key Vault for SSL cert)
@@ -116,7 +122,7 @@ resource "azurerm_application_gateway" "main" {
       name                          = "private-frontend"
       subnet_id                     = local.app_gateway_subnet_id
       private_ip_address_allocation = "Static"
-      private_ip_address            = cidrhost(azurerm_subnet.app_gateway[0].address_prefixes[0], 10)
+      private_ip_address            = local.appgw_private_ip
     }
   }
 

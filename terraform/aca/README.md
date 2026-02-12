@@ -88,6 +88,19 @@ cd portkey-gateway-infrastructure/terraform/aca
 ```
 
 ### 3. Configure Backend
+
+**Step 1: Uncomment backend configuration**
+
+Edit `backend.tf` and uncomment lines 5-7:
+
+```hcl
+terraform {
+  backend "azurerm" {}
+}
+```
+
+**Step 2: Create storage account for Terraform state**
+
 ```sh
 # Create storage account and container for Terraform state
 backend_sa=portkeytfstate                      # Storage account for Terraform state (must be globally unique)
@@ -103,15 +116,20 @@ az storage container create \
   --account-name ${backend_sa}
 ```
 
-Update `environments/dev/backend.config` file with resource group name, storage account name and container name:
+**Step 3: Update backend configuration file**
+
+Update `environments/dev/backend.config` with your backend storage details:
+
+```hcl
+resource_group_name  = "portkey-rg"                    # Resource group from step 1
+storage_account_name = "portkeytfstate"                # Storage account name from above
+container_name       = "tfstate"
+key                  = "dev/portkey-gateway/terraform.tfstate"
+```
 
 **Alternative - Local State (for testing only):**
 
-If you prefer local state for development/testing, rename the backend file:
-
-```bash
-mv backend.tf backend.tf.disabled
-```
+If you prefer local state for development/testing, keep the backend commented in `backend.tf`.
 
 ### 4. Configure Variables
 

@@ -2,6 +2,6 @@
 # File: terraform/aca/backend.tf
 ################################################################################
 
-terraform {
-  backend "azurerm" {}
-}
+# terraform {
+#   backend "azurerm" {}
+# }
