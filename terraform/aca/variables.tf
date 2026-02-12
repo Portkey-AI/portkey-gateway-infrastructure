@@ -312,7 +312,7 @@ variable "storage_config" {
     resource_group = optional(string)  # Resource group of existing storage account
     auth_mode      = optional(string, "managed")  # "managed" or "connection_string"
     account_name   = optional(string)  # Existing storage account name (if not provided, one will be created)
-    container_name = optional(string, "portkey-log-store")  # Container name (defaults to 'portkey-logs')
+    container_name = optional(string, "portkey-log-store")  # Container name (defaults to 'portkey-log-store')
   })
   default = {
     auth_mode      = "managed"
