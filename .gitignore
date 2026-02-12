@@ -50,6 +50,10 @@ terraform/environments/local
 # Ignore local backend config
 terraform/backend.local.tf
 
+# Ignore backend config files (may contain sensitive info)
+**/backend.config
+!**/backend.config.example
+
 # Ignore lambda archive files
 terraform/lambda/lifecycle-hook/function.zip
 
@@ -58,3 +62,5 @@ terraform/ecs/environments/local
 
 
 *.DS_Store
+
+**local**

@@ -43,7 +43,13 @@ module "redis" {
     health_check_grace_period_seconds  = 150
     enable_execute_command             = true
     capacity_provider                  = local.capacity_provider_name
-    enable_blue_green                  = false
+    deployment_configuration = {
+      enable_blue_green = false
+    }
+    deployment_circuit_breaker = {
+      enable   = true
+      rollback = true
+    }
 
     log_config = {
       enable_logging    = true

@@ -170,8 +170,8 @@ variable "target_capacity" {
 variable "gateway_image" {
   description = "Container image to use for the gateway."
   type = object({
-    image = optional(string)
-    tag   = optional(string)
+    image = string
+    tag   = string
   })
   default = {
     image = "portkeyai/gateway_enterprise"
@@ -182,8 +182,8 @@ variable "gateway_image" {
 variable "data_service_image" {
   description = "Container image to use for the data service."
   type = object({
-    image = optional(string)
-    tag   = optional(string)
+    image = string
+    tag   = string
   })
   default = {
     image = "portkeyai/data-service"
@@ -197,10 +197,10 @@ variable "docker_cred_secret_arn" {
 }
 
 variable "redis_image" {
-  description = "Container image to use for the data service."
+  description = "Container image to use for Redis."
   type = object({
-    image = optional(string)
-    tag   = optional(string)
+    image = string
+    tag   = string
   })
   default = {
     image = "redis"
@@ -252,13 +252,35 @@ variable "gateway_autoscaling" {
   }
 }
 
-variable "enable_blue_green" {
-  description = "Define whether to configure blue-green deployment for gateway with load balancer"
-  type        = bool
-  default     = false
-  validation {
-    condition     = !(var.enable_blue_green && !var.create_lb)
-    error_message = "Must set create_lb to true for enabling blue green deployment."
+variable "gateway_deployment_configuration" {
+  description = "Deployment configuration for Gateway Service. Set to null for rolling deployment (default)."
+  type = object({
+    enable_blue_green = bool
+    canary_configuration = optional(object({
+      canary_bake_time_in_minutes = number
+      canary_percent              = number
+    }))
+    linear_configuration = optional(object({
+      step_bake_time_in_minutes = number
+      step_percent              = number
+    }))
+  })
+  default = {
+    enable_blue_green    = false
+    canary_configuration = null
+    linear_configuration = null
+  }
+}
+
+variable "gateway_deployment_circuit_breaker" {
+  description = "Deployment circuit breaker configuration for Gateway Service"
+  type = object({
+    enable   = bool
+    rollback = bool
+  })
+  default = {
+    enable   = true
+    rollback = true
   }
 }
 
@@ -291,6 +313,18 @@ variable "dataservice_config" {
     desired_task_count = 1
     cpu                = 256
     memory             = 1024
+  }
+}
+
+variable "dataservice_deployment_circuit_breaker" {
+  description = "Deployment circuit breaker configuration for Data Service"
+  type = object({
+    enable   = bool
+    rollback = bool
+  })
+  default = {
+    enable   = true
+    rollback = true
   }
 }
 
@@ -416,8 +450,8 @@ variable "object_storage" {
   description = "Specify log stores."
   type = object({
     log_store_bucket   = string
-    log_exports_bucket = optional(string, "")
-    finetune_bucket    = optional(string, "")
+    log_exports_bucket = string
+    finetune_bucket    = string
     bucket_region      = string
   })
 }
@@ -511,11 +545,19 @@ variable "server_mode" {
 variable "alb_routing_configuration" {
   description = "ALB routing configuration"
   type = object({
-    enable_path_based_routing = optional(bool, false)
-    enable_host_based_routing = optional(bool, false)
-    mcp_path                  = optional(string, "/mcp")
-    gateway_path              = optional(string, "/gateway")
-    mcp_host                  = optional(string, "")
-    gateway_host              = optional(string, "")
+    enable_path_based_routing = bool
+    enable_host_based_routing = bool
+    mcp_path                  = string
+    gateway_path              = string
+    mcp_host                  = string
+    gateway_host              = string
   })
+  default = {
+    enable_path_based_routing = false
+    enable_host_based_routing = false
+    mcp_path                  = "/mcp"
+    gateway_path              = "/gateway"
+    mcp_host                  = ""
+    gateway_host              = ""
+  }
 }

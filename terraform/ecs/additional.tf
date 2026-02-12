@@ -15,7 +15,7 @@ resource "aws_vpc_security_group_ingress_rule" "lb_prod_listener_ingress" {
 
 # Allow traffic to load balancer on test port
 resource "aws_vpc_security_group_ingress_rule" "lb_test_listener_ingress" {
-  count             = var.create_lb && var.enable_blue_green ? length(local.allowed_lb_cidrs) : 0
+  count             = var.create_lb && local.enable_test_listener ? length(local.allowed_lb_cidrs) : 0
   security_group_id = module.gateway.lb_security_group_id
   ip_protocol       = "tcp"
   from_port         = var.tls_certificate_arn != "" ? 8443 : 8080

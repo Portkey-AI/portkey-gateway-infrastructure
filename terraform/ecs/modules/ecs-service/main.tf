@@ -39,11 +39,25 @@ locals {
 
   service_connect_enabled = length(var.ecs_service_config.service_connect_config) > 0
 
-  # Extract namespace arn
   namespace_arn = local.service_connect_enabled && local.service_namespace != null ? data.aws_service_discovery_http_namespace.service_namespace[0].arn : null
 
-  enable_test_listener = var.ecs_service_config.deployment_configuration.enable_blue_green || var.ecs_service_config.deployment_configuration.linear_configuration != null || var.ecs_service_config.deployment_configuration.canary_configuration != null
-  strategy             = var.ecs_service_config.deployment_configuration.enable_blue_green ? "BLUE_GREEN" : var.ecs_service_config.deployment_configuration.linear_configuration != null ? "LINEAR" : var.ecs_service_config.deployment_configuration.canary_configuration != null ? "CANARY" : "ROLLING"
+  # Backward compatibility: support both old and new deployment configuration structures
+  deployment_config = var.ecs_service_config.deployment_configuration != null ? (
+    var.ecs_service_config.deployment_configuration
+  ) : (
+    var.ecs_service_config.enable_blue_green != null ? {
+      enable_blue_green    = var.ecs_service_config.enable_blue_green
+      canary_configuration = null
+      linear_configuration = null
+    } : {
+      enable_blue_green    = false
+      canary_configuration = null
+      linear_configuration = null
+    }
+  )
+
+  enable_test_listener = local.deployment_config.enable_blue_green || local.deployment_config.linear_configuration != null || local.deployment_config.canary_configuration != null
+  strategy             = local.deployment_config.enable_blue_green ? "BLUE_GREEN" : local.deployment_config.linear_configuration != null ? "LINEAR" : local.deployment_config.canary_configuration != null ? "CANARY" : "ROLLING"
 
   secret_arns = tolist(toset(flatten([
     for c in var.container_config : values(c.secrets)
@@ -179,15 +193,15 @@ resource "aws_ecs_service" "service" {
     dynamic "linear_configuration" {
       for_each = local.strategy == "LINEAR" ? [1] : []
       content {
-        step_bake_time_in_minutes = var.ecs_service_config.deployment_configuration.linear_configuration.step_bake_time_in_minutes
-        step_percent              = var.ecs_service_config.deployment_configuration.linear_configuration.step_percent
+        step_bake_time_in_minutes = local.deployment_config.linear_configuration.step_bake_time_in_minutes
+        step_percent              = local.deployment_config.linear_configuration.step_percent
       }
     }
     dynamic "canary_configuration" {
       for_each = local.strategy == "CANARY" ? [1] : []
       content {
-        canary_bake_time_in_minutes = var.ecs_service_config.deployment_configuration.canary_configuration.canary_bake_time_in_minutes
-        canary_percent              = var.ecs_service_config.deployment_configuration.canary_configuration.canary_percent
+        canary_bake_time_in_minutes = local.deployment_config.canary_configuration.canary_bake_time_in_minutes
+        canary_percent              = local.deployment_config.canary_configuration.canary_percent
       }
     }
   }
