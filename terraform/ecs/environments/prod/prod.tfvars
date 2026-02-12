@@ -91,7 +91,22 @@ gateway_config = {
 #   scale_out_cooldown        = 60                                    # Amount of time (seconds) wait after a scale out activity before another scale out activity can start.
 # }
 
-enable_blue_green      = true                                         # Set to true to enable blue-green deployment for Gateway Service.
+gateway_deployment_configuration = {                                         
+  enable_blue_green = true                                            # Set to true to enable blue-green deployment for Gateway Service.
+  # canary_configuration = {
+  #   canary_bake_time_in_minutes = 100
+  #   canary_percent = 200
+  # }
+  # linear_configuration = {
+  #   step_bake_time_in_minutes = 100
+  #   step_percent = 10
+  # }
+}
+
+# gateway_deployment_circuit_breaker = {
+#   enable   = true
+#   rollback = true
+# }
 
 # gateway_lifecycle_hook = {
 #   enable_lifecycle_hook = false                                     # Set to true to enable lifecycle hook for Gateway Service.

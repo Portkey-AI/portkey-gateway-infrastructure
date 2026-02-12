@@ -23,5 +23,4 @@ module "vpc" {
   default_vpc_enable_dns_hostnames = true
 
   default_vpc_enable_dns_support = true
-
 }

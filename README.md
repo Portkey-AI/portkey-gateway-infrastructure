@@ -12,7 +12,7 @@ This repository contains Terraform configurations for deploying the Portkey AI G
 | Platform | Status | Documentation |
 |----------|--------|---------------|
 | **Amazon ECS** | ✅ Available | [ECS Deployment Guide](terraform/ecs/README.md) |
-| **Azure Container Apps (ACA)** | 🔜 Coming Soon | - |
+| **Azure Container Apps (ACA)** |  ✅ Available | [ACA Deployment Guide](terraform/aca/README.md) |
 
 ## Repository Structure
 

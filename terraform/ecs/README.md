@@ -1,6 +1,6 @@
 # Portkey Gateway - Amazon ECS Deployment
 
-This guide provides comprehensive instructions for deploying Portkey Gateway on Amazon ECS clusters with support for high availability, auto-scaling, and blue/green deployments.
+This guide provides comprehensive instructions for deploying Portkey Gateway on Amazon ECS clusters with support for high availability, auto-scaling, and multiple deployment strategies (Rolling, Blue/Green, Canary, Linear).
 
 ## Table of Contents
 - [Components and Sizing](#components-and-sizing-recommendations)
@@ -28,7 +28,8 @@ This guide provides comprehensive instructions for deploying Portkey Gateway on 
 - ✅ Automated VPC and networking setup
 - ✅ High availability across multiple AZs
 - ✅ Auto-scaling based on CPU/memory utilization
-- ✅ Blue/Green deployment support for gateway
+- ✅ Multiple deployment strategies (Rolling, Blue/Green, Canary, Linear)
+- ✅ Deployment circuit breaker with automatic rollback
 - ✅ CloudWatch logging and monitoring
 - ✅ Secrets management with AWS Secrets Manager
 
@@ -163,8 +164,8 @@ gateway_config = {
 
 gateway_autoscaling = {
   enable_autoscaling           = false
-  min_capacity                 = 1
-  max_capacity                 = 3
+  autoscaling_min_capacity     = 1
+  autoscaling_max_capacity     = 3
   target_cpu_utilization       = 70
   target_memory_utilization    = 70
 }
@@ -175,18 +176,23 @@ gateway_autoscaling = {
 | Variable Name | Default | Required | Description |
 |---------------|---------|----------|-------------|
 | **Essential** | | | |
-| `aws_region` | - | **Yes** | AWS deployment region |
+| `aws_region` | `"us-west-2"` | No | AWS deployment region |
 | `environment_variables_file_path` | - | **Yes** | Path to environment-variables.json |
 | `secrets_file_path` | - | **Yes** | Path to secrets.json |
 | `docker_cred_secret_arn` | - | **Yes** | Docker credentials secret ARN |
 | **Server Mode** | | | |
 | `server_mode` | `"gateway"` | No | Gateway mode: `gateway` (port 8787), `mcp` (port 8788), or `all` |
 | **Load Balancer** | | | |
-| `create_lb` | `true` | No | Create load balancer |
-| `lb_type` | `"network"` | No | `network` (NLB) or `application` (ALB). **ALB requires host headers** |
-| `llm_gateway_host` | `""` | **Conditional** | Required if `lb_type="application"` and `server_mode` is `gateway` or `all` |
-| `mcp_gateway_host` | `""` | **Conditional** | Required if `lb_type="application"` and `server_mode` is `mcp` or `all` |
-| `enable_blue_green` | `false` | No | Enable Blue/Green deployment |
+| `create_lb` | `false` | No | Create load balancer |
+| `lb_type` | `"network"` | No | `network` (NLB) or `application` (ALB). **ALB requires host/path routing** |
+| `alb_routing_configuration.gateway_host` | `""` | **Conditional** | Required if using ALB with host-based routing for Gateway |
+| `alb_routing_configuration.mcp_host` | `""` | **Conditional** | Required if using ALB with host-based routing for MCP |
+| **Deployment Strategy** | | | |
+| `gateway_deployment_configuration.enable_blue_green` | `false` | No | Enable Blue/Green deployment |
+| `gateway_deployment_configuration.canary_configuration` | `null` | No | Configure Canary deployment |
+| `gateway_deployment_configuration.linear_configuration` | `null` | No | Configure Linear deployment |
+
+📖 **For deployment strategy details, see [DeploymentStrategies.md](docs/DeploymentStrategies.md)**
 
 **Important Notes:**
 - **Application Load Balancer (ALB) always requires host headers** for routing

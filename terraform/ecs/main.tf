@@ -42,6 +42,7 @@ locals {
   cluster_arn  = var.create_cluster ? module.ecs_cluster[0].arn : "arn:aws:ecs:${local.region}:${local.account_id}:cluster/${local.cluster_name}"
 
   capacity_provider_name = var.create_cluster ? module.ecs_cluster[0].autoscaling_capacity_providers["primary_provider"].name : var.capacity_provider_name
+  enable_test_listener   = var.gateway_deployment_configuration != null && (var.gateway_deployment_configuration.enable_blue_green || var.gateway_deployment_configuration.linear_configuration != null || var.gateway_deployment_configuration.canary_configuration != null)
 
   allowed_lb_cidrs = length(var.allowed_lb_cidrs) != 0 ? var.allowed_lb_cidrs : (var.internal_lb ? [local.vpc_cidr] : ["0.0.0.0/0"])
 

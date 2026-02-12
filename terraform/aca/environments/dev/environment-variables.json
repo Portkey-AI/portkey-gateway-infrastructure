@@ -1,0 +1,12 @@
+{
+  "gateway": {
+    "LOG_LEVEL": "info",
+    "NODE_ENV": "development",
+    "ANALYTICS_STORE": "control_plane",
+    "AZURE_MANAGED_VERSION": "2019-08-01"
+  },
+  "data-service": {
+    "LOG_LEVEL": "info",
+    "NODE_ENV": "development"
+  }
+}

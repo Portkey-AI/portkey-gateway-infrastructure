@@ -65,7 +65,8 @@ module "gateway" {
     health_check_grace_period_seconds  = 150
     enable_execute_command             = true
     capacity_provider                  = local.capacity_provider_name
-    enable_blue_green                  = var.enable_blue_green
+    deployment_configuration           = var.gateway_deployment_configuration
+    deployment_circuit_breaker         = var.gateway_deployment_circuit_breaker
     lifecycle_hooks = var.gateway_lifecycle_hook.enable_lifecycle_hook ? [
       {
         hook_target_arn  = aws_lambda_function.ecs_hook_lambda[0].arn
@@ -135,7 +136,7 @@ module "gateway" {
       port            = var.tls_certificate_arn != "" ? 443 : 80
       certificate_arn = var.tls_certificate_arn != "" ? var.tls_certificate_arn : null
     }
-    test_listener = var.enable_blue_green ? {
+    test_listener = var.gateway_deployment_configuration != null && (var.gateway_deployment_configuration.enable_blue_green || var.gateway_deployment_configuration.linear_configuration != null || var.gateway_deployment_configuration.canary_configuration != null) ? {
       protocol        = var.lb_type == "application" ? (var.tls_certificate_arn != "" ? "HTTPS" : "HTTP") : (var.tls_certificate_arn != "" ? "TLS" : "TCP")
       port            = var.tls_certificate_arn != "" ? 8443 : 8080
       certificate_arn = var.tls_certificate_arn != "" ? var.tls_certificate_arn : null
