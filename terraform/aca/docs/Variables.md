@@ -431,12 +431,14 @@ secrets = object({
 ```hcl
 # Pass data directly
 module "portkey_gateway" {
-  source = "github.com/Portkey-AI/portkey-gateway-infrastructure//terraform/aca?ref=v1.0.0"
+  source = "github.com/Portkey-AI/portkey-gateway-infrastructure//terraform/aca?ref=v1.1.0"
 
   environment_variables = {
     gateway = {
-      LOG_LEVEL = "info"
-      NODE_ENV  = "production"
+      LOG_LEVEL             = "info"
+      NODE_ENV              = "production"
+      ANALYTICS_STORE       = "control_plane"
+      AZURE_MANAGED_VERSION = "2019-08-01"
     }
   }
   
