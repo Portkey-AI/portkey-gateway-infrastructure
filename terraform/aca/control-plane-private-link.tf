@@ -1,10 +1,6 @@
 ################################################################################
-# File: terraform/aca/control-plane-private-link.tf
+# Portkey Control Plane Private Link
 ################################################################################
-
-#########################################################################
-#                     PORTKEY CONTROL PLANE PRIVATE LINK                  #
-#########################################################################
 
 locals {
   control_plane_pl_outbound = var.control_plane_private_link.outbound && local.use_vnet
@@ -13,7 +9,7 @@ locals {
   ) : null
 }
 
-# Private Endpoint to connect to Portkey Control Plane via Private Link
+# Private Endpoint to connect to Portkey Control Plane
 resource "azurerm_private_endpoint" "control_plane" {
   count = local.control_plane_pl_outbound ? 1 : 0
 
@@ -32,11 +28,7 @@ resource "azurerm_private_endpoint" "control_plane" {
   tags = local.tags
 }
 
-#########################################################################
-#                     PRIVATE DNS ZONE                                    #
-#########################################################################
-
-# Private DNS Zone for Portkey Control Plane
+# Private DNS Zone for Control Plane
 resource "azurerm_private_dns_zone" "control_plane" {
   count = local.control_plane_pl_outbound ? 1 : 0
 
@@ -46,7 +38,7 @@ resource "azurerm_private_dns_zone" "control_plane" {
   tags = local.tags
 }
 
-# Link the Private DNS Zone to the VNET so containers can resolve the record
+# Link Private DNS Zone to VNET
 resource "azurerm_private_dns_zone_virtual_network_link" "control_plane" {
   count = local.control_plane_pl_outbound ? 1 : 0
 
@@ -59,7 +51,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "control_plane" {
   tags = local.tags
 }
 
-# A record pointing to the Private Endpoint IP
+# DNS A record pointing to Private Endpoint IP
 resource "azurerm_private_dns_a_record" "control_plane" {
   count = local.control_plane_pl_outbound ? 1 : 0
 
@@ -69,19 +61,3 @@ resource "azurerm_private_dns_a_record" "control_plane" {
   ttl                 = 300
   records             = [azurerm_private_endpoint.control_plane[0].private_service_connection[0].private_ip_address]
 }
-
-#########################################################################
-#                     INBOUND — NATIVE ACA PRIVATE ENDPOINT              #
-#########################################################################
-# External consumers (e.g., Portkey Control Plane in another subscription)
-# can reach the ACA environment via a native Private Endpoint.
-#
-# No resources are created here — ACA natively supports Private Endpoints.
-# The consumer creates a PE targeting the ACA environment resource ID
-# (output: container_app_environment_id) with subresource "managedEnvironments".
-#
-# Traffic is routed to individual apps based on the Host header.
-# The consumer must use the FQDN *without* ".internal." and resolve it
-# to the PE's private IP via DNS or hosts file.
-#   e.g., https://gateway.<env-domain>.eastus.azurecontainerapps.io
-#########################################################################
