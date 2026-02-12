@@ -55,10 +55,9 @@ Complete documentation of all Terraform input variables for the Azure Container 
 
 | Subnet | CIDR (default) | Purpose |
 |--------|----------------|---------|
-| `snet-aca` | `10.0.0.0/23` | Container Apps Environment |
+| `snet-aca` | `10.0.0.0/23` | Container Apps Environment (NAT Gateway attached for outbound) |
 | `snet-appgw` | `10.0.4.0/24` | Application Gateway |
 | `snet-pe` | `10.0.5.0/24` | Private Endpoints |
-| `snet-nat` | `10.0.3.0/24` | NAT Gateway |
 
 ---
 

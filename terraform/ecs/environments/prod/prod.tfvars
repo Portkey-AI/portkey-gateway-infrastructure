@@ -95,7 +95,7 @@ gateway_deployment_configuration = {
   enable_blue_green = true                                            # Set to true to enable blue-green deployment for Gateway Service.
   # canary_configuration = {
   #   canary_bake_time_in_minutes = 100
-  #   canary_percent = 200
+  #   canary_percent = 20
   # }
   # linear_configuration = {
   #   step_bake_time_in_minutes = 100
