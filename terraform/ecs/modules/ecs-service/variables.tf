@@ -135,10 +135,16 @@ variable "ecs_service_config" {
 
     }), null)
 
+    # DEPRECATED: Use deployment_configuration.enable_blue_green instead
+    enable_blue_green = optional(bool, null)
+
     deployment_circuit_breaker = optional(object({
       enable   = optional(bool, true)
       rollback = optional(bool, true)
-    }))
+    }), {
+      enable   = true
+      rollback = true
+    })
 
     lifecycle_hooks = optional(list(object({
       hook_target_arn  = string
@@ -262,5 +268,19 @@ variable "load_balancer_config" {
       var.load_balancer_config.test_listener.certificate_arn != null
     )
     error_message = "certificate_arn is required in test_listener when protocol is HTTPS"
+  }
+}
+
+variable "ecs_service_config_validation" {
+  description = "Internal validation variable"
+  type        = bool
+  default     = true
+
+  validation {
+    condition = !(
+      var.ecs_service_config.deployment_configuration != null &&
+      var.ecs_service_config.enable_blue_green != null
+    )
+    error_message = "Cannot specify both 'deployment_configuration' and deprecated 'enable_blue_green'. Use 'deployment_configuration' only."
   }
 }
