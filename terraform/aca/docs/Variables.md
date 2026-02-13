@@ -132,13 +132,14 @@ gateway_image = {
 | `min_replicas` | `number` | `1` | `1` | Minimum replica count |
 | `max_replicas` | `number` | `3` | `3` | Maximum replica count (auto-scaled) |
 | `port` | `number` | `8787` | `8788` | Container listening port |
-| `cpu_scale_threshold` | `number` | `null` | `null` | CPU % threshold (0-100) to trigger scaling. If set, uses CPU-based scaling instead of HTTP. |
-| `memory_scale_threshold` | `number` | `null` | `null` | Memory % threshold (0-100) to trigger scaling. If set, uses memory-based scaling instead of HTTP. |
+| `cpu_scale_threshold` | `number` | `70` | `70` | CPU % threshold (0-100) to trigger scaling. Set to `null` to disable and fall back to HTTP scaling. |
+| `memory_scale_threshold` | `number` | `null` | `null` | Memory % threshold (0-100) to trigger scaling. Can be used alongside CPU scaling. |
+| `http_scale_concurrent_requests` | `number` | `100` | `100` | Concurrent HTTP requests per replica to trigger scaling. Only used when both `cpu_scale_threshold` and `memory_scale_threshold` are `null`. |
 
 **Scaling behavior:**
-- **If `cpu_scale_threshold` or `memory_scale_threshold` set**: Scales based on CPU/memory utilization
-- **If neither set (default)**: Scales based on HTTP concurrent requests (100 per replica)
-- **Both can be used together**: Scales when either threshold is reached
+- **Default**: CPU-based scaling at 70% utilization
+- **If `cpu_scale_threshold` set to `null` and `memory_scale_threshold` is `null`**: Falls back to HTTP concurrent requests scaling
+- **CPU + Memory together**: Scales when either threshold is reached
 
 **CPU/Memory valid combinations:**
 

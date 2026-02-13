@@ -194,22 +194,24 @@ variable "gateway_image" {
 variable "gateway_config" {
   description = "AI Gateway Container App configuration"
   type = object({
-    cpu                    = number
-    memory                 = string
-    min_replicas           = number
-    max_replicas           = number
-    port                   = optional(number, 8787)
-    cpu_scale_threshold    = optional(number, null)    # CPU % threshold (0-100) for scaling
-    memory_scale_threshold = optional(number, null)    # Memory % threshold (0-100) for scaling
+    cpu                          = number
+    memory                       = string
+    min_replicas                 = number
+    max_replicas                 = number
+    port                         = optional(number, 8787)
+    cpu_scale_threshold          = optional(number, 70)      # CPU % threshold (0-100) for scaling
+    memory_scale_threshold       = optional(number, null)    # Memory % threshold (0-100) for scaling
+    http_scale_concurrent_requests = optional(number, 100)   # Concurrent requests per replica for HTTP scaling
   })
   default = {
-    cpu                    = 1
-    memory                 = "2Gi"
-    min_replicas           = 1
-    max_replicas           = 3
-    port                   = 8787
-    cpu_scale_threshold    = null
-    memory_scale_threshold = null
+    cpu                          = 1
+    memory                       = "2Gi"
+    min_replicas                 = 1
+    max_replicas                 = 3
+    port                         = 8787
+    cpu_scale_threshold          = 70
+    memory_scale_threshold       = null
+    http_scale_concurrent_requests = 100
   }
 }
 
@@ -220,22 +222,24 @@ variable "gateway_config" {
 variable "mcp_config" {
   description = "MCP Container App configuration"
   type = object({
-    cpu                    = number
-    memory                 = string
-    min_replicas           = number
-    max_replicas           = number
-    port                   = optional(number, 8788)
-    cpu_scale_threshold    = optional(number, null)    # CPU % threshold (0-100) for scaling
-    memory_scale_threshold = optional(number, null)    # Memory % threshold (0-100) for scaling
+    cpu                          = number
+    memory                       = string
+    min_replicas                 = number
+    max_replicas                 = number
+    port                         = optional(number, 8788)
+    cpu_scale_threshold          = optional(number, 70)      # CPU % threshold (0-100) for scaling
+    memory_scale_threshold       = optional(number, null)    # Memory % threshold (0-100) for scaling
+    http_scale_concurrent_requests = optional(number, 100)   # Concurrent requests per replica for HTTP scaling
   })
   default = {
-    cpu                    = 1
-    memory                 = "2Gi"
-    min_replicas           = 1
-    max_replicas           = 3
-    port                   = 8788
-    cpu_scale_threshold    = null
-    memory_scale_threshold = null
+    cpu                          = 1
+    memory                       = "2Gi"
+    min_replicas                 = 1
+    max_replicas                 = 3
+    port                         = 8788
+    cpu_scale_threshold          = 70
+    memory_scale_threshold       = null
+    http_scale_concurrent_requests = 100
   }
 }
 

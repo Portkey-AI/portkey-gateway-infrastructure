@@ -67,8 +67,9 @@ module "gateway" {
   ingress_transport   = "auto"
 
   # Scaling configuration
-  cpu_scale_threshold    = var.gateway_config.cpu_scale_threshold
-  memory_scale_threshold = var.gateway_config.memory_scale_threshold
+  cpu_scale_threshold            = var.gateway_config.cpu_scale_threshold
+  memory_scale_threshold         = var.gateway_config.memory_scale_threshold
+  http_scale_concurrent_requests = var.gateway_config.http_scale_concurrent_requests
 
   # Key Vault for secrets
   key_vault_url = data.azurerm_key_vault.secrets.vault_uri
@@ -130,8 +131,9 @@ module "mcp" {
   ingress_transport   = "auto"
 
   # Scaling configuration
-  cpu_scale_threshold    = var.mcp_config.cpu_scale_threshold
-  memory_scale_threshold = var.mcp_config.memory_scale_threshold
+  cpu_scale_threshold            = var.mcp_config.cpu_scale_threshold
+  memory_scale_threshold         = var.mcp_config.memory_scale_threshold
+  http_scale_concurrent_requests = var.mcp_config.http_scale_concurrent_requests
 
   # Key Vault for secrets
   key_vault_url = data.azurerm_key_vault.secrets.vault_uri

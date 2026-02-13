@@ -51,15 +51,6 @@ variable "container_config" {
   })
 }
 
-variable "container_ports" {
-  description = "List of ports to expose"
-  type = list(object({
-    port     = number
-    protocol = string
-  }))
-  default = []
-}
-
 variable "key_vault_url" {
   description = "Key Vault URL (e.g., https://myvault.vault.azure.net/)"
   type        = string
@@ -143,6 +134,12 @@ variable "scale_rules" {
     metadata = map(string)
   }))
   default = []
+}
+
+variable "http_scale_concurrent_requests" {
+  description = "Number of concurrent HTTP requests per replica to trigger scaling. Used when HTTP scaling is active."
+  type        = number
+  default     = 100
 }
 
 variable "cpu_scale_threshold" {
