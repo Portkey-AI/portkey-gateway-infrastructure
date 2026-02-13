@@ -239,7 +239,7 @@ resource "azurerm_container_app" "main" {
       for_each = var.cpu_scale_threshold == null && var.memory_scale_threshold == null && length(var.scale_rules) == 0 && var.ingress_transport != "tcp" ? [1] : []
       content {
         name                = "http-scale"
-        concurrent_requests = "100"
+        concurrent_requests = tostring(var.http_scale_concurrent_requests)
       }
     }
 
@@ -248,7 +248,7 @@ resource "azurerm_container_app" "main" {
       for_each = var.cpu_scale_threshold == null && var.memory_scale_threshold == null && length(var.scale_rules) == 0 && var.ingress_transport == "tcp" ? [1] : []
       content {
         name                = "tcp-scale"
-        concurrent_requests = "100"
+        concurrent_requests = tostring(var.http_scale_concurrent_requests)
       }
     }
 

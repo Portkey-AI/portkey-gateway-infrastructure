@@ -6,6 +6,7 @@ Deploy Portkey AI Gateway on Azure Container Apps with VNET integration, Applica
 
 - [Features](#features)
 - [Prerequisites](#prerequisites)
+- [Create Portkey Account](#create-portkey-account)
 - [Quick Start](#quick-start)
 - [Configuration Guides](#configuration-guides)
   - [Server Mode (Gateway + MCP)](#server-mode-gateway--mcp)
@@ -34,6 +35,18 @@ Deploy Portkey AI Gateway on Azure Container Apps with VNET integration, Applica
 | **Azure Subscription** | With permissions for ACA, Key Vault, Storage, VNET, App Gateway etc |
 | **Terraform** | v1.5+ ([installation](https://developer.hashicorp.com/terraform/install)) |
 | **Azure CLI** | Configured with credentials ([installation](https://learn.microsoft.com/cli/azure/install-azure-cli)) |
+
+## Create Portkey Account
+
+1. Sign up at [portkey.ai](https://portkey.ai)
+2. Once logged in, locate your `Organisation ID` in the browser URL:
+   ```
+   https://app.portkey.ai/organisation/<organisation_id>/
+   ```
+3. Contact the Portkey team with your Organisation ID and email address
+4. The Portkey team will provide:
+   - Docker credentials (username and password)
+   - Client Auth Key (license)
 
 ## Quick Start
 
@@ -318,31 +331,32 @@ app_gateway_config = {
 
 Control how replicas scale based on different metrics.
 
-**Default (HTTP-based scaling):**
+**Default (CPU-based scaling):**
 
-Scales based on concurrent HTTP requests (100 per replica):
-
-```hcl
-gateway_config = {
-  cpu          = 0.5
-  memory       = "1Gi"
-  min_replicas = 1
-  max_replicas = 10
-  # No thresholds = HTTP scaling
-}
-```
-
-**CPU-based scaling:**
-
-Scales when CPU utilization exceeds threshold:
+Scales when CPU utilization exceeds 70% (default):
 
 ```hcl
 gateway_config = {
   cpu                 = 1
   memory              = "2Gi"
-  min_replicas        = 2
-  max_replicas        = 20
-  cpu_scale_threshold = 70  # Scale at 70% CPU
+  min_replicas        = 1
+  max_replicas        = 10
+  cpu_scale_threshold = 70  # Default: scale at 70% CPU
+}
+```
+
+**HTTP-based scaling:**
+
+Scales based on concurrent HTTP requests per replica. Set `cpu_scale_threshold = null` to switch to HTTP scaling:
+
+```hcl
+gateway_config = {
+  cpu                            = 0.5
+  memory                         = "1Gi"
+  min_replicas                   = 1
+  max_replicas                   = 10
+  cpu_scale_threshold            = null  # Disable CPU scaling
+  http_scale_concurrent_requests = 100   # Scale at 100 concurrent requests per replica
 }
 ```
 
@@ -356,7 +370,8 @@ gateway_config = {
   memory                 = "2Gi"
   min_replicas           = 2
   max_replicas           = 20
-  memory_scale_threshold = 80  # Scale at 80% memory
+  cpu_scale_threshold    = null  # Disable default CPU scaling
+  memory_scale_threshold = 80    # Scale at 80% memory
 }
 ```
 
@@ -375,7 +390,7 @@ gateway_config = {
 }
 ```
 
-> **Note:** When using CPU/memory thresholds, HTTP-based scaling is disabled. Choose the metric that best matches your workload characteristics.
+> **Note:** CPU scaling (70%) is the default. HTTP-based scaling activates only when both `cpu_scale_threshold` and `memory_scale_threshold` are `null`.
 
 ### Azure Managed Redis
 
