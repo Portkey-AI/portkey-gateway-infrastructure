@@ -31,7 +31,7 @@ Deploy Portkey AI Gateway on Azure Container Apps with VNET integration, Applica
 
 | Requirement | Details |
 |-------------|---------|
-| **Portkey Account** | Sign up at [portkey.ai](https://portkey.ai) and reach out to Portkey  |
+| **Portkey Account** | Sign up at [portkey.ai](https://portkey.ai) |
 | **Azure Subscription** | With permissions for ACA, Key Vault, Storage, VNET, App Gateway etc |
 | **Terraform** | v1.5+ ([installation](https://developer.hashicorp.com/terraform/install)) |
 | **Azure CLI** | Configured with credentials ([installation](https://learn.microsoft.com/cli/azure/install-azure-cli)) |
