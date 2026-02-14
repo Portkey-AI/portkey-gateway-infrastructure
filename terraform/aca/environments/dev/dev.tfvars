@@ -112,7 +112,7 @@ redis_config = {
 
 # storage_config = {
 #   resource_group = "my-resource-group" # Resource group of storage account
-#   auth_mode      = "managed"           # "managed" or "connection_string"
+#   auth_mode      = "managed"           # "managed"
 #   account_name   = "mystorageaccount"  # Existing storage account name
 #   container_name = "portkey-logs"      # Container name
 # }
