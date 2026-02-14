@@ -314,7 +314,7 @@ variable "storage_config" {
   description = "Azure Blob Storage configuration. If not provided, a new storage account and container will be created."
   type = object({
     resource_group = optional(string)  # Resource group of existing storage account
-    auth_mode      = optional(string, "managed")  # "managed" or "connection_string"
+    auth_mode      = optional(string, "managed")  # "managed"
     account_name   = optional(string)  # Existing storage account name (if not provided, one will be created)
     container_name = optional(string, "portkey-log-store")  # Container name (defaults to 'portkey-log-store')
   })

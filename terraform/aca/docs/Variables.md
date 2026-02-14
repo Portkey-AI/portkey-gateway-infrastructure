@@ -203,7 +203,7 @@ redis_config = {
 | Field | Type | Default | Required | Description |
 |-------|------|---------|----------|-------------|
 | `resource_group` | `string` | `null` | No | Resource group of an existing storage account. If `null`, uses deployment resource group for new storage. |
-| `auth_mode` | `string` | `"managed"` | No | `managed` = authenticate via managed identity (recommended), `connection_string` = use connection string from Key Vault. |
+| `auth_mode` | `string` | `"managed"` | No | `managed` = authenticate via managed identity (recommended)|
 | `account_name` | `string` | `null` | No | Name of an existing Azure Storage account. If `null`, a new storage account is created with a globally unique name. |
 | `container_name` | `string` | `"portkey-logs"` | No | Blob container name for log storage. Created automatically if using a new storage account. |
 
