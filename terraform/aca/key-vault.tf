@@ -47,8 +47,8 @@ data "azurerm_key_vault" "docker_creds" {
 # (skip if same as secrets Key Vault)
 resource "azurerm_role_assignment" "docker_kv_secrets_user" {
   count = (
-    var.registry_type == "dockerhub" && 
-    var.docker_credentials != null && 
+    var.registry_type == "dockerhub" &&
+    var.docker_credentials != null &&
     var.docker_credentials.key_vault_name != var.secrets_key_vault.name
   ) ? 1 : 0
 

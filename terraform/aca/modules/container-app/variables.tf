@@ -87,10 +87,10 @@ variable "docker_registry_url" {
 variable "docker_credentials" {
   description = "Docker Hub credentials Key Vault configuration"
   type = object({
-    key_vault_name      = string
-    key_vault_rg        = string
-    username_secret     = string
-    password_secret     = string
+    key_vault_name  = string
+    key_vault_rg    = string
+    username_secret = string
+    password_secret = string
   })
   default = null
 }

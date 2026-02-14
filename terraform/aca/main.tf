@@ -31,7 +31,7 @@ locals {
   env_vars_from_file = var.environment_variables_file_path != null ? (
     jsondecode(file("${path.module}/${var.environment_variables_file_path}"))
   ) : null
-  
+
   secrets_from_file = var.secrets_file_path != null ? (
     jsondecode(file("${path.module}/${var.secrets_file_path}"))
   ) : null
@@ -42,19 +42,19 @@ locals {
     local.env_vars_from_file.gateway,
     {}
   )
-  
+
   dataservice_variables = try(
     var.environment_variables["data-service"],
     local.env_vars_from_file["data-service"],
     {}
   )
-  
+
   gateway_secrets = try(
     var.secrets.gateway,
     local.secrets_from_file.gateway,
     {}
   )
-  
+
   dataservice_secrets = try(
     var.secrets["data-service"],
     local.secrets_from_file["data-service"],

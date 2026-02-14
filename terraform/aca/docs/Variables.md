@@ -141,16 +141,6 @@ gateway_image = {
 - **If `cpu_scale_threshold` set to `null` and `memory_scale_threshold` is `null`**: Falls back to HTTP concurrent requests scaling
 - **CPU + Memory together**: Scales when either threshold is reached
 
-**CPU/Memory valid combinations:**
-
-| CPU | Memory Options |
-|-----|----------------|
-| 0.25 | 0.5Gi |
-| 0.5 | 1Gi |
-| 1 | 2Gi |
-| 2 | 4Gi |
-| 4 | 8Gi |
-
 ---
 
 ## Redis

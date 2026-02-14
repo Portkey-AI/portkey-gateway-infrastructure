@@ -141,7 +141,7 @@ variable "ecs_service_config" {
     deployment_circuit_breaker = optional(object({
       enable   = optional(bool, true)
       rollback = optional(bool, true)
-    }), {
+      }), {
       enable   = true
       rollback = true
     })

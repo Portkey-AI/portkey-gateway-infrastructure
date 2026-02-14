@@ -10,7 +10,7 @@ locals {
   appgw_ssl_enabled  = var.app_gateway_config.ssl_cert_key_vault_secret_id != null
   appgw_host_routing = var.app_gateway_config.routing_mode == "host"
   appgw_path_routing = var.app_gateway_config.routing_mode == "path"
-  
+
   # Compute app gateway private IP based on subnet (works for both new and existing VNET)
   appgw_subnet_prefix = local.create_new_vnet ? azurerm_subnet.app_gateway[0].address_prefixes[0] : (
     var.network_mode == "existing" && var.app_gateway_subnet_id != null ? data.azurerm_subnet.app_gateway_existing[0].address_prefixes[0] : null
@@ -391,8 +391,8 @@ resource "azurerm_application_gateway" "main" {
         rule_sequence = 100
 
         url {
-          path         = "{var_uri_path_1}"
-          reroute      = false
+          path    = "{var_uri_path_1}"
+          reroute = false
         }
 
         condition {
@@ -416,8 +416,8 @@ resource "azurerm_application_gateway" "main" {
         rule_sequence = 100
 
         url {
-          path         = "{var_uri_path_1}"
-          reroute      = false
+          path    = "{var_uri_path_1}"
+          reroute = false
         }
 
         condition {

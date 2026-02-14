@@ -33,7 +33,7 @@ resource "azurerm_subnet" "aca" {
   virtual_network_name            = azurerm_virtual_network.main[0].name
   address_prefixes                = [cidrsubnet(var.vnet_cidr, 7, 0)] # /23 from /16
   default_outbound_access_enabled = false
-  
+
   # Service endpoints for storage account network rules
   service_endpoints = ["Microsoft.Storage"]
 

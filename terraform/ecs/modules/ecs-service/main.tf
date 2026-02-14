@@ -44,12 +44,12 @@ locals {
   # Backward compatibility: support both old and new deployment configuration structures
   deployment_config = var.ecs_service_config.deployment_configuration != null ? (
     var.ecs_service_config.deployment_configuration
-  ) : (
+    ) : (
     var.ecs_service_config.enable_blue_green != null ? {
       enable_blue_green    = var.ecs_service_config.enable_blue_green
       canary_configuration = null
       linear_configuration = null
-    } : {
+      } : {
       enable_blue_green    = false
       canary_configuration = null
       linear_configuration = null
