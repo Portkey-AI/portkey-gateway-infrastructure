@@ -19,10 +19,10 @@ resource "azurerm_private_endpoint" "control_plane" {
   subnet_id           = local.private_endpoint_subnet_id
 
   private_service_connection {
-    name                           = "psc-controlplane-${local.name_prefix}"
-    private_connection_resource_id = "/subscriptions/4bec865f-23ea-4d04-be20-3e883cbb3eb1/resourceGroups/privatelink/providers/Microsoft.Network/privateLinkServices/privatelink-proxy-pls"
-    is_manual_connection           = true
-    request_message                = "Portkey Gateway ${var.project_name}-${var.environment} requesting Private Link to Control Plane"
+    name                              = "psc-controlplane-${local.name_prefix}"
+    private_connection_resource_alias = "portkey-privatelink-pls.d17828ab-c5d7-4f67-aae6-1f5b68ae0565.eastus2.azure.privatelinkservice"
+    is_manual_connection              = true
+    request_message                   = "Portkey Gateway ${var.project_name}-${var.environment} requesting Private Link to Control Plane"
   }
 
   tags = local.tags
