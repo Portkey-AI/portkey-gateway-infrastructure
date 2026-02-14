@@ -31,7 +31,7 @@ locals {
   # Build full image URL based on registry type
   image_url = var.registry_type == "acr" ? (
     "${var.acr_login_server}/${var.container_config.image}:${var.container_config.tag}"
-  ) : (
+    ) : (
     "${var.docker_registry_url}/${var.container_config.image}:${var.container_config.tag}"
   )
 
@@ -57,8 +57,8 @@ locals {
   # secrets is a map of ENV_VAR_NAME => secret_name
   secret_env_vars = [
     for env_var, secret_name in var.container_config.secrets : {
-      name        = env_var      # ORGANISATIONS_TO_SYNC
-      secret_name = secret_name  # org-secret-name
+      name        = env_var     # ORGANISATIONS_TO_SYNC
+      secret_name = secret_name # org-secret-name
     }
   ]
 
