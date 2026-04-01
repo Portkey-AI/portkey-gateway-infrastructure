@@ -254,6 +254,12 @@ variable "server_mode" {
   }
 }
 
+variable "mcp_gateway_base_url" {
+  description = "Base URL of the MCP gateway. When server_mode = 'all' and this is not set, defaults to the internal service URL 'http://mcp'."
+  type        = string
+  default     = null
+}
+
 #########################################################################
 #                     REDIS CONFIGURATION                                #
 #########################################################################

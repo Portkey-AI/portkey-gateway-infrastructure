@@ -305,6 +305,9 @@ mcp_config = {
   port         = 8788
 }
 
+# Optional: override the MCP Gateway base URL (defaults to internal "http://mcp")
+# mcp_gateway_base_url = "https://mcp.example.com"
+
 # Application Gateway routing (host-based)
 app_gateway_config = {
   # ...
@@ -326,6 +329,7 @@ app_gateway_config = {
 > - Both Gateway and MCP share the same environment variables and secrets (from `gateway` key in JSON).
 > - The module automatically adds MCP-specific overrides (`SERVER_MODE=mcp`, `MCP_PORT=8788`).
 > - When `server_mode = "all"` with Application Gateway, you must use either host-based or path-based routing.
+> - When `server_mode = "all"`, `MCP_GATEWAY_BASE_URL` defaults to the internal service URL (`http://mcp`). Set `mcp_gateway_base_url` to override this with a custom URL (e.g., an external or load-balanced endpoint).
 
 ### Auto-Scaling Configuration
 
