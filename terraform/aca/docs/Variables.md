@@ -105,6 +105,7 @@ docker_credentials = {
 | `gateway_image` | `object` | See below | No | Container image for the Gateway and MCP apps. |
 | `gateway_config` | `object` | See below | No | Gateway container sizing and scaling. |
 | `mcp_config` | `object` | See below | No | MCP container sizing and scaling (independent from Gateway). |
+| `mcp_gateway_base_url` | `string` | `null` | No | Base URL of the MCP gateway. When `server_mode = "all"` and not set, defaults to the internal service URL `http://mcp`. Set this to use a custom or external MCP endpoint. |
 
 **Server mode options:**
 

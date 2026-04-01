@@ -80,7 +80,7 @@ locals {
   # Gateway-specific environment variables
   gateway_env = {
     PORT                 = var.gateway_config.port
-    MCP_GATEWAY_BASE_URL = var.server_mode == "all" ? "http://mcp" : null
+    MCP_GATEWAY_BASE_URL = coalesce(var.mcp_gateway_base_url, var.server_mode == "all" ? "http://mcp" : null)
   }
 
   # MCP-specific environment variables
