@@ -62,7 +62,7 @@ az keyvault secret set \
 
 ```hcl
 redis_config = {
-  redis_type = "azure-managed-redis"
+  redis_type = "azure-redis"  # "azure-managed-redis" is also accepted
   endpoint   = "rediss://portkey-redis.redis.cache.windows.net:6380"
   tls        = true
   mode       = "standalone"  # or "cluster" for clustered redis
@@ -113,7 +113,7 @@ module "portkey_gateway" {
   environment  = "dev"
 
   redis_config = {
-    redis_type = "azure-managed-redis"
+    redis_type = "azure-redis"  # "azure-managed-redis" is also accepted
     endpoint   = "rediss://portkey-redis.redis.cache.windows.net:6380"
     tls        = true
     mode       = "standalone"
@@ -169,7 +169,7 @@ module "portkey_gateway" {
   source = "github.com/Portkey-AI/portkey-gateway-infrastructure//terraform/aca?ref=v1.0.0"
 
   redis_config = {
-    redis_type = "azure-managed-redis"
+    redis_type = "azure-redis"  # "azure-managed-redis" is also accepted
     endpoint   = "rediss://portkey-redis.redis.cache.windows.net:6380"
     tls        = true
     mode       = "standalone"
@@ -230,7 +230,7 @@ az network private-dns record-set a add-record \
 
 ```hcl
 redis_config = {
-  redis_type = "azure-managed-redis"
+  redis_type = "azure-redis"  # "azure-managed-redis" is also accepted
   endpoint   = "rediss://portkey-redis.privatelink.redis.cache.windows.net:6380"  # Private DNS
   tls        = true
   mode       = "standalone"

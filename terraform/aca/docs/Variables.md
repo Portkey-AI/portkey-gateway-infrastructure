@@ -158,7 +158,7 @@ gateway_image = {
 | `redis_type` | `string` | `"redis"` | No | `redis` = deploy as container app, `azure-redis` (recommended) / `azure-managed-redis` = use existing external Redis. |
 | `cpu` | `number` | `0.5` | No | CPU for container Redis. Ignored for `azure-redis` / `azure-managed-redis`. |
 | `memory` | `string` | `"1Gi"` | No | Memory for container Redis. Ignored for `azure-redis` / `azure-managed-redis`. |
-| `endpoint` | `string` | `""` | Conditional | Redis connection endpoint. **Required** when `redis_type = "azure-redis"` or `"azure-managed-redis"`. |
+| `endpoint` | `string` | `""` | Conditional | Redis connection endpoint. **Required** when `redis_type = "azure-redis"` (Recommended) or `redis_type = "azure-managed-redis"`. |
 | `tls` | `bool` | `false` | No | Enable TLS for the Redis connection. Set to `true` for Azure Managed Redis. |
 | `mode` | `string` | `"standalone"` | No | `standalone` or `cluster`. Must match your Redis deployment type. |
 
@@ -172,9 +172,9 @@ redis_config = {
   memory     = "1Gi"
 }
 
-# Azure Managed Redis (production)
+# Azure Redis (production) — "azure-redis" and "azure-managed-redis" are equivalent
 redis_config = {
-  redis_type = "azure-managed-redis"
+  redis_type = "azure-redis"
   endpoint   = "my-redis.redis.cache.windows.net:6380"
   tls        = true
   mode       = "standalone"
