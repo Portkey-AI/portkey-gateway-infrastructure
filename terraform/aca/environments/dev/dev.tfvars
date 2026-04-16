@@ -97,10 +97,10 @@ server_mode = "gateway"
 #########################################################################
 
 # Set redis_type to 'redis' to deploy Redis as a container app,
-# or 'azure-managed-redis' to use an external Azure Managed Redis instance.
+# or 'azure-redis' / 'azure-managed-redis' to use an external Azure Managed Redis instance.
 
 redis_config = {
-  redis_type = "redis"                                                # "redis" (container) or "azure-managed-redis"
+  redis_type = "redis"                                                # "redis" (container) or "azure-redis" / "azure-managed-redis"
 }
 
 #########################################################################

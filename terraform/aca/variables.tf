@@ -267,10 +267,10 @@ variable "mcp_gateway_base_url" {
 variable "redis_config" {
   description = "Redis configuration"
   type = object({
-    redis_type = string                         # "redis" (container) or "azure-managed-redis"
+    redis_type = string                         # "redis" (container) or "azure-redis" / "azure-managed-redis"
     cpu        = optional(number, 0.5)          # Relevant if redis_type = "redis"
     memory     = optional(string, "1Gi")        # Relevant if redis_type = "redis"
-    endpoint   = optional(string, "")           # Required if redis_type = "azure-managed-redis"
+    endpoint   = optional(string, "")           # Required if redis_type = "azure-redis" or "azure-managed-redis"
     tls        = optional(bool, false)          # Set to true if TLS is enabled on Azure Managed Redis
     mode       = optional(string, "standalone") # "standalone" or "cluster"
   })
@@ -282,8 +282,8 @@ variable "redis_config" {
   }
 
   validation {
-    condition     = contains(["redis", "azure-managed-redis"], var.redis_config.redis_type)
-    error_message = "redis_config.redis_type must be one of: 'redis', 'azure-managed-redis'."
+    condition     = contains(["redis", "azure-redis", "azure-managed-redis"], var.redis_config.redis_type)
+    error_message = "redis_config.redis_type must be one of: 'redis', 'azure-redis', 'azure-managed-redis'."
   }
 
   validation {
@@ -293,10 +293,10 @@ variable "redis_config" {
 
   validation {
     condition = (
-      var.redis_config.redis_type != "azure-managed-redis" ||
-      (var.redis_config.redis_type == "azure-managed-redis" && var.redis_config.endpoint != "")
+      !contains(["azure-redis", "azure-managed-redis"], var.redis_config.redis_type) ||
+      (contains(["azure-redis", "azure-managed-redis"], var.redis_config.redis_type) && var.redis_config.endpoint != "")
     )
-    error_message = "A valid endpoint must be provided if redis_type = 'azure-managed-redis'."
+    error_message = "A valid endpoint must be provided if redis_type = 'azure-redis' or 'azure-managed-redis'."
   }
 }
 
