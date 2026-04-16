@@ -382,9 +382,8 @@ module "portkey_gateway" {
     ssl_cert_key_vault_rg        = "ssl-rg"
   }
 
-  # Azure Managed Redis
   redis_config = {
-    redis_type = "azure-managed-redis"
+    redis_type = "azure-redis"  # "azure-managed-redis" is also accepted for standalone mode.
     endpoint   = "prod-redis.redis.cache.windows.net:6380"
     tls        = true
     mode       = "cluster"
