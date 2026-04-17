@@ -66,7 +66,7 @@ secrets_key_vault = {
 
 gateway_image = {
   image = "portkeyai/gateway_enterprise"
-  tag   = "latest"
+  tag   = "2.6.2"
 }
 
 #########################################################################
