@@ -262,10 +262,4 @@ resource "azurerm_container_app" "main" {
       }
     }
   }
-
-  lifecycle {
-    ignore_changes = [
-      template[0].container[0].image
-    ]
-  }
 }
