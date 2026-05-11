@@ -184,6 +184,14 @@ variable "ecs_service_config" {
     vpc_id          = string
     service_subnets = list(string)
   })
+
+  validation {
+    condition = !(
+      var.ecs_service_config.deployment_configuration != null &&
+      var.ecs_service_config.enable_blue_green != null
+    )
+    error_message = "Cannot specify both 'deployment_configuration' and deprecated 'enable_blue_green'. Use 'deployment_configuration' only."
+  }
 }
 
 # ============================================================================
@@ -268,19 +276,5 @@ variable "load_balancer_config" {
       var.load_balancer_config.test_listener.certificate_arn != null
     )
     error_message = "certificate_arn is required in test_listener when protocol is HTTPS"
-  }
-}
-
-variable "ecs_service_config_validation" {
-  description = "Internal validation variable"
-  type        = bool
-  default     = true
-
-  validation {
-    condition = !(
-      var.ecs_service_config.deployment_configuration != null &&
-      var.ecs_service_config.enable_blue_green != null
-    )
-    error_message = "Cannot specify both 'deployment_configuration' and deprecated 'enable_blue_green'. Use 'deployment_configuration' only."
   }
 }

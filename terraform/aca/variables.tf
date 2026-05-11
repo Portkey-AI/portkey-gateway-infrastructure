@@ -95,6 +95,20 @@ variable "secrets" {
 }
 
 #########################################################################
+#                     SECRET VOLUME MOUNTS                               #
+#########################################################################
+
+variable "gateway_secret_volume_mounts" {
+  description = "Secret-typed volume mounts for the gateway and mcp Container Apps. Key Vault secrets must be listed in secrets.gateway (or secrets.json); each is also available as a secret env var. See docs/SecretVolumeMounts.md."
+  type = list(object({
+    name       = string
+    mount_path = string
+    sub_path   = optional(string)
+  }))
+  default = []
+}
+
+#########################################################################
 #                         NETWORK CONFIGURATION                         #
 #########################################################################
 

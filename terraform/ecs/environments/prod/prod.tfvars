@@ -2,22 +2,22 @@
 #                           PROJECT DETAILS                             #
 #########################################################################
 
-project_name = "portkey-gateway"
-environment  = "prod"
-aws_region   = "us-east-1"                                        
+project_name                    = "portkey-gateway"
+environment                     = "prod"
+aws_region                      = "us-east-1"
 environment_variables_file_path = "environments/prod/environment-variables.json"
-secrets_file_path = "environments/prod/secrets.json"
+secrets_file_path               = "environments/prod/secrets.json"
 
 #########################################################################
 #                         NETWORK CONFIGURATION                         #
 #########################################################################
 
 # Provide following details to create new VPC
-create_new_vpc = true                                           # Set to true for creating new VPC, false for deploying Portkey in new VPC.
-                                                       
-vpc_cidr           = "10.0.0.0/16"                              # Specify the CIDR block for the new VPC. Recommended to have CIDR of atleast /20 in size.
-num_az             = 2                                          # Number of Availability Zones to use. At least 2 AZs are recommended for high availability. One public and one private subnet will be created per AZ.
-single_nat_gateway = true                                       # Set to true to create a single NAT Gateway shared across all private subnets in different AZs, false for one NAT Gateway per AZ.
+create_new_vpc = true # Set to true for creating new VPC, false for deploying Portkey in new VPC.
+
+vpc_cidr           = "10.0.0.0/16" # Specify the CIDR block for the new VPC. Recommended to have CIDR of atleast /20 in size.
+num_az             = 2             # Number of Availability Zones to use. At least 2 AZs are recommended for high availability. One public and one private subnet will be created per AZ.
+single_nat_gateway = true          # Set to true to create a single NAT Gateway shared across all private subnets in different AZs, false for one NAT Gateway per AZ.
 
 
 # # Provide following details if using existing VPC
@@ -34,11 +34,11 @@ single_nat_gateway = true                                       # Set to true to
 ###########################################################################
 # Provide following details to create new ECS Cluster and EC2 Autoscaling based capacity provider.
 create_cluster   = true
-instance_type    = "t4g.medium"                                 # Provide EC2 instance type to use for the cluster.
-max_asg_size     = 2                                            # Maximum size of the Auto Scaling Group.
-min_asg_size     = 1                                            # Minimum size of the Auto Scaling Group.
-desired_asg_size = 1                                            # Desired size of the Autoscaling Group.
-target_capacity  = 100                                          # Provide the capacity which ECS should try to maintain - (0-100)
+instance_type    = "t4g.medium" # Provide EC2 instance type to use for the cluster.
+max_asg_size     = 2            # Maximum size of the Auto Scaling Group.
+min_asg_size     = 1            # Minimum size of the Auto Scaling Group.
+desired_asg_size = 1            # Desired size of the Autoscaling Group.
+target_capacity  = 100          # Provide the capacity which ECS should try to maintain - (0-100)
 
 
 
@@ -62,7 +62,7 @@ data_service_image = {
 }
 
 # Provide the Secret ARN obtained from output section of AWS CloudFormation Stack.
-docker_cred_secret_arn = "<DockerCredentialsSecretArn>"            # Replace with your AWS Secrets Manager Secret ARN containing Docker Hub credentials for pulling Portkey private images.
+docker_cred_secret_arn = "<DockerCredentialsSecretArn>" # Replace with your AWS Secrets Manager Secret ARN containing Docker Hub credentials for pulling Portkey private images.
 
 redis_image = {
   image = "redis"
@@ -74,11 +74,11 @@ redis_image = {
 ###########################################################################
 
 gateway_config = {
-  desired_task_count = 1                                             # Set desired replica of gateway tasks to run in Gateway Service.
-  cpu                = 256                                           # Set the number of cpu units used by the tasks.
-  memory             = 1024                                          # Set the Amount (in MiB) of memory used by the tasks.
-  gateway_port       = 8787                                          # Port on which Gateway application will listen (internally).
-  mcp_port           = 8788                                          # Port on which MCP application will listen (internally).
+  desired_task_count = 1    # Set desired replica of gateway tasks to run in Gateway Service.
+  cpu                = 256  # Set the number of cpu units used by the tasks.
+  memory             = 1024 # Set the Amount (in MiB) of memory used by the tasks.
+  gateway_port       = 8787 # Port on which Gateway application will listen (internally).
+  mcp_port           = 8788 # Port on which MCP application will listen (internally).
 }
 
 # gateway_autoscaling = {
@@ -91,8 +91,8 @@ gateway_config = {
 #   scale_out_cooldown        = 60                                    # Amount of time (seconds) wait after a scale out activity before another scale out activity can start.
 # }
 
-gateway_deployment_configuration = {                                         
-  enable_blue_green = true                                            # Set to true to enable blue-green deployment for Gateway Service.
+gateway_deployment_configuration = {
+  enable_blue_green = true # Set to true to enable blue-green deployment for Gateway Service.
   # canary_configuration = {
   #   canary_bake_time_in_minutes = 100
   #   canary_percent = 20
@@ -118,10 +118,10 @@ gateway_deployment_configuration = {
 ###########################################################################
 
 dataservice_config = {
-  enable_dataservice = false                                        # Set to true to enable Data Service.
-  desired_task_count = 1                                            # Set desired replica of dataservice tasks to run in Data Service.
-  cpu                = 256                                          # Set the number of cpu units used by the tasks.
-  memory             = 1024                                         # Set the Amount (in MiB) of memory used by the tasks.
+  enable_dataservice = false # Set to true to enable Data Service.
+  desired_task_count = 1     # Set desired replica of dataservice tasks to run in Data Service.
+  cpu                = 256   # Set the number of cpu units used by the tasks.
+  memory             = 1024  # Set the Amount (in MiB) of memory used by the tasks.
 }
 
 # dataservice_autoscaling = {
@@ -139,20 +139,20 @@ dataservice_config = {
 ###########################################################################
 
 redis_configuration = {
-  redis_type = "redis"                                              # Set to 'redis' to use 'container' based redis, set to 'aws-elastic-cache' to use AWS ElastiCache as cache store.
-  cpu        = 256                                                  # Relevant if using built-in container based redis.
-  memory     = 512                                                  # Relevant if using built-in container based redis.
-  endpoint   = ""                                                   # Only required if using Amazon ElastiCache.
-  tls        = false                                                # Set to true if tls is enabled on Amazon ElastiCache
-  mode       = "standalone"                                         # Set to 'cluster' if cluster mode is enabled on Amazon ElastiCache, otherwise set it to standalone.
+  redis_type = "redis"      # Set to 'redis' to use 'container' based redis, set to 'aws-elastic-cache' to use AWS ElastiCache as cache store.
+  cpu        = 256          # Relevant if using built-in container based redis.
+  memory     = 512          # Relevant if using built-in container based redis.
+  endpoint   = ""           # Only required if using Amazon ElastiCache.
+  tls        = false        # Set to true if tls is enabled on Amazon ElastiCache
+  mode       = "standalone" # Set to 'cluster' if cluster mode is enabled on Amazon ElastiCache, otherwise set it to standalone.
 }
 
 ###########################################################################
 #                           LOG STORE CONFIGURATION                       #
 ###########################################################################
 object_storage = {
-  log_store_bucket   = "<BUCKET_NAME>"                               # Specify the S3 bucket where logs will be stored.
-  bucket_region      = "<AWS_REGION>"                                # Specify AWS region where buckets exists.
+  log_store_bucket = "<BUCKET_NAME>" # Specify the S3 bucket where logs will be stored.
+  bucket_region    = "<AWS_REGION>"  # Specify AWS region where buckets exists.
   # log_exports_bucket = ""                                          # (Optional) (Optional) Specify bucket for logs exports, if not specified `log_store_bucket` will be used for log exports.
   # finetune_bucket    = ""                                          # (Optional) Specify bucket where dataset will be stored for finetuning LLM models.
 }
@@ -167,9 +167,9 @@ object_storage = {
 #                       LOAD BALANCER CONFIGURATION                       #
 ###########################################################################
 
-create_lb               = false                                  # Set to true to create a Load Balancer, or false to skip creating one.
-internal_lb             = true                                   # Set to true to create an internal LB, or false to create an internet-facing LB.
-lb_type                 = "network"                              # Set to 'application' or 'network' to specify load balancer type.
+create_lb   = false     # Set to true to create a Load Balancer, or false to skip creating one.
+internal_lb = true      # Set to true to create an internal LB, or false to create an internet-facing LB.
+lb_type     = "network" # Set to 'application' or 'network' to specify load balancer type.
 # allowed_lb_cidrs        = ["X.X.X.X/Y"]                        # Provide a list of CIDR ranges to whitelist in LB's Security Group.
 # tls_certificate_arn     = ""                                   # (Optional) Provide ACM certificate ARN to enable TLS-based listeners.
 
@@ -185,7 +185,7 @@ lb_type                 = "network"                              # Set to 'appli
 # When server_mode = "all", ALB with host-based or path-based routing must be enabled.
 # Define routing rules to route traffic based on host headers and paths.
 
-server_mode = "gateway"                                            # Specify server mode: 'gateway', 'mcp', or 'all'.
+server_mode = "gateway" # Specify server mode: 'gateway', 'mcp', or 'all'.
 
 # alb_routing_configuration = {
 #   enable_path_based_routing = false                              # Set to true to enable path-based routing.

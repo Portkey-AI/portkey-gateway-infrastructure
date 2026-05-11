@@ -74,6 +74,8 @@ module "gateway" {
   # Key Vault for secrets
   key_vault_url = data.azurerm_key_vault.secrets.vault_uri
 
+  secret_volume_mounts = var.gateway_secret_volume_mounts
+
   # Health probes - uses default timings, path is hardcoded to /v1/health
   health_probes = {}
 
@@ -137,6 +139,8 @@ module "mcp" {
 
   # Key Vault for secrets
   key_vault_url = data.azurerm_key_vault.secrets.vault_uri
+
+  secret_volume_mounts = var.gateway_secret_volume_mounts
 
   # Health probes - uses default timings, path is hardcoded to /v1/health
   health_probes = {}

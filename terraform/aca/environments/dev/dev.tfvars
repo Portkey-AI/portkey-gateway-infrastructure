@@ -100,7 +100,7 @@ server_mode = "gateway"
 # or 'azure-redis' / 'azure-managed-redis' to use an external Azure Managed Redis instance.
 
 redis_config = {
-  redis_type = "redis"                                                # "redis" (container) or "azure-redis" / "azure-managed-redis"
+  redis_type = "redis" # "redis" (container) or "azure-redis" / "azure-managed-redis"
 }
 
 #########################################################################

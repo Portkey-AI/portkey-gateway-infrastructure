@@ -58,6 +58,33 @@ variable "key_vault_url" {
 }
 
 #########################################################################
+#                     SECRET VOLUME MOUNTS                               #
+#########################################################################
+
+# Provider limitation: azurerm 4.x cannot filter which secrets land in a
+# Secret volume — every Container App secret is projected. Tracking:
+# hashicorp/terraform-provider-azurerm#25431, #31979.
+variable "secret_volume_mounts" {
+  description = "List of Secret-typed volume mounts. Each mount projects every Container App secret as a file at mount_path/<secret_name>."
+  type = list(object({
+    name       = string
+    mount_path = string
+    sub_path   = optional(string)
+  }))
+  default = []
+
+  validation {
+    condition     = length(var.secret_volume_mounts) == length(distinct([for v in var.secret_volume_mounts : v.name]))
+    error_message = "secret_volume_mounts entries must have unique 'name' values."
+  }
+
+  validation {
+    condition     = alltrue([for v in var.secret_volume_mounts : startswith(v.mount_path, "/")])
+    error_message = "Each secret_volume_mounts.mount_path must be an absolute path (start with '/')."
+  }
+}
+
+#########################################################################
 #                     REGISTRY CONFIGURATION                             #
 #########################################################################
 
