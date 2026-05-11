@@ -66,11 +66,7 @@ variable "container_config" {
     ])
     error_message = "Each container must have either 'docker_repository_name' or 'ecr_repository_name' provided (non-empty)."
   }
-
-
-
 }
-
 
 # ============================================================================
 # TASK RESOURCES
@@ -130,7 +126,7 @@ variable "ecs_service_config" {
       }), null)
       linear_configuration = optional(object({
         step_bake_time_in_minutes = optional(number, 100) # Time to wait after each step before the next step starts
-        step_percent              = optional(number, 10)  # Percentage of traffic to shift per step (3-100%) 
+        step_percent              = optional(number, 10)  # Percentage of traffic to shift per step (3-100%)
       }), null)
 
     }), null)

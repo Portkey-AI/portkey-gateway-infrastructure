@@ -90,7 +90,6 @@ module "gateway" {
 #                     MCP CONTAINER APP                                  #
 #########################################################################
 
-# Separate container app for MCP traffic (server_mode = "all" or "mcp")
 module "mcp" {
   source = "./modules/container-app"
   count  = (var.server_mode == "all" || var.server_mode == "mcp") ? 1 : 0

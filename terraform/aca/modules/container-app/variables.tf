@@ -57,13 +57,6 @@ variable "key_vault_url" {
   default     = null
 }
 
-#########################################################################
-#                     SECRET VOLUME MOUNTS                               #
-#########################################################################
-
-# Provider limitation: azurerm 4.x cannot filter which secrets land in a
-# Secret volume — every Container App secret is projected. Tracking:
-# hashicorp/terraform-provider-azurerm#25431, #31979.
 variable "secret_volume_mounts" {
   description = "List of Secret-typed volume mounts. Each mount projects every Container App secret as a file at mount_path/<secret_name>."
   type = list(object({
