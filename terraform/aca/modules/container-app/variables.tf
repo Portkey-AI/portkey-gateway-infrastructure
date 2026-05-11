@@ -58,7 +58,7 @@ variable "key_vault_url" {
 }
 
 variable "secret_volume_mounts" {
-  description = "List of Secret-typed volume mounts. Each mount projects every Container App secret as a file at mount_path/<secret_name>."
+  description = "Secret-type volume mounts. If sub_path is omitted, mount_path is a directory and each Container App secret appears as a file under it (typically mount_path/<secret_name>). If sub_path is set, only that secret is mounted as a single file at mount_path; sub_path must match the Key Vault secret name."
   type = list(object({
     name       = string
     mount_path = string

@@ -13,7 +13,6 @@ Deploy Portkey AI Gateway on Azure Container Apps with VNET integration, Applica
   - [Azure Managed Redis](#azure-managed-redis)
   - [Application Gateway Ingress](#application-gateway-ingress)
   - [Private Link Connectivity](#private-link-connectivity)
-  - [Mounting Key Vault Secrets as Files](#mounting-key-vault-secrets-as-files)
 - [Variables Reference](#variables-reference)
 - [Outputs](#outputs)
 - [Troubleshooting](#troubleshooting)
