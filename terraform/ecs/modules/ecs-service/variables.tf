@@ -66,11 +66,7 @@ variable "container_config" {
     ])
     error_message = "Each container must have either 'docker_repository_name' or 'ecr_repository_name' provided (non-empty)."
   }
-
-
-
 }
-
 
 # ============================================================================
 # TASK RESOURCES
@@ -130,7 +126,7 @@ variable "ecs_service_config" {
       }), null)
       linear_configuration = optional(object({
         step_bake_time_in_minutes = optional(number, 100) # Time to wait after each step before the next step starts
-        step_percent              = optional(number, 10)  # Percentage of traffic to shift per step (3-100%) 
+        step_percent              = optional(number, 10)  # Percentage of traffic to shift per step (3-100%)
       }), null)
 
     }), null)
@@ -184,6 +180,14 @@ variable "ecs_service_config" {
     vpc_id          = string
     service_subnets = list(string)
   })
+
+  validation {
+    condition = !(
+      var.ecs_service_config.deployment_configuration != null &&
+      var.ecs_service_config.enable_blue_green != null
+    )
+    error_message = "Cannot specify both 'deployment_configuration' and deprecated 'enable_blue_green'. Use 'deployment_configuration' only."
+  }
 }
 
 # ============================================================================
@@ -268,19 +272,5 @@ variable "load_balancer_config" {
       var.load_balancer_config.test_listener.certificate_arn != null
     )
     error_message = "certificate_arn is required in test_listener when protocol is HTTPS"
-  }
-}
-
-variable "ecs_service_config_validation" {
-  description = "Internal validation variable"
-  type        = bool
-  default     = true
-
-  validation {
-    condition = !(
-      var.ecs_service_config.deployment_configuration != null &&
-      var.ecs_service_config.enable_blue_green != null
-    )
-    error_message = "Cannot specify both 'deployment_configuration' and deprecated 'enable_blue_green'. Use 'deployment_configuration' only."
   }
 }

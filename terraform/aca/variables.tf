@@ -94,6 +94,26 @@ variable "secrets" {
   }
 }
 
+variable "gateway_secret_volume_mounts" {
+  description = "Secret-type volume mounts for gateway and mcp (same list for both). Secrets must be listed in secrets.gateway (or secrets.json) and are also bound as secret env vars. Without sub_path, mount_path is a directory with one file per secret; with sub_path, mount_path is a single file for that secret (sub_path = Key Vault secret name)."
+  type = list(object({
+    name       = string
+    mount_path = string
+    sub_path   = optional(string)
+  }))
+  default = []
+
+  validation {
+    condition     = length(var.gateway_secret_volume_mounts) == length(distinct([for v in var.gateway_secret_volume_mounts : v.name]))
+    error_message = "gateway_secret_volume_mounts entries must have unique 'name' values."
+  }
+
+  validation {
+    condition     = alltrue([for v in var.gateway_secret_volume_mounts : startswith(v.mount_path, "/")])
+    error_message = "Each gateway_secret_volume_mounts.mount_path must be an absolute path (start with '/')."
+  }
+}
+
 #########################################################################
 #                         NETWORK CONFIGURATION                         #
 #########################################################################

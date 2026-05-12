@@ -13,6 +13,7 @@ Complete documentation of all Terraform input variables for the Azure Container 
 - [Ingress](#ingress)
 - [Application Gateway](#application-gateway)
 - [Key Vault](#key-vault)
+- [Secret Volume Mounts](#secret-volume-mounts)
 - [Control Plane Private Link](#control-plane-private-link)
 - [Config Files](#config-files)
 
@@ -325,6 +326,48 @@ The module grants `Key Vault Secrets User` role to the managed identity on this 
 
 ---
 
+## Secret Volume Mounts
+
+| Variable | Type | Default | Required | Description |
+|----------|------|---------|----------|-------------|
+| `gateway_secret_volume_mounts` | `list(object)` | `[]` | No | Secret volumes for **gateway** and **mcp** only. Same list applied to both apps. Key Vault secrets must be listed in `secrets.gateway` (they are also bound as secret env vars). |
+
+**`gateway_secret_volume_mounts[*]` fields:**
+
+| Field | Type | Default | Required | Description |
+|-------|------|---------|----------|-------------|
+| `name` | `string` | — | **Yes** | Logical volume name. Must be unique within a Container App. Has no effect on file paths. |
+| `mount_path` | `string` | — | **Yes** | Absolute path inside the container. Treated as a **directory** when `sub_path` is unset, as a **single file path** when `sub_path` is set. |
+| `sub_path` | `string` | `null` | No | If set, mount only the named file from the volume at `mount_path`. The value must equal the **Key Vault secret name** (not the desired filename). |
+
+**Example (TLS CA as file + secret env var):**
+
+```hcl
+secrets = {
+  gateway = {
+    LLM_SERVER_CA = "llm-server-ca"
+  }
+}
+
+gateway_secret_volume_mounts = [
+  {
+    name       = "llm-server-ca"
+    mount_path = "/etc/ssl/certs/llm-server-ca.pem"
+    sub_path   = "llm-server-ca"
+  }
+]
+
+environment_variables = {
+  gateway = {
+    NODE_EXTRA_CA_CERTS = "/etc/ssl/certs/llm-server-ca.pem"
+  }
+}
+```
+
+> **Step-by-step:** [docs/SecretVolumeMounts.md](SecretVolumeMounts.md)
+
+---
+
 ## Control Plane Private Link
 
 | Variable | Type | Default | Required | Description |
@@ -379,7 +422,8 @@ Values are **Key Vault secret names** (not actual values). At runtime, ACA injec
 {
   "gateway": {
     "PORTKEY_CLIENT_AUTH": "portkey-client-auth",
-    "ORGANISATIONS_TO_SYNC": "organisations-to-sync"
+    "ORGANISATIONS_TO_SYNC": "organisations-to-sync",
+    "LLM_SERVER_CA": "llm-server-ca"
   },
   "data-service": {
     "PORTKEY_CLIENT_AUTH": "portkey-client-auth",
@@ -387,6 +431,8 @@ Values are **Key Vault secret names** (not actual values). At runtime, ACA injec
   }
 }
 ```
+
+Use `gateway_secret_volume_mounts` in Terraform / tfvars to mount those secrets as files. See [SecretVolumeMounts.md](SecretVolumeMounts.md).
 
 **Usage (clone & deploy):**
 

@@ -80,7 +80,6 @@ locals {
     }
   ] : []
 
-  # All secrets combined
   all_secrets = concat(local.secrets, local.docker_password_secret)
 }
 
@@ -205,6 +204,23 @@ resource "azurerm_container_app" "main" {
         interval_seconds        = var.health_probes.startup.interval_seconds
         timeout                 = var.health_probes.startup.timeout
         failure_count_threshold = var.health_probes.startup.failure_count_threshold
+      }
+
+      dynamic "volume_mounts" {
+        for_each = var.secret_volume_mounts
+        content {
+          name     = volume_mounts.value.name
+          path     = volume_mounts.value.mount_path
+          sub_path = volume_mounts.value.sub_path
+        }
+      }
+    }
+
+    dynamic "volume" {
+      for_each = var.secret_volume_mounts
+      content {
+        name         = volume.value.name
+        storage_type = "Secret"
       }
     }
 

@@ -74,6 +74,8 @@ module "gateway" {
   # Key Vault for secrets
   key_vault_url = data.azurerm_key_vault.secrets.vault_uri
 
+  secret_volume_mounts = var.gateway_secret_volume_mounts
+
   # Health probes - uses default timings, path is hardcoded to /v1/health
   health_probes = {}
 
@@ -88,7 +90,6 @@ module "gateway" {
 #                     MCP CONTAINER APP                                  #
 #########################################################################
 
-# Separate container app for MCP traffic (server_mode = "all" or "mcp")
 module "mcp" {
   source = "./modules/container-app"
   count  = (var.server_mode == "all" || var.server_mode == "mcp") ? 1 : 0
@@ -137,6 +138,8 @@ module "mcp" {
 
   # Key Vault for secrets
   key_vault_url = data.azurerm_key_vault.secrets.vault_uri
+
+  secret_volume_mounts = var.gateway_secret_volume_mounts
 
   # Health probes - uses default timings, path is hardcoded to /v1/health
   health_probes = {}

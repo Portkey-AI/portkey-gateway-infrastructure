@@ -57,6 +57,26 @@ variable "key_vault_url" {
   default     = null
 }
 
+variable "secret_volume_mounts" {
+  description = "Secret-type volume mounts. If sub_path is omitted, mount_path is a directory and each Container App secret appears as a file under it (typically mount_path/<secret_name>). If sub_path is set, only that secret is mounted as a single file at mount_path; sub_path must match the Key Vault secret name."
+  type = list(object({
+    name       = string
+    mount_path = string
+    sub_path   = optional(string)
+  }))
+  default = []
+
+  validation {
+    condition     = length(var.secret_volume_mounts) == length(distinct([for v in var.secret_volume_mounts : v.name]))
+    error_message = "secret_volume_mounts entries must have unique 'name' values."
+  }
+
+  validation {
+    condition     = alltrue([for v in var.secret_volume_mounts : startswith(v.mount_path, "/")])
+    error_message = "Each secret_volume_mounts.mount_path must be an absolute path (start with '/')."
+  }
+}
+
 #########################################################################
 #                     REGISTRY CONFIGURATION                             #
 #########################################################################
