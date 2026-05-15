@@ -185,16 +185,17 @@ lb_type     = "network" # Set to 'application' or 'network' to specify load bala
 #                           ROUTING CONFIGURATION                         #
 ###########################################################################
 
-# When server_mode = "all", ALB with host-based or path-based routing must be enabled.
-# Define routing rules to route traffic based on host headers and paths.
+# When server_mode = "all", ALB with host-based must be enabled.
+# Define routing rules to route traffic based on host headers.
 
 server_mode = "gateway" # Specify server mode: 'gateway', 'mcp', or 'all'.
+
+# Required when server_mode = "all" or "mcp": URL or hostname clients use to reach MCP (maps to MCP_GATEWAY_BASE_URL).
+# mcp_gateway_base_url = "https://mcp.example.com"
 
 # alb_routing_configuration = {
 #   enable_path_based_routing = false                              # Set to true to enable path-based routing.
 #   enable_host_based_routing = false                              # Set to true to enable host-based routing.
-#   mcp_path                  = "/mcp"                             # Path for MCP service (relevant if path-based routing is enabled).
-#   gateway_path              = "/gateway"                         # Path for Gateway service (relevant if path-based routing is enabled).
 #   mcp_host                  = ""                                 # Host for MCP service (relevant if host-based routing is enabled).
 #   gateway_host              = ""                                 # Host for Gateway service (relevant if host-based routing is enabled).
 # }

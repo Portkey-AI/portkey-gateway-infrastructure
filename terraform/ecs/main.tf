@@ -70,13 +70,16 @@ locals {
     LOG_STORE_REGION  = var.object_storage.bucket_region
   }
 
-  gateway_env = {
-    SERVER_MODE                  = var.server_mode == "all" ? "all" : (var.server_mode == "mcp" ? "mcp" : "")
-    PORT                         = var.gateway_config.gateway_port
-    MCP_PORT                     = var.server_mode == "all" || var.server_mode == "mcp" ? var.gateway_config.mcp_port : null
-    LOG_STORE_GENERATIONS_BUCKET = var.object_storage.log_store_bucket
-    DATASERVICE_BASEPATH         = var.dataservice_config.enable_dataservice ? "http://data-service:8081" : null
-  }
+  gateway_env = merge(
+    {
+      SERVER_MODE                  = var.server_mode == "all" ? "all" : (var.server_mode == "mcp" ? "mcp" : "")
+      PORT                         = var.gateway_config.gateway_port
+      MCP_PORT                     = var.server_mode == "all" || var.server_mode == "mcp" ? var.gateway_config.mcp_port : null
+      LOG_STORE_GENERATIONS_BUCKET = var.object_storage.log_store_bucket
+      DATASERVICE_BASEPATH         = var.dataservice_config.enable_dataservice ? "http://data-service:8081" : null
+    },
+    var.server_mode == "all" || var.server_mode == "mcp" ? { MCP_GATEWAY_BASE_URL = trimspace(var.mcp_gateway_base_url) } : {}
+  )
 
   dataservice_env = {
     LOG_EXPORTS_BUCKET     = local.log_exports_bucket != "" ? local.log_exports_bucket : local.log_store_bucket

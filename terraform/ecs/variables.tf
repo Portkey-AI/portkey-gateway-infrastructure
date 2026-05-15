@@ -548,6 +548,17 @@ variable "server_mode" {
     error_message = "'server_mode' must be one of: 'gateway', 'mcp', 'all'."
   }
 }
+
+variable "mcp_gateway_base_url" {
+  description = "URL clients use to reach MCP (e.g. https://mcp.example.com). Required when server_mode is all or mcp."
+  type        = string
+  default     = ""
+  validation {
+    condition     = !contains(["all", "mcp"], var.server_mode) || trimspace(var.mcp_gateway_base_url) != ""
+    error_message = "mcp_gateway_base_url is required when server_mode is 'all' or 'mcp' (set to the hostname or URL used to access MCP)."
+  }
+}
+
 variable "alb_routing_configuration" {
   description = "ALB routing configuration"
   type = object({

@@ -208,6 +208,7 @@ gateway_task_role_policy_arns = {
 | Variable | Default | Required | Description |
 |----------|---------|----------|-------------|
 | `server_mode` | `"gateway"` | No | Server mode: `gateway`, `mcp`, or `all` |
+| `mcp_gateway_base_url` | `""` | **Yes** when `server_mode = "all"` or `server_mode = "mcp"` | Public hostname or base URL used to access MCP from outside the task (e.g. `https://mcp.example.com`). Passed to the gateway as `MCP_GATEWAY_BASE_URL`. Ignored when `server_mode` is `gateway`. |
 
 ### Server Modes
 - `gateway`: Gateway listens on port 8787 only
@@ -224,6 +225,8 @@ gateway_task_role_policy_arns = {
 | `alb_routing_configuration.mcp_path` | `"/mcp"` | No | Path for MCP service (e.g., https://example.com/mcp) |
 | `alb_routing_configuration.gateway_host` | `""` | Conditional | Domain for accessing Gateway (e.g., gateway.example.com) |
 | `alb_routing_configuration.mcp_host` | `""` | Conditional | Domain for accessing MCP (e.g., mcp.example.com) |
+
+> **Note:** Path-based routing is **not recommended** when `server_mode` is `mcp` or `all`. Use host-based routing for those modes.
 
 ## Deployment Strategies
 
