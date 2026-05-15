@@ -6,13 +6,13 @@ This document provides a simplified guide for configuring AWS assumed roles to a
 
 To use Amazon Bedrock with Portkey Gateway, you need to configure AWS assumed roles with the appropriate permissions. This allows the gateway to authenticate with AWS and invoke Bedrock models on your behalf.
 
-Alternatively you can use an access token and secret key id, but using assumed roles is a more secure and recommended way to interact with Bedrock.
+Alternatively, you can use an access key ID and secret access key, but using assumed roles is a more secure and recommended way to interact with Bedrock.
 
 ### Same AWS Account
 
 Use this path when the Portkey gateway and Amazon Bedrock run in **one** AWS account.
 
-## Step 1: Create Bedrock IAM Policy
+#### Step 1: Create Bedrock IAM Policy
 
 Create a customer-managed IAM policy. 
 
@@ -39,7 +39,7 @@ Create a customer-managed IAM policy.
 
 > Please make a note of the ARN for the IAM policy created.
 
-## Step 2: Attach the policy in Terraform
+#### Step 2: Attach the policy in Terraform
 
 Add the Bedrock policy ARN to your environment `*.tfvars` file (for example `environments/dev/dev.tfvars`). Terraform attaches it to the **gateway ECS task role** on deploy.
 
@@ -50,7 +50,7 @@ gateway_task_role_policy_arns = {
 ```
 Replace `<IAM_POLICY_ARN>` with the policy ARN from Step 1.
 
-## Step 3: Deploy the gateway
+#### Step 3: Deploy the gateway
 
 From the `terraform/ecs` directory, run apply:
 
@@ -60,7 +60,7 @@ terraform apply -var-file=environments/dev/dev.tfvars
 
 Update the paths above for your environment.
 
-## Step 4: Create Bedrock integration
+#### Step 4: Create Bedrock integration
 
 In the Portkey portal, create **Amazon Bedrock** or **Bedrock Mantle** LLM integration and choose **AWS Service Role** as auth type.
 
@@ -68,7 +68,7 @@ In the Portkey portal, create **Amazon Bedrock** or **Bedrock Mantle** LLM integ
 
 Use this path when the gateway runs in AWS account **A** and Bedrock is used in a different account **B**.
 
-## Step 1: Find out IAM Role ARN of ECS Gateway task
+#### Step 1: Find out IAM Role ARN of ECS Gateway task
 
 ```bash
 # From the terraform/ecs directory (state must match your environment)
@@ -77,7 +77,7 @@ terraform output -raw gateway_task_role_arn
 
 Save this value as **`<GATEWAY_TASK_ROLE_ARN>`** (account **A**). The Bedrock account (**B**) must trust this principal so the gateway can assume a role there and call Bedrock.
 
-## Step 2: Create an IAM role in the target account (Bedrock account)
+#### Step 2: Create an IAM role in the target account (Bedrock account)
 
 Work in AWS account **B** (where Amazon Bedrock is enabled and models are used).
 
@@ -127,7 +127,7 @@ Work in AWS account **B** (where Amazon Bedrock is enabled and models are used).
 
 4. **Copy the new role’s ARN**.
 
-## Step 3: Allow the gateway task role to assume the role in account B
+#### Step 3: Allow the gateway task role to assume the role in account B
 
 Work in account **A** (where the ECS gateway runs).
 
@@ -158,6 +158,6 @@ gateway_task_role_policy_arns = {
 
 Replace with the policy ARN from substep 1. Apply Terraform so the gateway tasks pick up the new policy.
 
-## Step 4: Create Bedrock integration
+#### Step 4: Create Bedrock integration
 
 In the Portkey portal, add an LLM integration for **Amazon Bedrock** or **Bedrock Mantle**. Choose **AWS Assumed Role** as auth type and enter the **IAM role ARN from account B** in AWS Role ARN field.

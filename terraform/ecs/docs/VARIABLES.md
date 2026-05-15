@@ -172,7 +172,7 @@ gateway_config = {
 | `object_storage.bucket_region` | - | **Yes** | AWS region for S3 bucket |
 
 
-
+## Task Policy Configuration
 Additional IAM policies you create (e.g. Bedrock invoke, `sts:AssumeRole` for cross-account S3) can be attached per service. Each service always receives the managed S3 log-store policy from this module.
 
 | Variable | Default | Required | Description |
@@ -184,7 +184,7 @@ Example:
 
 ```hcl
 gateway_task_role_policy_arns = {
-  bedrock = "arn:aws:iam::123456789012:policy/portkey-gateway-bedrock"
+  bedrock = "arn:aws:iam::<account-id>:policy/<portkey-bedrock-access-policy>"
 }
 ```
 
@@ -221,8 +221,8 @@ gateway_task_role_policy_arns = {
 |----------|---------|----------|-------------|
 | `alb_routing_configuration.enable_path_based_routing` | `false` | Conditional | Enable path-based routing for accessing Gateway or/and MCP |
 | `alb_routing_configuration.enable_host_based_routing` | `false` | Conditional | Enable host-based routing for accessing Gateway or/and MCP |
-| `alb_routing_configuration.gateway_path` | `"/gateway"` | No | Path for Gateway service (e.g., https://example.com/gateway) |
-| `alb_routing_configuration.mcp_path` | `"/mcp"` | No | Path for MCP service (e.g., https://example.com/mcp) |
+| `alb_routing_configuration.gateway_path` | `"/gateway"` | No | Path for Gateway service (e.g., https://example.com/gateway). Optional; defaults to `/gateway` if omitted. |
+| `alb_routing_configuration.mcp_path` | `"/mcp"` | No | Path for MCP service (e.g., https://example.com/mcp). Optional; defaults to `/mcp` if omitted. |
 | `alb_routing_configuration.gateway_host` | `""` | Conditional | Domain for accessing Gateway (e.g., gateway.example.com) |
 | `alb_routing_configuration.mcp_host` | `""` | Conditional | Domain for accessing MCP (e.g., mcp.example.com) |
 

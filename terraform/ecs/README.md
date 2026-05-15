@@ -278,8 +278,8 @@ curl "${GATEWAY_URL}/v1/chat/completions" \
 ```
 
 **Notes:**
-- **For ALB**: When path-based routing is enabled on the Application Load Balancer, you must include the paths defined in the **tfvars** file when accessing the Gateway and MCP server.
-For example, if `alb_routing_configuration.gateway_path` is set to `/gateway` and `alb_routing_configuration.mcp_path` is set to `/mcp`, the endpoints would be:
+- **For ALB**: When host-based routing is enabled on the Application Load Balancer, you must include the host defined in the **tfvars** file when accessing the LLM and MCP Gateway.
+- **Path-based routing is deprecated**; prefer host-based routing (especially when `server_mode` is `mcp` or `all`). For example, if `alb_routing_configuration.gateway_path` is set to `/gateway` and `alb_routing_configuration.mcp_path` is set to `/mcp`, the endpoints would be:
 `https://gateway.example.com/gateway/v1/xyz` and `https://gateway.example.com/mcp/v1/xyz`.
 - If you don’t have access to an LLM provider API key, you can still validate connectivity by sending a request with a dummy key, for example:
 

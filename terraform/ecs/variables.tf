@@ -461,13 +461,13 @@ variable "object_storage" {
 ###########################################################################
 
 variable "gateway_task_role_policy_arns" {
-  description = "Map of label to IAM policy ARN attached to the gateway ECS task role (e.g. Bedrock, sts:AssumeRole for S3 log store). The managed S3 log-store policy is always attached separately."
+  description = "Map of label to IAM policy ARN attached to the gateway ECS task role (e.g. Bedrock, sts:AssumeRole for S3 log store)."
   type        = map(string)
   default     = {}
 }
 
 variable "data_service_task_role_policy_arns" {
-  description = "Map of label to IAM policy ARN attached to the data-service ECS task role. The managed S3 log-store policy is always attached separately."
+  description = "Map of label to IAM policy ARN attached to the data-service ECS task role."
   type        = map(string)
   default     = {}
 }
@@ -560,8 +560,8 @@ variable "alb_routing_configuration" {
   type = object({
     enable_path_based_routing = bool
     enable_host_based_routing = bool
-    mcp_path                  = string
-    gateway_path              = string
+    mcp_path                  = optional(string, "/mcp")
+    gateway_path              = optional(string, "/gateway")
     mcp_host                  = string
     gateway_host              = string
   })
