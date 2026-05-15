@@ -182,7 +182,7 @@ gateway_autoscaling = {
 | `docker_cred_secret_arn` | - | **Yes** | Docker credentials secret ARN |
 | **Server Mode** | | | |
 | `server_mode` | `"gateway"` | No | Gateway mode: `gateway` (port 8787), `mcp` (port 8788), or `all` |
-| `mcp_gateway_base_url` | `""` | **Yes** if `server_mode` is `all` or `mcp` | MCP public URL/hostname → `MCP_GATEWAY_BASE_URL` |
+| `mcp_gateway_base_url` | `""` | **Yes** if `server_mode` is `all` or `mcp` | Required for MCP; sets `MCP_GATEWAY_BASE_URL` when non-empty. Not validated by Terraform (backwards compatible). |
 | **Load Balancer** | | | |
 | `create_lb` | `false` | No | Create load balancer |
 | `lb_type` | `"network"` | No | `network` (NLB) or `application` (ALB). **ALB requires host/path routing** |
@@ -198,7 +198,7 @@ gateway_autoscaling = {
 **Important Notes:**
 - **Application Load Balancer (ALB) always requires host headers** for routing
 - **Network Load Balancer (NLB)** works without host headers using default routing
-- When `server_mode` is `all` or `mcp`, set `mcp_gateway_base_url` to the hostname or URL used to access MCP. When `server_mode = "all"`, you **must** also use an ALB with host-based or path-based routing configured.
+- When `server_mode = "all"`, you **must** use an ALB with host-based or path-based routing configured. When `server_mode` is `all` or `mcp`, set `mcp_gateway_base_url` to the public MCP URL or hostname (required for correct MCP behavior; Terraform does not enforce it so existing configs keep working until you add it).
 - Currently, after completing a deployment with a specific `server_mode` and `lb_type`, these settings cannot be modified in subsequent Terraform deployments. The only allowed change is updating `server_mode` from `gateway` or `mcp` to `all`.
 
 ### Step 6: Setup Remote S3 Backend (Recommended)

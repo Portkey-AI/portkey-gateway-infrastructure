@@ -550,13 +550,9 @@ variable "server_mode" {
 }
 
 variable "mcp_gateway_base_url" {
-  description = "URL clients use to reach MCP (e.g. https://mcp.example.com). Required when server_mode is all or mcp."
+  description = "Public URL or hostname clients use to reach MCP (e.g. https://mcp.example.com). Required when server_mode is all or mcp for correct MCP behavior; Terraform does not validate non-empty so existing stacks stay valid. When non-empty, sets MCP_GATEWAY_BASE_URL on the gateway."
   type        = string
   default     = ""
-  validation {
-    condition     = !contains(["all", "mcp"], var.server_mode) || trimspace(var.mcp_gateway_base_url) != ""
-    error_message = "mcp_gateway_base_url is required when server_mode is 'all' or 'mcp' (set to the hostname or URL used to access MCP)."
-  }
 }
 
 variable "alb_routing_configuration" {

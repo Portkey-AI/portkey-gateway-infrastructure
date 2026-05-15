@@ -189,7 +189,7 @@ lb_type     = "network" # Set to 'application' or 'network' to specify load bala
 
 server_mode = "gateway" # Specify server mode: 'gateway', 'mcp', or 'all'.
 
-# Required when server_mode = "all" or "mcp": URL or hostname clients use to reach MCP (maps to MCP_GATEWAY_BASE_URL).
+# Required when server_mode is "all" or "mcp".
 # mcp_gateway_base_url = "https://mcp.example.com"
 
 # alb_routing_configuration = {

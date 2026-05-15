@@ -208,7 +208,7 @@ gateway_task_role_policy_arns = {
 | Variable | Default | Required | Description |
 |----------|---------|----------|-------------|
 | `server_mode` | `"gateway"` | No | Server mode: `gateway`, `mcp`, or `all` |
-| `mcp_gateway_base_url` | `""` | **Yes** when `server_mode = "all"` or `server_mode = "mcp"` | Public hostname or base URL used to access MCP from outside the task (e.g. `https://mcp.example.com`). Passed to the gateway as `MCP_GATEWAY_BASE_URL`. Ignored when `server_mode` is `gateway`. |
+| `mcp_gateway_base_url` | `""` | **Yes** when `server_mode` is `all` or `mcp` | Public URL or hostname for MCP (e.g. `https://mcp.example.com`). Sets `MCP_GATEWAY_BASE_URL` when non-empty. Required in practice for those modes; not enforced by Terraform validation so upgrades stay compatible. |
 
 ### Server Modes
 - `gateway`: Gateway listens on port 8787 only
