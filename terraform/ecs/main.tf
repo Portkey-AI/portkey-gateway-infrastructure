@@ -118,15 +118,15 @@ locals {
 
   gateway_task_role_policies = merge(
     {
-      s3_access_policy_arn   = aws_iam_policy.s3_access_policy.arn,
-      assume_role_policy_arn = aws_iam_policy.assume_role_policy.arn,
+      s3_access_policy_arn = aws_iam_policy.s3_access_policy.arn
     },
-    var.enable_bedrock_access ? {
-      bedrock_access_policy_arn = aws_iam_policy.bedrock_access_policy[0].arn
-    } : {}
+    var.gateway_task_role_policy_arns
   )
 
-  data_service_task_role_policies = {
-    s3_access_policy_arn = aws_iam_policy.s3_access_policy.arn,
-  }
+  data_service_task_role_policies = merge(
+    {
+      s3_access_policy_arn = aws_iam_policy.s3_access_policy.arn
+    },
+    var.data_service_task_role_policy_arns
+  )
 }

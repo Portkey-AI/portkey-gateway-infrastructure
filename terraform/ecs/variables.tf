@@ -457,13 +457,19 @@ variable "object_storage" {
 }
 
 ###########################################################################
-#                           BEDROCK CONFIGURATION                       #
+#                    ECS TASK ROLE POLICY CONFIGURATION                   #
 ###########################################################################
 
-variable "enable_bedrock_access" {
-  description = "Enable access to bedrock"
-  type        = bool
-  default     = false
+variable "gateway_task_role_policy_arns" {
+  description = "Map of label to IAM policy ARN attached to the gateway ECS task role (e.g. Bedrock, sts:AssumeRole for S3 log store). The managed S3 log-store policy is always attached separately."
+  type        = map(string)
+  default     = {}
+}
+
+variable "data_service_task_role_policy_arns" {
+  description = "Map of label to IAM policy ARN attached to the data-service ECS task role. The managed S3 log-store policy is always attached separately."
+  type        = map(string)
+  default     = {}
 }
 
 ###########################################################################

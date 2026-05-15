@@ -157,10 +157,13 @@ object_storage = {
 }
 
 ###########################################################################
-#                   AMAZON BEDROCK ACCESS CONFIGURATION                   #
+#                   ECS TASK ROLE POLICY CONFIGURATION                    #
 ###########################################################################
 
-# enable_bedrock_access = false
+# gateway_task_role_policy_arns = {
+#   bedrock = "arn:aws:iam::123456789012:policy/portkey-gateway-bedrock"
+# }
+# data_service_task_role_policy_arns = {}
 
 ###########################################################################
 #                       LOAD BALANCER CONFIGURATION                       #

@@ -171,11 +171,22 @@ gateway_config = {
 | `object_storage.finetune_bucket` | `""` | No | S3 bucket for fine-tuning data |
 | `object_storage.bucket_region` | - | **Yes** | AWS region for S3 bucket |
 
-## Amazon Bedrock Access Configuration 
+
+
+Additional IAM policies you create (e.g. Bedrock invoke, `sts:AssumeRole` for cross-account S3) can be attached per service. Each service always receives the managed S3 log-store policy from this module.
 
 | Variable | Default | Required | Description |
 |----------|---------|----------|-------------|
-| `enable_bedrock_access` | `false` | No | Enable IAM access to AWS Bedrock API |
+| `gateway_task_role_policy_arns` | `{}` | No | Map of label → IAM policy ARN for the gateway ECS task role |
+| `data_service_task_role_policy_arns` | `{}` | No | Map of label → IAM policy ARN for the data-service ECS task role |
+
+Example:
+
+```hcl
+gateway_task_role_policy_arns = {
+  bedrock = "arn:aws:iam::123456789012:policy/portkey-gateway-bedrock"
+}
+```
 
 ## Load Balancer Configuration
 
