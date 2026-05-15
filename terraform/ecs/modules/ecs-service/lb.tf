@@ -195,7 +195,7 @@ resource "aws_lb_target_group" "green_tg" {
 }
 
 # ============================================================================
-# PRODUCTION LISTENER RULES (Host-based routing)
+# PRODUCTION LISTENER RULES (ALB: host and/or path conditions)
 # ============================================================================
 
 resource "aws_lb_listener_rule" "prod_rules" {
@@ -211,7 +211,7 @@ resource "aws_lb_listener_rule" "prod_rules" {
     target_group_arn = aws_lb_target_group.blue_tg[each.key].arn
   }
 
-  # Host-based routing condition
+  # Optional host-header condition
   dynamic "condition" {
     for_each = each.value.host != null ? [1] : []
     content {
@@ -252,7 +252,7 @@ resource "aws_lb_listener_rule" "prod_rules" {
 }
 
 # ============================================================================
-# TEST LISTENER RULES (for Blue/Green deployment)
+# TEST LISTENER RULES (ALB: host and/or path; Blue/Green test listener)
 # ============================================================================
 
 resource "aws_lb_listener_rule" "test_rules" {
@@ -268,7 +268,7 @@ resource "aws_lb_listener_rule" "test_rules" {
     target_group_arn = aws_lb_target_group.green_tg[each.key].arn
   }
 
-  # Host-based routing condition
+  # Optional host-header condition
   dynamic "condition" {
     for_each = each.value.host != null ? [1] : []
     content {

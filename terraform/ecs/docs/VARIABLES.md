@@ -226,7 +226,7 @@ gateway_task_role_policy_arns = {
 | `alb_routing_configuration.gateway_host` | `""` | Conditional | Domain for accessing Gateway (e.g., gateway.example.com) |
 | `alb_routing_configuration.mcp_host` | `""` | Conditional | Domain for accessing MCP (e.g., mcp.example.com) |
 
-> **Note:** Path-based routing is **not recommended** when `server_mode` is `mcp` or `all`. Use host-based routing for those modes.
+> **Note:** Path-based routing is **deprecated** when `server_mode` is `mcp` or `all`; host-based is preferred. Path-based remains supported for compatibility.
 
 ## Deployment Strategies
 

@@ -185,8 +185,9 @@ lb_type     = "network" # Set to 'application' or 'network' to specify load bala
 #                           ROUTING CONFIGURATION                         #
 ###########################################################################
 
-# When server_mode = "all", ALB with host-based must be enabled.
-# Define routing rules to route traffic based on host headers.
+# When server_mode = "all", use lb_type = "application" (ALB). Enable host-based routing,
+# path-based routing, or both so Gateway and MCP get distinct rules. Path-based is
+# deprecated; prefer host-based.
 
 server_mode = "gateway" # Specify server mode: 'gateway', 'mcp', or 'all'.
 

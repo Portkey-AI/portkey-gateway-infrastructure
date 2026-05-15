@@ -90,7 +90,7 @@ locals {
 
   routing_rules = [
     for rule in [
-      # For ALB: create host-based routing rules
+      # For ALB: listener rules from host and/or path=
       var.lb_type == "application" && (var.server_mode == "all" || var.server_mode == "gateway") ? {
         name              = "gateway"
         priority          = 100

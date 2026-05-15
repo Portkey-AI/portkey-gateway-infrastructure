@@ -498,7 +498,7 @@ variable "lb_type" {
   }
   validation {
     condition     = var.server_mode != "all" || var.lb_type == "application"
-    error_message = "When server_mode is 'all', lb_type must be 'application' to support host-based routing for multiple services."
+    error_message = "When server_mode is 'all', lb_type must be 'application' so the ALB can use host- and/or path-based listener rules for multiple services."
   }
 }
 
@@ -556,7 +556,7 @@ variable "mcp_gateway_base_url" {
 }
 
 variable "alb_routing_configuration" {
-  description = "ALB routing configuration"
+  description = "ALB routing: enable host-based rules, path-based rules, or both (path-based is deprecated; prefer host-based for mcp/all)."
   type = object({
     enable_path_based_routing = bool
     enable_host_based_routing = bool

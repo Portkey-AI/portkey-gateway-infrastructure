@@ -120,7 +120,7 @@ module "gateway" {
   }
 
   # Load Balancer Configuration
-  # Supports host-based routing with Application Load Balancer
+  # ALB: host- and/or path-based routing per alb_routing_configuration; NLB: single default rule
   load_balancer_config = {
     create_lb          = var.create_lb
     lb_internal        = var.internal_lb

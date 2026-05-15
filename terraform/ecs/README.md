@@ -185,9 +185,9 @@ gateway_autoscaling = {
 | `mcp_gateway_base_url` | `""` | **Yes** if `server_mode` is `all` or `mcp` | Required for MCP; sets `MCP_GATEWAY_BASE_URL` when non-empty. Not validated by Terraform (backwards compatible). |
 | **Load Balancer** | | | |
 | `create_lb` | `false` | No | Create load balancer |
-| `lb_type` | `"network"` | No | `network` (NLB) or `application` (ALB). **ALB requires host/path routing** |
-| `alb_routing_configuration.gateway_host` | `""` | **Conditional** | Required if using ALB with host-based routing for Gateway |
-| `alb_routing_configuration.mcp_host` | `""` | **Conditional** | Required if using ALB with host-based routing for MCP |
+| `lb_type` | `"network"` | No | `network` (NLB) or `application` (ALB). For ALB with `server_mode = all`, configure host and/or path rules |
+| `alb_routing_configuration.gateway_host` | `""` | **Conditional** | Domain for Gateway when host-based routing is enabled |
+| `alb_routing_configuration.mcp_host` | `""` | **Conditional** | Domain for MCP when host-based routing is enabled |
 | **Deployment Strategy** | | | |
 | `gateway_deployment_configuration.enable_blue_green` | `false` | No | Enable Blue/Green deployment |
 | `gateway_deployment_configuration.canary_configuration` | `null` | No | Configure Canary deployment |
@@ -196,9 +196,9 @@ gateway_autoscaling = {
 📖 **For deployment strategy details, see [DeploymentStrategies.md](docs/DeploymentStrategies.md)**
 
 **Important Notes:**
-- **Application Load Balancer (ALB) always requires host headers** for routing
-- **Network Load Balancer (NLB)** works without host headers using default routing
-- When `server_mode = "all"`, you **must** use an ALB with host-based or path-based routing configured. When `server_mode` is `all` or `mcp`, set `mcp_gateway_base_url` to the public MCP URL or hostname (required for correct MCP behavior; Terraform does not enforce it so existing configs keep working until you add it).
+- **Application Load Balancer (ALB)** uses listener rules from `alb_routing_configuration`: **host-based, path-based, or both**. Path-based is deprecated; recommend host-based.
+- **Network Load Balancer (NLB)** uses default routing (no host/path rules).
+- When `server_mode = "all"`, you **must** use an ALB (`lb_type = application`) with host-based or routing enabled so Gateway and MCP are routed separately. When `server_mode` is `all` or `mcp`, set `mcp_gateway_base_url` to the MCP Gateway URL.
 - Currently, after completing a deployment with a specific `server_mode` and `lb_type`, these settings cannot be modified in subsequent Terraform deployments. The only allowed change is updating `server_mode` from `gateway` or `mcp` to `all`.
 
 ### Step 6: Setup Remote S3 Backend (Recommended)
@@ -253,10 +253,8 @@ export OPENAI_API_KEY="<YOUR_OPENAI_API_KEY>"
 export PORTKEY_API_KEY="<YOUR_PORTKEY_API_KEY>"
 
 # For NLB: Use the load balancer DNS name
-# For ALB with host-based routing enabled: Use your configured domain (e.g., gateway.yourdomain.com)
-# For ALB without host-based routing enabled: You can use ALB DNS name
-# For HTTPs: Prod listener port - 443
-# For HTTP: Prod listener port - 80
+# For ALB with host-based routing: Use the configured hostname(s) (e.g. gateway.yourdomain.com)
+
  
 
 # If SSL is enabled on listener
@@ -278,9 +276,8 @@ curl "${GATEWAY_URL}/v1/chat/completions" \
 ```
 
 **Notes:**
-- **For ALB**: When host-based routing is enabled on the Application Load Balancer, you must include the host defined in the **tfvars** file when accessing the LLM and MCP Gateway.
-- **Path-based routing is deprecated**; prefer host-based routing (especially when `server_mode` is `mcp` or `all`). For example, if `alb_routing_configuration.gateway_path` is set to `/gateway` and `alb_routing_configuration.mcp_path` is set to `/mcp`, the endpoints would be:
-`https://gateway.example.com/gateway/v1/xyz` and `https://gateway.example.com/mcp/v1/xyz`.
+- **For ALB with host-based routing**: Include the `Host` header (or use the hostname in the URL) matching **tfvars** when calling the APIs.
+- **Path-based routing is deprecated** but supported.
 - If you don’t have access to an LLM provider API key, you can still validate connectivity by sending a request with a dummy key, for example:
 
    `export OPENAI_API_KEY="myrandomkey"`
