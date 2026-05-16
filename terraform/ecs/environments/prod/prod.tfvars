@@ -173,7 +173,7 @@ object_storage = {
 create_lb   = false     # Set to true to create a Load Balancer, or false to skip creating one.
 internal_lb = true      # Set to true to create an internal LB, or false to create an internet-facing LB.
 lb_type     = "network" # Set to 'application' or 'network' to specify load balancer type.
-# allowed_lb_cidrs        = ["X.X.X.X/Y"]                        # Provide a list of CIDR ranges to whitelist in LB's Security Group.
+allowed_lb_cidrs        = ["X.X.X.X/Y"]                          # Provide a list of CIDR ranges to whitelist in LB's Security Group.
 # tls_certificate_arn     = ""                                   # (Optional) Provide ACM certificate ARN to enable TLS-based listeners.
 
 # Access Logs Configuration
