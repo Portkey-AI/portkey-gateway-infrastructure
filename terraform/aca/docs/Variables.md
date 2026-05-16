@@ -261,13 +261,15 @@ storage_config = {
 | `capacity` | `number` | `2` | No | Fixed instance count (no autoscaling). |
 | `enable_waf` | `bool` | `false` | No | Enable Web Application Firewall (OWASP 3.2 rule set). |
 | `public` | `bool` | `true` | No | `true` = create public IP, `false` = private only (VNET access). |
-| `routing_mode` | `string` | `"host"` | No | `host` = route by domain name, `path` = route by URL path prefix. |
+| `routing_mode` | `string` | `"host"` | No | `host` = route by domain name (recommended). `path` = route by URL path prefix (**deprecated**). |
 | `gateway_host` | `string` | `""` | Conditional | Gateway hostname. **Required** when `routing_mode = "host"`. |
 | `mcp_host` | `string` | `""` | Conditional | MCP hostname. **Required** when `routing_mode = "host"` and `server_mode = "all"`. |
 | `gateway_path` | `string` | `"/gateway/*"` | No | Gateway URL path prefix (when `routing_mode = "path"`). Prefix is stripped before forwarding. |
 | `mcp_path` | `string` | `"/mcp/*"` | No | MCP URL path prefix (when `routing_mode = "path"`). Prefix is stripped before forwarding. |
 | `ssl_cert_key_vault_secret_id` | `string` | `null` | No | Key Vault secret ID for SSL certificate (e.g., `https://myvault.vault.azure.net/secrets/my-cert`). Enables HTTPS listeners. |
 | `ssl_cert_key_vault_rg` | `string` | `null` | No | Resource group of the Key Vault containing the SSL cert. Defaults to the deployment resource group. |
+
+> **Note:** Path-based routing (`routing_mode = "path"`) is **not recommended**, especially when `server_mode` is `mcp` or `all`. Prefer host-based routing (`routing_mode = "host"`).
 
 **Features:**
 - Deployed across **3 Availability Zones** for high availability
@@ -292,7 +294,7 @@ app_gateway_config = {
   ssl_cert_key_vault_rg        = "my-kv-rg"
 }
 
-# Path-based routing, private only
+# Path-based routing, private only (deprecated — prefer host-based)
 app_gateway_config = {
   sku_name     = "Standard_v2"
   sku_tier     = "Standard_v2"
