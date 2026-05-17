@@ -52,6 +52,8 @@ Before deploying Portkey Gateway on AWS ECS, ensure you have:
 
 ## Deployment Guide
 
+> **Looking for module-based deployment?** See [docs/ModuleUsage.md](docs/ModuleUsage.md) for version-controlled deployments in your own Terraform project.
+
 Follow these steps to deploy Portkey Gateway on AWS ECS.
 
 ### Step 1: Create Portkey Account
@@ -125,7 +127,7 @@ Non-sensitive information can be supplied by updating the **environment-variable
 }
 ```
 
-These variables can then be passed to Terraform by specifying the path to the `environment-variables.json` file in the `environment_variables_file_path` variable within the `dev.tfvars` file.
+These variables can then be passed to Terraform by specifying the path to the `environment-variables.json` file in the `environment_variables_file_path` variable within the `dev.tfvars` file, or by setting the `environment_variables` map directly (see [VARIABLES.md](docs/VARIABLES.md)).
 
 **Sensitive Variables**
 
@@ -177,8 +179,10 @@ gateway_autoscaling = {
 |---------------|---------|----------|-------------|
 | **Essential** | | | |
 | `aws_region` | `"us-west-2"` | No | AWS deployment region |
-| `environment_variables_file_path` | - | **Yes** | Path to environment-variables.json |
-| `secrets_file_path` | - | **Yes** | Path to secrets.json |
+| `environment_variables_file_path` | `null` | Conditional | Path to environment-variables.json (required if `environment_variables` not set) |
+| `secrets_file_path` | `null` | Conditional | Path to secrets.json (required if `secrets` not set) |
+| `environment_variables` | `null` | Conditional | Inline env var maps per service (required if file path not set) |
+| `secrets` | `null` | Conditional | Inline Secrets Manager ARN maps per service (required if file path not set) |
 | `docker_cred_secret_arn` | - | **Yes** | Docker credentials secret ARN |
 | **Server Mode** | | | |
 | `server_mode` | `"gateway"` | No | Gateway mode: `gateway` (port 8787), `mcp` (port 8788), or `all` |
@@ -195,6 +199,37 @@ gateway_autoscaling = {
 
 📖 **For deployment strategy details, see [DeploymentStrategies.md](docs/DeploymentStrategies.md)**
 
+### Amazon ElastiCache
+
+Use Amazon ElastiCache for Redis OSS or Valkey instead of the built-in Redis container for production.
+
+**Quick configuration:**
+
+```hcl
+redis_configuration = {
+  redis_type = "aws-elastic-cache"
+  endpoint   = "master.portkey-redis.xxxxx.use1.cache.amazonaws.com:6379"
+  tls        = true
+  mode       = "standalone"
+  cpu        = 256
+  memory     = 512
+}
+```
+
+**Add Redis password to secrets** (when ElastiCache AUTH is enabled):
+
+```json
+{
+  "gateway": {
+    "PORTKEY_CLIENT_AUTH": "<ClientOrgSecretNameArn>",
+    "ORGANISATIONS_TO_SYNC": "<ClientOrgSecretNameArn>",
+    "REDIS_PASSWORD": "<RedisAuthSecretArn>"
+  }
+}
+```
+
+> **For detailed setup including:** `redis_configuration`, Secrets Manager auth token references, and module examples, see **[docs/ExternalRedis.md](docs/ExternalRedis.md)**.
+
 **Important Notes:**
 - **Application Load Balancer (ALB)** uses listener rules from `alb_routing_configuration`: **host-based, path-based, or both**. Path-based is deprecated; recommend host-based.
 - **Network Load Balancer (NLB)** uses default routing (no host/path rules).
@@ -203,7 +238,25 @@ gateway_autoscaling = {
 
 ### Step 6: Setup Remote S3 Backend (Recommended)
 
-To manage Terraform state securely and enable collaboration across teams, it's recommended to configure a remote backend. Modify the `backend.config` file located in the `environments/dev` directory (relative to this README).
+To manage Terraform state securely and enable collaboration across teams, it's recommended to configure a remote backend.
+
+**Step 1: Uncomment backend configuration**
+
+Edit `backend.tf` and uncomment the `terraform { backend "s3" {} }` block:
+
+```hcl
+terraform {
+  backend "s3" {
+    use_lockfile = true
+  }
+}
+```
+
+> The block is commented by default so the same module sources can also be consumed via [module-based deployment](docs/ModuleUsage.md), where the consuming Terraform project declares its own backend.
+
+**Step 2: Update backend configuration file**
+
+Modify the `backend.config` file located in the `environments/dev` directory (relative to this README):
 
 ```hcl
 # Replace "<S3_BUCKET_NAME>" with s3 bucket name where terraform state file will be stored.
@@ -215,6 +268,10 @@ key = "<S3_KEY_PATH>"
 # Replace "<AWS_REGION>" with AWS region in which S3 bucket resides (e.g., us-east-1).
 region = "<AWS_REGION>"
 ```
+
+**Alternative - Local State (for testing only):**
+
+If you prefer local state for development/testing, keep the backend commented in `backend.tf` and run `terraform init` without `-backend-config`.
 
 ### Step 7: Initialize Terraform
 
