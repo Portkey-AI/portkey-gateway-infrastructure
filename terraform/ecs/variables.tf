@@ -457,13 +457,19 @@ variable "object_storage" {
 }
 
 ###########################################################################
-#                           BEDROCK CONFIGURATION                       #
+#                    ECS TASK ROLE POLICY CONFIGURATION                   #
 ###########################################################################
 
-variable "enable_bedrock_access" {
-  description = "Enable access to bedrock"
-  type        = bool
-  default     = false
+variable "gateway_task_role_policy_arns" {
+  description = "Map of label to IAM policy ARN attached to the gateway ECS task role (e.g. Bedrock, sts:AssumeRole for S3 log store)."
+  type        = map(string)
+  default     = {}
+}
+
+variable "data_service_task_role_policy_arns" {
+  description = "Map of label to IAM policy ARN attached to the data-service ECS task role."
+  type        = map(string)
+  default     = {}
 }
 
 ###########################################################################
@@ -492,7 +498,7 @@ variable "lb_type" {
   }
   validation {
     condition     = var.server_mode != "all" || var.lb_type == "application"
-    error_message = "When server_mode is 'all', lb_type must be 'application' to support host-based routing for multiple services."
+    error_message = "When server_mode is 'all', lb_type must be 'application' so the ALB can use host- and/or path-based listener rules for multiple services."
   }
 }
 
@@ -542,13 +548,20 @@ variable "server_mode" {
     error_message = "'server_mode' must be one of: 'gateway', 'mcp', 'all'."
   }
 }
+
+variable "mcp_gateway_base_url" {
+  description = "Public URL or hostname clients use to reach MCP (e.g. https://mcp.example.com). Required when server_mode is all or mcp for correct MCP behavior; Terraform does not validate non-empty so existing stacks stay valid. When non-empty, sets MCP_GATEWAY_BASE_URL on the gateway."
+  type        = string
+  default     = ""
+}
+
 variable "alb_routing_configuration" {
-  description = "ALB routing configuration"
+  description = "ALB routing: enable host-based rules, path-based rules, or both (path-based is deprecated; prefer host-based for mcp/all)."
   type = object({
     enable_path_based_routing = bool
     enable_host_based_routing = bool
-    mcp_path                  = string
-    gateway_path              = string
+    mcp_path                  = optional(string, "/mcp")
+    gateway_path              = optional(string, "/gateway")
     mcp_host                  = string
     gateway_host              = string
   })

@@ -138,8 +138,6 @@ redis_config = {
 #   routing_mode                 = "host"          # "host" or "path"
 #   gateway_host                 = "gateway.example.com"   # Used if routing_mode = "host"
 #   mcp_host                     = "mcp.example.com"       # Used if routing_mode = "host"
-#   gateway_path                 = "/gateway/*"    # Used if routing_mode = "path"
-#   mcp_path                     = "/mcp/*"        # Used if routing_mode = "path"
 #   ssl_cert_key_vault_secret_id = "https://myvault.vault.azure.net/secrets/my-cert"
 # }
 

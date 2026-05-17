@@ -231,7 +231,7 @@ variable "load_balancer_config" {
     access_logs_bucket = optional(string, "")
     access_logs_prefix = optional(string, "")
 
-    # Routing Rules (host-based for ALB, single rule for NLB)
+    # Routing rules for ALB (host and/or path); single rule for NLB
     routing_rules = optional(list(object({
       name              = string                      # Unique name for the rule
       priority          = number                      # Priority of the rule (lower = higher priority)

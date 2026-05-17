@@ -1,23 +1,6 @@
 ################################################################################
 # File: terraform/iam.tf
 ################################################################################
-resource "aws_iam_policy" "assume_role_policy" {
-  name        = "${var.project_name}-gateway-assume-role-policy-${var.environment}"
-  path        = "/"
-  description = "Policy allowing ECS tasks to assume roles"
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Resource = [
-          "*"
-        ]
-      }
-    ]
-  })
-}
 resource "aws_iam_policy" "s3_access_policy" {
   name        = "${var.project_name}-gateway-s3-access-policy-${var.environment}"
   path        = "/"
@@ -44,28 +27,6 @@ resource "aws_iam_policy" "s3_access_policy" {
     ]
   })
 }
-
-resource "aws_iam_policy" "bedrock_access_policy" {
-  count       = var.enable_bedrock_access ? 1 : 0
-  name        = "${var.project_name}-bedrock-access-policy-${var.environment}"
-  path        = "/"
-  description = "Policy allowing portkey gateway access to bedrock models"
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = [
-          "bedrock:InvokeModel",
-          "bedrock:InvokeModelWithResponseStream"
-        ]
-        Effect   = "Allow"
-        Resource = ["*"]
-      }
-    ]
-  })
-}
-
 
 # IAM Role for ecs hook lambda
 resource "aws_iam_role" "ecs_hook_lambda_execution_role" {

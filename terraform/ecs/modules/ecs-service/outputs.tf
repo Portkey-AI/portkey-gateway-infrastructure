@@ -22,6 +22,11 @@ output "task_definition_arn" {
   value       = aws_ecs_task_definition.task_definition.arn
 }
 
+output "task_role_arn" {
+  description = "ARN of the IAM role assumed by the ECS task at runtime (task role)"
+  value       = aws_iam_role.ecs_task_role.arn
+}
+
 output "lb_dns_name" {
 
   description = "DNS name of the LB"

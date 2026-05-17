@@ -53,6 +53,7 @@ terraform/backend.local.tf
 # Ignore backend config files (may contain sensitive info)
 **/backend.config
 !**/backend.config.example
+*.zip
 
 # Ignore lambda archive files
 terraform/lambda/lifecycle-hook/function.zip

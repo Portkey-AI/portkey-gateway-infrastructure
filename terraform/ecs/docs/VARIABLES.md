@@ -171,11 +171,22 @@ gateway_config = {
 | `object_storage.finetune_bucket` | `""` | No | S3 bucket for fine-tuning data |
 | `object_storage.bucket_region` | - | **Yes** | AWS region for S3 bucket |
 
-## Amazon Bedrock Access Configuration 
+
+## Task Policy Configuration
+Additional IAM policies you create (e.g. Bedrock invoke, `sts:AssumeRole` for cross-account S3) can be attached per service. Each service always receives the managed S3 log-store policy from this module.
 
 | Variable | Default | Required | Description |
 |----------|---------|----------|-------------|
-| `enable_bedrock_access` | `false` | No | Enable IAM access to AWS Bedrock API |
+| `gateway_task_role_policy_arns` | `{}` | No | Map of label → IAM policy ARN for the gateway ECS task role |
+| `data_service_task_role_policy_arns` | `{}` | No | Map of label → IAM policy ARN for the data-service ECS task role |
+
+Example:
+
+```hcl
+gateway_task_role_policy_arns = {
+  bedrock = "arn:aws:iam::<account-id>:policy/<portkey-bedrock-access-policy>"
+}
+```
 
 ## Load Balancer Configuration
 
@@ -197,6 +208,7 @@ gateway_config = {
 | Variable | Default | Required | Description |
 |----------|---------|----------|-------------|
 | `server_mode` | `"gateway"` | No | Server mode: `gateway`, `mcp`, or `all` |
+| `mcp_gateway_base_url` | `""` | **Yes** when `server_mode` is `all` or `mcp` | Public URL or hostname for MCP (e.g. `https://mcp.example.com`). Sets `MCP_GATEWAY_BASE_URL` when non-empty. Required in practice for those modes; not enforced by Terraform validation so upgrades stay compatible. |
 
 ### Server Modes
 - `gateway`: Gateway listens on port 8787 only
@@ -209,10 +221,12 @@ gateway_config = {
 |----------|---------|----------|-------------|
 | `alb_routing_configuration.enable_path_based_routing` | `false` | Conditional | Enable path-based routing for accessing Gateway or/and MCP |
 | `alb_routing_configuration.enable_host_based_routing` | `false` | Conditional | Enable host-based routing for accessing Gateway or/and MCP |
-| `alb_routing_configuration.gateway_path` | `"/gateway"` | No | Path for Gateway service (e.g., https://example.com/gateway) |
-| `alb_routing_configuration.mcp_path` | `"/mcp"` | No | Path for MCP service (e.g., https://example.com/mcp) |
+| `alb_routing_configuration.gateway_path` | `"/gateway"` | No | Path for Gateway service (e.g., https://example.com/gateway). Optional; defaults to `/gateway` if omitted. |
+| `alb_routing_configuration.mcp_path` | `"/mcp"` | No | Path for MCP service (e.g., https://example.com/mcp). Optional; defaults to `/mcp` if omitted. |
 | `alb_routing_configuration.gateway_host` | `""` | Conditional | Domain for accessing Gateway (e.g., gateway.example.com) |
 | `alb_routing_configuration.mcp_host` | `""` | Conditional | Domain for accessing MCP (e.g., mcp.example.com) |
+
+> **Note:** Path-based routing is **deprecated** when `server_mode` is `mcp` or `all`; host-based is preferred. Path-based remains supported for compatibility.
 
 ## Deployment Strategies
 

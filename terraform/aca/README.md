@@ -316,7 +316,7 @@ app_gateway_config = {
   mcp_host     = "mcp.example.com"
 }
 
-# Or path-based routing
+# Or path-based routing (deprecated — prefer host-based)
 app_gateway_config = {
   # ...
   routing_mode = "path"
@@ -328,7 +328,7 @@ app_gateway_config = {
 > **Note:** 
 > - Both Gateway and MCP share the same environment variables and secrets (from `gateway` key in JSON).
 > - The module automatically adds MCP-specific overrides (`SERVER_MODE=mcp`, `MCP_PORT=8788`).
-> - When `server_mode = "all"` with Application Gateway, you must use either host-based or path-based routing.
+> - When `server_mode = "all"` with Application Gateway, use host-based or path-based routing. **Path-based routing is not recommended** (especially for `mcp` / `all`); prefer `routing_mode = "host"`.
 > - When `server_mode = "all"`, `MCP_GATEWAY_BASE_URL` defaults to the internal service URL (`http://mcp`). Set `mcp_gateway_base_url` to override this with a custom URL (e.g., an external or load-balanced endpoint).
 
 ### Auto-Scaling Configuration
@@ -511,9 +511,9 @@ gateway.example.com  A  <app-gateway-public-ip>
 mcp.example.com      A  <app-gateway-public-ip>
 ```
 
-**Path-based Routing:**
+**Path-based Routing (not recommended):**
 
-Route by URL path. Single domain, different paths for each service.
+Route by URL path. Single domain, different paths for each service. **Deprecated** recommend host-based routing, especially when `server_mode` is `mcp` or `all`.
 
 ```hcl
 app_gateway_config = {

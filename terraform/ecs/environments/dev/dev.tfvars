@@ -157,10 +157,13 @@ object_storage = {
 }
 
 ###########################################################################
-#                   AMAZON BEDROCK ACCESS CONFIGURATION                   #
+#                   ECS TASK ROLE POLICY CONFIGURATION                    #
 ###########################################################################
 
-# enable_bedrock_access = false
+# gateway_task_role_policy_arns = {
+#   bedrock = "arn:aws:iam::123456789012:policy/portkey-gateway-bedrock"
+# }
+# data_service_task_role_policy_arns = {}
 
 ###########################################################################
 #                       LOAD BALANCER CONFIGURATION                       #
@@ -169,7 +172,7 @@ object_storage = {
 create_lb   = false     # Set to true to create a Load Balancer, or false to skip creating one.
 internal_lb = true      # Set to true to create an internal LB, or false to create an internet-facing LB.
 lb_type     = "network" # Set to 'application' or 'network' to specify load balancer type.
-# allowed_lb_cidrs        = ["X.X.X.X/Y"]                        # Provide a list of CIDR ranges to whitelist in LB's Security Group.
+allowed_lb_cidrs        = ["X.X.X.X/Y"]                          # Provide a list of CIDR ranges to whitelist in LB's Security Group.
 # tls_certificate_arn     = ""                                   # (Optional) Provide ACM certificate ARN to enable TLS-based listeners.
 
 # Access Logs Configuration
@@ -181,16 +184,18 @@ lb_type     = "network" # Set to 'application' or 'network' to specify load bala
 #                           ROUTING CONFIGURATION                         #
 ###########################################################################
 
-# When server_mode = "all", ALB with host-based or path-based routing must be enabled.
-# Define routing rules to route traffic based on host headers and paths.
+# When server_mode = "all", use lb_type = "application" (ALB). Enable host-based routing,
+# path-based routing, or both so Gateway and MCP get distinct rules. Path-based is
+# deprecated; prefer host-based.
 
 server_mode = "gateway" # Specify server mode: 'gateway', 'mcp', or 'all'.
+
+# Required when server_mode is "all" or "mcp".
+# mcp_gateway_base_url = "https://mcp.example.com"
 
 # alb_routing_configuration = {
 #   enable_path_based_routing = false                              # Set to true to enable path-based routing.
 #   enable_host_based_routing = false                              # Set to true to enable host-based routing.
-#   mcp_path                  = "/mcp"                             # Path for MCP service (relevant if path-based routing is enabled).
-#   gateway_path              = "/gateway"                         # Path for Gateway service (relevant if path-based routing is enabled).
 #   mcp_host                  = ""                                 # Host for MCP service (relevant if host-based routing is enabled).
 #   gateway_host              = ""                                 # Host for Gateway service (relevant if host-based routing is enabled).
 # }

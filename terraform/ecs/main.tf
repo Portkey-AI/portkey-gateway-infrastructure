@@ -70,13 +70,16 @@ locals {
     LOG_STORE_REGION  = var.object_storage.bucket_region
   }
 
-  gateway_env = {
-    SERVER_MODE                  = var.server_mode == "all" ? "all" : (var.server_mode == "mcp" ? "mcp" : "")
-    PORT                         = var.gateway_config.gateway_port
-    MCP_PORT                     = var.server_mode == "all" || var.server_mode == "mcp" ? var.gateway_config.mcp_port : null
-    LOG_STORE_GENERATIONS_BUCKET = var.object_storage.log_store_bucket
-    DATASERVICE_BASEPATH         = var.dataservice_config.enable_dataservice ? "http://data-service:8081" : null
-  }
+  gateway_env = merge(
+    {
+      SERVER_MODE                  = var.server_mode == "all" ? "all" : (var.server_mode == "mcp" ? "mcp" : "")
+      PORT                         = var.gateway_config.gateway_port
+      MCP_PORT                     = var.server_mode == "all" || var.server_mode == "mcp" ? var.gateway_config.mcp_port : null
+      LOG_STORE_GENERATIONS_BUCKET = var.object_storage.log_store_bucket
+      DATASERVICE_BASEPATH         = var.dataservice_config.enable_dataservice ? "http://data-service:8081" : null
+    },
+    (var.server_mode == "all" || var.server_mode == "mcp") && trimspace(var.mcp_gateway_base_url) != "" ? { MCP_GATEWAY_BASE_URL = trimspace(var.mcp_gateway_base_url) } : {}
+  )
 
   dataservice_env = {
     LOG_EXPORTS_BUCKET     = local.log_exports_bucket != "" ? local.log_exports_bucket : local.log_store_bucket
@@ -87,7 +90,7 @@ locals {
 
   routing_rules = [
     for rule in [
-      # For ALB: create host-based routing rules
+      # For ALB: listener rules from host and/or path=
       var.lb_type == "application" && (var.server_mode == "all" || var.server_mode == "gateway") ? {
         name              = "gateway"
         priority          = 100
@@ -118,15 +121,15 @@ locals {
 
   gateway_task_role_policies = merge(
     {
-      s3_access_policy_arn   = aws_iam_policy.s3_access_policy.arn,
-      assume_role_policy_arn = aws_iam_policy.assume_role_policy.arn,
+      s3_access_policy_arn = aws_iam_policy.s3_access_policy.arn
     },
-    var.enable_bedrock_access ? {
-      bedrock_access_policy_arn = aws_iam_policy.bedrock_access_policy[0].arn
-    } : {}
+    var.gateway_task_role_policy_arns
   )
 
-  data_service_task_role_policies = {
-    s3_access_policy_arn = aws_iam_policy.s3_access_policy.arn,
-  }
+  data_service_task_role_policies = merge(
+    {
+      s3_access_policy_arn = aws_iam_policy.s3_access_policy.arn
+    },
+    var.data_service_task_role_policy_arns
+  )
 }
