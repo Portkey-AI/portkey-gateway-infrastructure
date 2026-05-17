@@ -26,12 +26,48 @@ variable "aws_region" {
 
 variable "environment_variables_file_path" {
   type        = string
-  description = "Provide the relative path for environment-variables.json"
+  description = "Relative path to environment-variables.json (optional if environment_variables is provided)"
+  default     = null
 }
 
 variable "secrets_file_path" {
   type        = string
-  description = "Provide the relative path for secrets.json"
+  description = "Relative path to secrets.json (optional if secrets is provided)"
+  default     = null
+}
+
+variable "environment_variables" {
+  description = "Environment variables for services (alternative to file path). Provide as a map with 'gateway' and/or 'data-service' keys."
+  type = object({
+    gateway      = optional(map(string), {})
+    data-service = optional(map(string), {})
+  })
+  default = null
+
+  validation {
+    condition = (
+      var.environment_variables != null ||
+      var.environment_variables_file_path != null
+    )
+    error_message = "Either environment_variables or environment_variables_file_path must be provided."
+  }
+}
+
+variable "secrets" {
+  description = "AWS Secrets Manager ARN mappings for services (alternative to file path). Provide as a map with 'gateway' and/or 'data-service' keys. Values are secret ARNs."
+  type = object({
+    gateway      = optional(map(string), {})
+    data-service = optional(map(string), {})
+  })
+  default = null
+
+  validation {
+    condition = (
+      var.secrets != null ||
+      var.secrets_file_path != null
+    )
+    error_message = "Either secrets or secrets_file_path must be provided."
+  }
 }
 
 #########################################################################

@@ -22,8 +22,79 @@ gateway_config = {
 | `project_name` | `"portkey"` | No | Project name used in resource naming |
 | `environment` | `"dev"` | No | Deployment environment (dev, prod, etc.) |
 | `aws_region` | `"us-west-2"` | No | AWS region for deployment |
-| `environment_variables_file_path` | - | **Yes** | Relative path to environment-variables.json file |
-| `secrets_file_path` | - | **Yes** | Path to secrets.json file with AWS Secrets Manager ARNs |
+
+## Environment Variables and Secrets
+
+Configuration can be provided via JSON files (for clone & deploy) or as direct variables (for module consumption). **One method is required** for both environment variables and secrets.
+
+### File-based Configuration
+
+| Variable | Default | Required | Description |
+|----------|---------|----------|-------------|
+| `environment_variables_file_path` | `null` | Conditional | Relative path to `environment-variables.json`. **Required** if `environment_variables` is not provided. |
+| `secrets_file_path` | `null` | Conditional | Relative path to `secrets.json`. **Required** if `secrets` is not provided. |
+
+**Usage (clone & deploy):**
+
+```hcl
+# In dev.tfvars
+environment_variables_file_path = "environments/dev/environment-variables.json"
+secrets_file_path               = "environments/dev/secrets.json"
+```
+
+### Variable-based Configuration
+
+| Variable | Default | Required | Description |
+|----------|---------|----------|-------------|
+| `environment_variables` | `null` | Conditional | Environment variables as a map. **Required** if `environment_variables_file_path` is not provided. |
+| `secrets` | `null` | Conditional | AWS Secrets Manager ARN mappings. **Required** if `secrets_file_path` is not provided. |
+
+**Object structure:**
+
+```hcl
+environment_variables = object({
+  gateway      = optional(map(string), {})
+  data-service = optional(map(string), {})
+})
+
+secrets = object({
+  gateway      = optional(map(string), {})
+  data-service = optional(map(string), {})
+})
+```
+
+**Usage (module consumption):**
+
+```hcl
+module "portkey_gateway" {
+  source = "github.com/Portkey-AI/portkey-gateway-infrastructure//terraform/ecs?ref=v1.0.0"
+
+  environment_variables = {
+    gateway = {
+      SERVICE_NAME    = "gateway"
+      ANALYTICS_STORE = "control_plane"
+      LOG_STORE       = "s3_assume"
+    }
+  }
+
+  secrets = {
+    gateway = {
+      PORTKEY_CLIENT_AUTH   = "arn:aws:secretsmanager:us-east-1:123456789012:secret:client-org"
+      ORGANISATIONS_TO_SYNC = "arn:aws:secretsmanager:us-east-1:123456789012:secret:client-org"
+    }
+  }
+
+  # ...
+}
+
+# Or read files from your root module
+module "portkey_gateway" {
+  source = "..."
+
+  environment_variables = jsondecode(file("${path.root}/config/environment-variables.json"))
+  secrets               = jsondecode(file("${path.root}/config/secrets.json"))
+}
+```
 
 ## Network Configuration
 
@@ -137,6 +208,8 @@ gateway_config = {
 | `dataservice_deployment_circuit_breaker.rollback` | `true` | No | Enable automatic rollback on deployment failure |
 
 ## Redis Configuration
+
+📖 **For using an existing ElastiCache cluster (endpoint, TLS, AUTH, module examples), see [ExternalRedis.md](ExternalRedis.md).**
 
 ### Consolidated Redis Configuration Object
 

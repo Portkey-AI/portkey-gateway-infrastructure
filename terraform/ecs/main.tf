@@ -51,13 +51,38 @@ locals {
   log_exports_bucket = var.object_storage.log_exports_bucket != null ? var.object_storage.log_exports_bucket : local.log_store_bucket
   finetune_bucket    = var.object_storage.finetune_bucket != null ? var.object_storage.finetune_bucket : local.log_store_bucket
 
-  # Read Environment Variables
-  gateway_variables     = jsondecode(file("${path.module}/${var.environment_variables_file_path}")).gateway
-  dataservice_variables = jsondecode(file("${path.module}/${var.environment_variables_file_path}")).data-service
+  # Read environment variables from JSON files or use provided variables
+  env_vars_from_file = var.environment_variables_file_path != null ? (
+    jsondecode(file("${path.module}/${var.environment_variables_file_path}"))
+  ) : null
 
-  # Read Secrets
-  gateway_secrets     = jsondecode(file("${path.module}/${var.secrets_file_path}")).gateway
-  dataservice_secrets = jsondecode(file("${path.module}/${var.secrets_file_path}")).data-service
+  secrets_from_file = var.secrets_file_path != null ? (
+    jsondecode(file("${path.module}/${var.secrets_file_path}"))
+  ) : null
+
+  gateway_variables = try(
+    var.environment_variables.gateway,
+    local.env_vars_from_file.gateway,
+    {}
+  )
+
+  dataservice_variables = try(
+    var.environment_variables["data-service"],
+    local.env_vars_from_file["data-service"],
+    {}
+  )
+
+  gateway_secrets = try(
+    var.secrets.gateway,
+    local.secrets_from_file.gateway,
+    {}
+  )
+
+  dataservice_secrets = try(
+    var.secrets["data-service"],
+    local.secrets_from_file["data-service"],
+    {}
+  )
 
   # Construct environment variables for gateway service
   common_env = {
