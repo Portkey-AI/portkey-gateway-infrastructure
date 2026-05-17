@@ -3,7 +3,8 @@
 ################################################################################
 
 module "ecs_cluster" {
-  source = "terraform-aws-modules/ecs/aws//modules/cluster"
+  source  = "terraform-aws-modules/ecs/aws//modules/cluster"
+  version = "~> 6.12"
 
   count = var.create_cluster ? 1 : 0
   name  = "${var.project_name}-cluster"
