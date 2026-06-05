@@ -69,7 +69,7 @@ resource "aws_vpc_security_group_ingress_rule" "gateway_from_dataservice_ingress
 
 # Allow traffic to redis from gateway service
 resource "aws_vpc_security_group_ingress_rule" "redis_lb_from_gateway_ingress" {
-  count                        = var.redis_type == "redis" ? 1 : 0
+  count                        = var.redis_configuration.redis_type == "redis" ? 1 : 0
   security_group_id            = module.redis[0].ecs_service_security_group_id
   ip_protocol                  = "tcp"
   from_port                    = 6379
@@ -80,7 +80,7 @@ resource "aws_vpc_security_group_ingress_rule" "redis_lb_from_gateway_ingress" {
 
 # Allow traffic to redis from data service
 resource "aws_vpc_security_group_ingress_rule" "redis_lb_from_dataservice_ingress" {
-  count                        = var.redis_type == "redis" && var.dataservice_config.enable_dataservice ? 1 : 0
+  count                        = var.redis_configuration.redis_type == "redis" && var.dataservice_config.enable_dataservice ? 1 : 0
   security_group_id            = module.redis[0].ecs_service_security_group_id
   ip_protocol                  = "tcp"
   from_port                    = 6379

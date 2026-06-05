@@ -211,27 +211,16 @@ module "portkey_gateway" {
 
 📖 **For using an existing ElastiCache cluster (endpoint, TLS, AUTH, module examples), see [ExternalRedis.md](ExternalRedis.md).**
 
-### Consolidated Redis Configuration Object
+### Redis Configuration Object
 
 | Variable | Default | Required | Description |
 |----------|---------|----------|-------------|
 | `redis_configuration.redis_type` | `"redis"` | No | Cache type: `redis` (containerized) or `aws-elastic-cache` (ElastiCache) |
 | `redis_configuration.cpu` | `256` | No | CPU units for containerized Redis |
 | `redis_configuration.memory` | `512` | No | Memory (MiB) for containerized Redis |
-| `redis_configuration.endpoint` | `""` | Conditional | ElastiCache endpoint (required if `redis_type = "aws-elastic-cache"`) |
+| `redis_configuration.endpoint` | `""` | Conditional | ElastiCache endpoint (required if `redis_type = "aws-elastic-cache"`)* |
 | `redis_configuration.tls` | `false` | No | Enable TLS for Redis connections |
 | `redis_configuration.mode` | `"standalone"` | No | Redis mode: `standalone` or `cluster` |
-
-### Individual Redis Variables (Alternative)
-
-| Variable | Default | Required | Description |
-|----------|---------|----------|-------------|
-| `redis_type` | `"redis"` | No | Cache type: `redis` (containerized) or `aws-elastic-cache` (ElastiCache) |
-| `redis_endpoint` | `""` | Conditional | ElastiCache endpoint (required if `redis_type = "aws-elastic-cache"`)* |
-| `redis_cpu` | `256` | No | CPU units for containerized Redis |
-| `redis_memory` | `512` | No | Memory (MiB) for containerized Redis |
-| `redis_tls_enabled` | `false` | No | Enable TLS for Redis connections |
-| `redis_mode` | `"standalone"` | No | Redis mode: `standalone` or `cluster` |
 
 *For cluster mode, use Configuration Endpoint. For standalone, use Primary Endpoint. See [AWS ElastiCache Endpoints](https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Endpoints.html) for more information.
 
