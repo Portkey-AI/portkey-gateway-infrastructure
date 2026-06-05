@@ -89,7 +89,7 @@ provider "aws" {
   }
 }
 
-# Replace vX.Y.Z with the desired module version (e.g., v1.0.0)
+# Replace vX.Y.Z with the desired module version (e.g., v2.0.0)
 module "portkey_gateway" {
   source = "github.com/Portkey-AI/portkey-gateway-infrastructure//terraform/ecs?ref=vX.Y.Z"
 
@@ -143,19 +143,18 @@ module "portkey_gateway" {
     redis_type = "redis"
     cpu        = 256
     memory     = 512
-    endpoint   = ""
     tls        = false
     mode       = "standalone"
   }
 
   # Log store
   object_storage = {
-    log_store_bucket = "<your-logs-bucket>"
-    bucket_region    = "us-east-1"
+    log_store_bucket = "<your-s3-logs-bucket>"
+    bucket_region    = "<s3-logs-bucket-region>"
   }
 
   # Load balancer (optional)
-  create_lb   = false
+  create_lb   = true
   internal_lb = true
   lb_type     = "network"
 }
@@ -183,7 +182,6 @@ terraform apply
 # If a load balancer was created
 curl "http://$(terraform output -raw load_balancer_dns_name)/v1/health"
 
-# Or test via ECS task networking / port-forward if create_lb = false
 ```
 
 ## Project Structure
@@ -248,7 +246,7 @@ Pass configuration directly as HCL:
 
 ```hcl
 module "portkey_gateway" {
-  source = "github.com/Portkey-AI/portkey-gateway-infrastructure//terraform/ecs?ref=v1.0.0"
+  source = "github.com/Portkey-AI/portkey-gateway-infrastructure//terraform/ecs?ref=v2.0.0"
 
   environment_variables = {
     gateway = {
@@ -281,7 +279,7 @@ If you prefer to keep configuration in JSON files (like the clone & deploy appro
 
 ```hcl
 module "portkey_gateway" {
-  source = "github.com/Portkey-AI/portkey-gateway-infrastructure//terraform/ecs?ref=v1.0.0"
+  source = "github.com/Portkey-AI/portkey-gateway-infrastructure//terraform/ecs?ref=v2.0.0"
 
   environment_variables = jsondecode(file("${path.root}/config/environment-variables.json"))
   secrets               = jsondecode(file("${path.root}/config/secrets.json"))
@@ -328,7 +326,7 @@ Use in `main.tf`:
 
 ```hcl
 module "portkey_gateway" {
-  source = "github.com/Portkey-AI/portkey-gateway-infrastructure//terraform/ecs?ref=v1.0.0"
+  source = "github.com/Portkey-AI/portkey-gateway-infrastructure//terraform/ecs?ref=v2.0.0"
 
   environment            = var.environment
   docker_cred_secret_arn = var.docker_cred_secret_arn
@@ -346,7 +344,7 @@ module "portkey_gateway" {
 
 ```hcl
 module "portkey_gateway" {
-  source = "github.com/Portkey-AI/portkey-gateway-infrastructure//terraform/ecs?ref=v1.0.0"
+  source = "github.com/Portkey-AI/portkey-gateway-infrastructure//terraform/ecs?ref=v2.0.0"
 
   project_name = "portkey-gateway"
   environment  = "prod"
@@ -461,7 +459,7 @@ module "portkey_gateway" {
 
 ```hcl
 module "portkey_gateway" {
-  source = "github.com/Portkey-AI/portkey-gateway-infrastructure//terraform/ecs?ref=v1.0.0"
+  source = "github.com/Portkey-AI/portkey-gateway-infrastructure//terraform/ecs?ref=v2.0.0"
 
   project_name = "portkey-gateway"
   environment  = "dev"
@@ -535,12 +533,12 @@ When running Gateway and MCP together:
 
 - Set `server_mode = "all"`
 - Set `lb_type = "application"` (ALB required)
-- Configure `alb_routing_configuration` with host-based routing (recommended) or path-based routing
-- Set `mcp_gateway_base_url` to the public MCP URL
+- Configure `alb_routing_configuration` with host-based routing (recommended) or path-based routing (deprecated)
+- Set `mcp_gateway_base_url` to the external MCP URL
 
 ```hcl
 module "portkey_gateway" {
-  source = "github.com/Portkey-AI/portkey-gateway-infrastructure//terraform/ecs?ref=v1.0.0"
+  source = "github.com/Portkey-AI/portkey-gateway-infrastructure//terraform/ecs?ref=v2.0.0"
 
   server_mode          = "all"
   mcp_gateway_base_url = "https://mcp.example.com"
@@ -648,7 +646,7 @@ provider "aws" {
 }
 
 module "portkey_gateway" {
-  source = "github.com/Portkey-AI/portkey-gateway-infrastructure//terraform/ecs?ref=v1.0.0"
+  source = "github.com/Portkey-AI/portkey-gateway-infrastructure//terraform/ecs?ref=v2.0.0"
 
   environment = var.environment
 
@@ -700,8 +698,8 @@ terraform apply -var-file=terraform.tfvars
 Always pin to a specific version in production:
 
 ```hcl
-# Good - pinned to v1.0.0
-source = "github.com/Portkey-AI/portkey-gateway-infrastructure//terraform/ecs?ref=v1.0.0"
+# Good - pinned to v2.0.0
+source = "github.com/Portkey-AI/portkey-gateway-infrastructure//terraform/ecs?ref=v2.0.0"
 
 # Bad - uses latest from main branch
 source = "github.com/Portkey-AI/portkey-gateway-infrastructure//terraform/ecs"
@@ -765,7 +763,7 @@ terraform apply
 If issues occur, revert to the previous version:
 
 ```hcl
-source = "github.com/Portkey-AI/portkey-gateway-infrastructure//terraform/ecs?ref=v1.0.0"
+source = "github.com/Portkey-AI/portkey-gateway-infrastructure//terraform/ecs?ref=v2.0.0"
 ```
 
 ```bash

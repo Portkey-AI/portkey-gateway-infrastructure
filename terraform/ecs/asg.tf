@@ -44,6 +44,12 @@ module "autoscaling" {
     AmazonSSMManagedInstanceCore        = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
   }
 
+  metadata_options = {
+    http_endpoint = "enabled"
+    http_tokens   = "required"
+    http_put_response_hop_limit = 1
+  }
+
   vpc_zone_identifier = local.private_subnet_ids
   health_check_type   = "EC2"
   min_size            = var.min_asg_size
