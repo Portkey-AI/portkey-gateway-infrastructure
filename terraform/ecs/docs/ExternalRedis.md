@@ -85,7 +85,7 @@ terraform apply -var-file=environments/dev/dev.tfvars
 
 ```hcl
 module "portkey_gateway" {
-  source = "github.com/Portkey-AI/portkey-gateway-infrastructure//terraform/ecs?ref=v1.0.0"
+  source = "github.com/Portkey-AI/portkey-gateway-infrastructure//terraform/ecs?ref=v2.0.0"
 
   redis_configuration = {
     redis_type = "aws-elastic-cache"
@@ -126,7 +126,7 @@ module "portkey_gateway" {
 
 ```hcl
 module "portkey_gateway" {
-  source = "github.com/Portkey-AI/portkey-gateway-infrastructure//terraform/ecs?ref=v1.0.0"
+  source = "github.com/Portkey-AI/portkey-gateway-infrastructure//terraform/ecs?ref=v2.0.0"
 
   redis_configuration = {
     redis_type = "aws-elastic-cache"
