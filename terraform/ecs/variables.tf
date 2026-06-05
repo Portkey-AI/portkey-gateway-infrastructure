@@ -490,6 +490,10 @@ variable "object_storage" {
     finetune_bucket    = string
     bucket_region      = string
   })
+  default = {
+    log_exports_bucket = null
+    finetune_bucket    = null
+  }
 }
 
 ###########################################################################
