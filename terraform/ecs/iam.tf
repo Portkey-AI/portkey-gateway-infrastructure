@@ -28,6 +28,34 @@ resource "aws_iam_policy" "s3_access_policy" {
   })
 }
 
+resource "aws_iam_policy" "data_service_s3_access_policy" {
+  name        = "${var.project_name}-data-service-s3-access-policy-${var.environment}"
+  path        = "/"
+  description = "Policy allowing the data service to read, write, delete, and manage multipart uploads in s3 log stores"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:AbortMultipartUpload"
+        ]
+        Effect = "Allow"
+        Resource = [
+          for bucket in toset(compact([
+            local.log_store_bucket,
+            local.log_exports_bucket,
+            local.finetune_bucket
+          ])) : "arn:aws:s3:::${bucket}/*"
+        ]
+      }
+    ]
+  })
+}
+
 # IAM Role for ecs hook lambda
 resource "aws_iam_role" "ecs_hook_lambda_execution_role" {
   count = var.gateway_lifecycle_hook.enable_lifecycle_hook ? 1 : 0

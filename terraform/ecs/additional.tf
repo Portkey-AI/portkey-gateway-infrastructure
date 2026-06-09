@@ -49,8 +49,8 @@ resource "aws_vpc_security_group_ingress_rule" "dataservice_from_gateway_ingress
   count                        = var.dataservice_config.enable_dataservice ? 1 : 0
   security_group_id            = module.data_service[0].ecs_service_security_group_id
   ip_protocol                  = "tcp"
-  from_port                    = 8081
-  to_port                      = 8081
+  from_port                    = var.dataservice_config.port
+  to_port                      = var.dataservice_config.port
   referenced_security_group_id = module.gateway.ecs_service_security_group_id
   depends_on                   = [module.gateway.ecs_service_security_group_id]
 }

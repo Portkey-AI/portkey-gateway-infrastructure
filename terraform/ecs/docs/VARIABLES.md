@@ -120,15 +120,29 @@ module "portkey_gateway" {
 | `min_asg_size` | `1` | No | Minimum EC2 instances in Auto Scaling Group |
 | `desired_asg_size` | `2` | No | Desired EC2 instances in Auto Scaling Group |
 | `target_capacity` | `100` | No | Target percentage of cluster resources ECS should maintain |
+| `instance_refresh` | `{}` (disabled) | No | Rolling instance refresh for the capacity-provider ASG (see below) |
+
+### `instance_refresh`
+
+Controls whether EC2 worker nodes are automatically rolled when the launch template changes (e.g. a new ECS-optimized AMI). Disabled by default, so node replacement stays manual.
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `enabled` | `false` | Enable rolling instance refresh on launch template changes |
+| `min_healthy_percentage` | `50` | Minimum percentage of healthy capacity to maintain during a refresh |
+| `max_healthy_percentage` | `100` | Maximum percentage of capacity allowed during a refresh |
+| `instance_warmup` | `300` | Seconds to wait before a refreshed instance counts as healthy |
+
+When enabled, the refresh uses the `Rolling` strategy, triggers on `launch_template` changes, and replaces scale-in protected instances (`scale_in_protected_instances = "Refresh"`) so it works alongside `protect_from_scale_in`.
 
 ## Docker Image Configuration
 
 | Variable | Default | Required | Description |
 |----------|---------|----------|-------------|
 | `gateway_image.image` | `"portkeyai/gateway_enterprise"` | No | Gateway container image |
-| `gateway_image.tag` | `"latest"` | No | Gateway image tag/version |
+| `gateway_image.tag` | `"2.10.0"` | No | Gateway image tag/version |
 | `data_service_image.image` | `"portkeyai/data-service"` | No | Data Service container image |
-| `data_service_image.tag` | `"latest"` | No | Data Service image tag/version |
+| `data_service_image.tag` | `"1.8.0"` | No | Data Service image tag/version |
 | `docker_cred_secret_arn` | - | **Yes** | AWS Secrets Manager ARN for Docker credentials |
 | `redis_image.image` | `"redis"` | No | Redis container image |
 | `redis_image.tag` | `"7.2-alpine"` | No | Redis image tag/version |
@@ -142,6 +156,7 @@ module "portkey_gateway" {
 | `gateway_config.memory` | `1024` | No | Memory in MiB |
 | `gateway_config.gateway_port` | `8787`| No | Port on which gateway will be running in ECS task |
 | `gateway_config.mcp_port` | `8788`| No | Port on which MCP will be running in ECS task |
+| `gateway_config.enable_execute_command` | `false` | No | Enable ECS Exec (`aws ecs execute-command`) for the Gateway service |
 
 ### Gateway Autoscaling
 
@@ -187,6 +202,8 @@ module "portkey_gateway" {
 | `dataservice_config.desired_task_count` | `1` | No | Number of Data Service tasks |
 | `dataservice_config.cpu` | `256` | No | CPU units (256 = 0.25 vCPU) |
 | `dataservice_config.memory` | `1024` | No | Memory in MiB |
+| `dataservice_config.port` | `8081` | No | Container/listen port for the Data Service (also used by the health check, Service Connect alias, and the gateway's `DATASERVICE_BASEPATH`) |
+| `dataservice_config.enable_execute_command` | `false` | No | Enable ECS Exec (`aws ecs execute-command`) for the Data Service |
 
 ### Data Service Autoscaling
 
@@ -221,6 +238,7 @@ module "portkey_gateway" {
 | `redis_configuration.endpoint` | `""` | Conditional | ElastiCache endpoint (required if `redis_type = "aws-elastic-cache"`)* |
 | `redis_configuration.tls` | `false` | No | Enable TLS for Redis connections |
 | `redis_configuration.mode` | `"standalone"` | No | Redis mode: `standalone` or `cluster` |
+| `redis_configuration.enable_execute_command` | `false` | No | Enable ECS Exec (`aws ecs execute-command`) for the containerized Redis service |
 
 *For cluster mode, use Configuration Endpoint. For standalone, use Primary Endpoint. See [AWS ElastiCache Endpoints](https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Endpoints.html) for more information.
 

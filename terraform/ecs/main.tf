@@ -101,12 +101,14 @@ locals {
       PORT                         = var.gateway_config.gateway_port
       MCP_PORT                     = var.server_mode == "all" || var.server_mode == "mcp" ? var.gateway_config.mcp_port : null
       LOG_STORE_GENERATIONS_BUCKET = var.object_storage.log_store_bucket
-      DATASERVICE_BASEPATH         = var.dataservice_config.enable_dataservice ? "http://data-service:8081" : null
+      DATASERVICE_BASEPATH         = var.dataservice_config.enable_dataservice ? "http://data-service:${var.dataservice_config.port}" : null
     },
     (var.server_mode == "all" || var.server_mode == "mcp") && trimspace(var.mcp_gateway_base_url) != "" ? { MCP_GATEWAY_BASE_URL = trimspace(var.mcp_gateway_base_url) } : {}
   )
 
   dataservice_env = {
+    PORT                   = var.dataservice_config.port
+    ALBUS_ENDPOINT         = "https://albus.portkey.ai"
     LOG_EXPORTS_BUCKET     = local.log_exports_bucket != "" ? local.log_exports_bucket : local.log_store_bucket
     FINETUNES_BUCKET       = local.finetune_bucket != "" ? local.finetune_bucket : local.log_store_bucket
     AWS_S3_FINETUNE_BUCKET = local.finetune_bucket != "" ? local.finetune_bucket : local.log_store_bucket
@@ -153,7 +155,7 @@ locals {
 
   data_service_task_role_policies = merge(
     {
-      s3_access_policy_arn = aws_iam_policy.s3_access_policy.arn
+      s3_access_policy_arn = aws_iam_policy.data_service_s3_access_policy.arn
     },
     var.data_service_task_role_policy_arns
   )

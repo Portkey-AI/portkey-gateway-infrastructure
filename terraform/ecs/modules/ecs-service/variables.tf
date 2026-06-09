@@ -12,6 +12,18 @@ variable "environment" {
   type        = string
 }
 
+variable "aws_region" {
+  description = "AWS region. Passed from the root so values derived from it (cluster ARN, log region) stay known at plan time. Falls back to the aws_region data source when null."
+  type        = string
+  default     = null
+}
+
+variable "aws_account_id" {
+  description = "AWS account ID. Passed from the root so values derived from it (cluster ARN, ECR image, IAM policies) stay known at plan time. Falls back to the aws_caller_identity data source when null."
+  type        = string
+  default     = null
+}
+
 # ============================================================================
 # CONTAINERS CONFIGURATION
 # ============================================================================
@@ -112,7 +124,7 @@ variable "ecs_service_config" {
     deployment_maximum_percent         = optional(number, 200)
     deployment_minimum_healthy_percent = optional(number, 100)
     health_check_grace_period_seconds  = optional(number, 60)
-    enable_execute_command             = optional(bool, true)
+    enable_execute_command             = optional(bool, false)
 
     capacity_provider = string
 

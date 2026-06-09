@@ -3,29 +3,15 @@
 ################################################################################
 
 #########################################################################
-#                   DOCKER HUB CREDENTIALS FROM KEY VAULT               #
-#########################################################################
-
-# Data source to fetch Docker credentials Key Vault
-data "azurerm_key_vault" "docker_creds" {
-  count = var.registry_type == "dockerhub" && var.docker_credentials != null ? 1 : 0
-
-  name                = var.docker_credentials.key_vault_name
-  resource_group_name = var.docker_credentials.key_vault_rg
-}
-
-# Fetch Docker username from Key Vault
-# (ACA registry block requires username as plain string, not secret reference)
-data "azurerm_key_vault_secret" "docker_username" {
-  count = var.registry_type == "dockerhub" && var.docker_credentials != null ? 1 : 0
-
-  name         = var.docker_credentials.username_secret
-  key_vault_id = data.azurerm_key_vault.docker_creds[0].id
-}
-
-#########################################################################
 #                              LOCALS                                   #
 #########################################################################
+
+# NOTE: Docker credentials are intentionally resolved at the root module (see
+# key-vault.tf) and passed in as plain values. They must NOT be read via data
+# sources here: a module-level `depends_on` cascades to in-module data sources,
+# deferring them to apply time. That leaves the container_app plan partially
+# unknown and triggers the azurerm provider bug "inconsistent final plan ...
+# for .secret" on Key Vault secret references.
 
 locals {
   # Build full image URL based on registry type
@@ -35,15 +21,11 @@ locals {
     "${var.docker_registry_url}/${var.container_config.image}:${var.container_config.tag}"
   )
 
-  # Docker username value from Key Vault
-  docker_username = var.registry_type == "dockerhub" && var.docker_credentials != null ? (
-    data.azurerm_key_vault_secret.docker_username[0].value
-  ) : null
+  # Docker username value (resolved at the root, passed in as a plain string)
+  docker_username = var.docker_username
 
-  # Docker password Key Vault secret URL (constructed from credentials config)
-  docker_password_kv_url = var.registry_type == "dockerhub" && var.docker_credentials != null ? (
-    "${data.azurerm_key_vault.docker_creds[0].vault_uri}secrets/${var.docker_credentials.password_secret}"
-  ) : null
+  # Docker password Key Vault secret URL (resolved at the root, passed in)
+  docker_password_kv_url = var.docker_password_kv_url
 
   # Convert environment variables to list format (filter out null/empty values)
   env_vars = [
@@ -72,7 +54,7 @@ locals {
   ]
 
   # Docker password secret (if using Docker Hub)
-  docker_password_secret = var.registry_type == "dockerhub" && var.docker_credentials != null ? [
+  docker_password_secret = var.registry_type == "dockerhub" && var.docker_password_kv_url != null ? [
     {
       name                = "docker-password"
       key_vault_secret_id = local.docker_password_kv_url
@@ -177,7 +159,7 @@ resource "azurerm_container_app" "main" {
       # Liveness probe
       liveness_probe {
         transport               = var.ingress_transport == "tcp" ? "TCP" : "HTTP"
-        path                    = var.ingress_transport == "tcp" ? null : "/v1/health"
+        path                    = var.ingress_transport == "tcp" ? null : var.health_probes.path
         port                    = var.ingress_target_port
         initial_delay           = var.health_probes.liveness.initial_delay
         interval_seconds        = var.health_probes.liveness.interval_seconds
@@ -188,7 +170,7 @@ resource "azurerm_container_app" "main" {
       # Readiness probe
       readiness_probe {
         transport               = var.ingress_transport == "tcp" ? "TCP" : "HTTP"
-        path                    = var.ingress_transport == "tcp" ? null : "/v1/health"
+        path                    = var.ingress_transport == "tcp" ? null : var.health_probes.path
         port                    = var.ingress_target_port
         initial_delay           = var.health_probes.readiness.initial_delay
         interval_seconds        = var.health_probes.readiness.interval_seconds
@@ -199,7 +181,7 @@ resource "azurerm_container_app" "main" {
       # Startup probe
       startup_probe {
         transport               = var.ingress_transport == "tcp" ? "TCP" : "HTTP"
-        path                    = var.ingress_transport == "tcp" ? null : "/v1/health"
+        path                    = var.ingress_transport == "tcp" ? null : var.health_probes.path
         port                    = var.ingress_target_port
         interval_seconds        = var.health_probes.startup.interval_seconds
         timeout                 = var.health_probes.startup.timeout

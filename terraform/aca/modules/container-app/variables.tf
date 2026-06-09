@@ -104,15 +104,17 @@ variable "docker_registry_url" {
   default     = "docker.io"
 }
 
-variable "docker_credentials" {
-  description = "Docker Hub credentials Key Vault configuration"
-  type = object({
-    key_vault_name  = string
-    key_vault_rg    = string
-    username_secret = string
-    password_secret = string
-  })
-  default = null
+variable "docker_username" {
+  description = "Resolved Docker Hub username (plain value, read from Key Vault at the root). Null when not using Docker Hub."
+  type        = string
+  default     = null
+  sensitive   = true
+}
+
+variable "docker_password_kv_url" {
+  description = "Key Vault secret URL for the Docker Hub password, referenced as an ACA secret. Null when not using Docker Hub."
+  type        = string
+  default     = null
 }
 
 #########################################################################
@@ -191,6 +193,7 @@ variable "memory_scale_threshold" {
 variable "health_probes" {
   description = "Health probe configuration"
   type = object({
+    path = optional(string, "/v1/health")
     liveness = optional(object({
       initial_delay           = optional(number, 30)
       interval_seconds        = optional(number, 30)

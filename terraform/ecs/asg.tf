@@ -9,7 +9,7 @@ data "aws_ssm_parameter" "ecs_optimized_ami" {
 
 module "autoscaling" {
   source  = "terraform-aws-modules/autoscaling/aws"
-  version = "~> 9.0"
+  version = "9.2.1"
 
   for_each = var.create_cluster ? {
     primary_provider = {
@@ -41,12 +41,11 @@ module "autoscaling" {
   iam_role_description        = "ECS role for ${var.project_name}-${each.key} auto scaling group"
   iam_role_policies = {
     AmazonEC2ContainerServiceforEC2Role = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
-    AmazonSSMManagedInstanceCore        = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
   }
 
   metadata_options = {
-    http_endpoint = "enabled"
-    http_tokens   = "required"
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
     http_put_response_hop_limit = 1
   }
 
@@ -60,6 +59,18 @@ module "autoscaling" {
     AmazonECSManaged = true
   }
   protect_from_scale_in = true
+
+  instance_refresh = var.instance_refresh.enabled ? {
+    strategy = "Rolling"
+    preferences = {
+      min_healthy_percentage = var.instance_refresh.min_healthy_percentage
+      max_healthy_percentage = var.instance_refresh.max_healthy_percentage
+      instance_warmup        = var.instance_refresh.instance_warmup
+      # Scale-in protected instances are excluded by default; allow refresh to replace them.
+      scale_in_protected_instances = "Refresh"
+    }
+    triggers = ["launch_template"]
+  } : null
 }
 
 # Create Policy allowing EC2 to enabled VPC Trunking
@@ -83,7 +94,29 @@ resource "aws_iam_role_policy" "ecs_instance_vpc_trunking_policy" {
   })
 }
 
-# Create security group for EC2 associated with autoscaling group.
+
+resource "aws_iam_role_policy" "ecs_instance_ssm_session_manager" {
+  count = var.create_cluster ? 1 : 0
+  name  = "ecsInstanceSsmSessionManager-${var.project_name}-${var.environment}"
+  role  = module.autoscaling["primary_provider"].iam_role_name
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ssmmessages:CreateControlChannel",
+          "ssmmessages:CreateDataChannel",
+          "ssmmessages:OpenControlChannel",
+          "ssmmessages:OpenDataChannel",
+          "ssm:UpdateInstanceInformation"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
 module "autoscaling_sg" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "~> 5.0"

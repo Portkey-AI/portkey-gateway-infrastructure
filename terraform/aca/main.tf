@@ -7,7 +7,6 @@ resource "random_id" "suffix" {
   byte_length = 4
 }
 
-# Fetch current Azure client configuration
 data "azurerm_client_config" "current" {}
 
 locals {
@@ -73,14 +72,15 @@ locals {
     AZURE_AUTH_MODE         = var.storage_config.auth_mode
     AZURE_STORAGE_ACCOUNT   = local.storage_account_name
     AZURE_STORAGE_CONTAINER = local.container_name
-    AZURE_MANAGED_CLIENT_ID = azurerm_user_assigned_identity.aca.client_id
-
+    # Only inject the managed identity client ID when managed-identity auth is in use.
+    AZURE_MANAGED_CLIENT_ID = var.storage_config.auth_mode == "managed" ? azurerm_user_assigned_identity.aca.client_id : null
   }
 
   # Gateway-specific environment variables
   gateway_env = {
     PORT                 = var.gateway_config.port
     MCP_GATEWAY_BASE_URL = coalesce(var.mcp_gateway_base_url, var.server_mode == "all" ? "http://mcp" : null)
+    DATASERVICE_BASEPATH = var.dataservice_config.enable_dataservice ? "http://data-service" : null
   }
 
   # MCP-specific environment variables
@@ -90,9 +90,14 @@ locals {
     MCP_PORT    = var.mcp_config.port
   }
 
-  # Data service-specific environment variables (kept for future use)
   dataservice_env = {
+    PORT             = var.dataservice_config.port
+    ALBUS_ENDPOINT   = "https://albus.portkey.ai"
     GATEWAY_BASE_URL = "http://gateway"
+    # Override the gateway identity injected via common_env with the data service's own identity.
+    AZURE_MANAGED_CLIENT_ID = (
+      var.dataservice_config.enable_dataservice && var.storage_config.auth_mode == "managed"
+    ) ? azurerm_user_assigned_identity.aca_dataservice[0].client_id : null
   }
 
   # Container Apps Environment internal/external configuration
@@ -121,7 +126,6 @@ resource "azurerm_resource_group" "main" {
   tags     = local.tags
 }
 
-# Data source for existing resource group
 data "azurerm_resource_group" "existing" {
   count = var.create_resource_group ? 0 : 1
   name  = var.resource_group_name

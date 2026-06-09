@@ -3,9 +3,11 @@
 ################################################################################
 
 module "gateway" {
-  source       = "./modules/ecs-service"
-  project_name = var.project_name
-  environment  = var.environment
+  source         = "./modules/ecs-service"
+  project_name   = var.project_name
+  environment    = var.environment
+  aws_region     = local.region
+  aws_account_id = local.account_id
   container_config = [
     {
       docker_repository_name = var.gateway_image.image
@@ -20,7 +22,6 @@ module "gateway" {
       )
       secrets = local.gateway_secrets
 
-      # List of ports/protocols exposed by this container
       container_ports = [
         for port in [
           var.server_mode == "all" || var.server_mode == "gateway" ? {
@@ -46,7 +47,6 @@ module "gateway" {
     }
   ]
 
-  # Task Definition Configuration
   task_definition_config = {
     cpu                       = var.gateway_config.cpu
     memory                    = var.gateway_config.memory
@@ -55,7 +55,6 @@ module "gateway" {
   }
 
 
-  # ECS Service Configuration
   ecs_service_config = {
     service_name                       = "gateway"
     cluster_name                       = local.cluster_name
@@ -63,7 +62,7 @@ module "gateway" {
     deployment_maximum_percent         = 200
     deployment_minimum_healthy_percent = 100
     health_check_grace_period_seconds  = 150
-    enable_execute_command             = true
+    enable_execute_command             = var.gateway_config.enable_execute_command
     capacity_provider                  = local.capacity_provider_name
     deployment_configuration           = var.gateway_deployment_configuration
     deployment_circuit_breaker         = var.gateway_deployment_circuit_breaker
@@ -119,7 +118,6 @@ module "gateway" {
     service_subnets = local.private_subnet_ids
   }
 
-  # Load Balancer Configuration
   # ALB: host- and/or path-based routing per alb_routing_configuration; NLB: single default rule
   load_balancer_config = {
     create_lb          = var.create_lb
