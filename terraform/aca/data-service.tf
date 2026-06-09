@@ -98,7 +98,7 @@ module "data_service" {
       local.gateway_variables,
       local.dataservice_env
     )
-    secrets = local.gateway_secrets
+    secrets = merge(local.gateway_secrets, local.dataservice_secrets)
   }
 
   registry_type          = var.registry_type

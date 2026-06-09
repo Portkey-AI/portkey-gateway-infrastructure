@@ -6,28 +6,16 @@
 #                              LOCALS                                   #
 #########################################################################
 
-# NOTE: Docker credentials are intentionally resolved at the root module (see
-# key-vault.tf) and passed in as plain values. They must NOT be read via data
-# sources here: a module-level `depends_on` cascades to in-module data sources,
-# deferring them to apply time. That leaves the container_app plan partially
-# unknown and triggers the azurerm provider bug "inconsistent final plan ...
-# for .secret" on Key Vault secret references.
-
 locals {
-  # Build full image URL based on registry type
   image_url = var.registry_type == "acr" ? (
     "${var.acr_login_server}/${var.container_config.image}:${var.container_config.tag}"
     ) : (
     "${var.docker_registry_url}/${var.container_config.image}:${var.container_config.tag}"
   )
 
-  # Docker username value (resolved at the root, passed in as a plain string)
-  docker_username = var.docker_username
-
-  # Docker password Key Vault secret URL (resolved at the root, passed in)
+  docker_username        = var.docker_username
   docker_password_kv_url = var.docker_password_kv_url
 
-  # Convert environment variables to list format (filter out null/empty values)
   env_vars = [
     for k, v in var.container_config.environment_variables : {
       name  = k
@@ -35,16 +23,14 @@ locals {
     } if v != null && v != ""
   ]
 
-  # Convert secrets to list format for secret env vars
-  # secrets is a map of ENV_VAR_NAME => secret_name
   secret_env_vars = [
     for env_var, secret_name in var.container_config.secrets : {
-      name        = env_var     # ORGANISATIONS_TO_SYNC
-      secret_name = secret_name # org-secret-name
+      name        = env_var
+      secret_name = secret_name
     }
   ]
 
-  # Build secrets list for Container App (Key Vault references)
+  # Container App secrets as Key Vault references (value is null by design)
   secrets = [
     for env_var, secret_name in var.container_config.secrets : {
       name                = secret_name
@@ -53,7 +39,6 @@ locals {
     }
   ]
 
-  # Docker password secret (if using Docker Hub)
   docker_password_secret = var.registry_type == "dockerhub" && var.docker_password_kv_url != null ? [
     {
       name                = "docker-password"

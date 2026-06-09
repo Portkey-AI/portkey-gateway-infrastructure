@@ -25,10 +25,8 @@ data "azurerm_key_vault" "secrets" {
 }
 
 locals {
-  gateway_consumed_secret_names = distinct(concat(
-    values(local.gateway_secrets),
-    values(local.dataservice_secrets),
-  ))
+  # Gateway/MCP identity: only the secrets those apps actually mount.
+  gateway_consumed_secret_names = distinct(values(local.gateway_secrets))
 
   # Docker password secret also needs runtime read access when creds share the secrets vault.
   docker_secret_in_secrets_vault = (
@@ -42,8 +40,10 @@ locals {
     local.docker_secret_in_secrets_vault,
   ))
 
+  # Data-service identity: gateway secrets it shares + its own data-service secrets.
   dataservice_kv_secret_names = var.dataservice_config.enable_dataservice ? toset(concat(
     distinct(values(local.gateway_secrets)),
+    distinct(values(local.dataservice_secrets)),
     local.docker_secret_in_secrets_vault,
   )) : toset([])
 }
@@ -68,11 +68,9 @@ data "azurerm_key_vault" "docker_creds" {
   resource_group_name = var.docker_credentials.key_vault_rg
 }
 
-# Resolve Docker Hub credentials at the root (NOT inside the container-app module).
-# Reading these here keeps them out of the modules' `depends_on`, so they resolve
-# at plan time. If read inside the module, the module-level depends_on defers them
-# to apply, leaving the container_app plan partially unknown and triggering the
-# azurerm "inconsistent final plan ... for .secret" bug on Key Vault secret refs.
+# Resolved at the root (not in-module) so a module-level depends_on can't defer
+# these reads to apply time, which would trigger the azurerm "inconsistent final
+# plan ... for .secret" bug.
 data "azurerm_key_vault_secret" "docker_username" {
   count = var.registry_type == "dockerhub" && var.docker_credentials != null ? 1 : 0
 
@@ -81,12 +79,10 @@ data "azurerm_key_vault_secret" "docker_username" {
 }
 
 locals {
-  # Docker username plain value (ACA registry block requires a plain string).
   docker_username = (
     var.registry_type == "dockerhub" && var.docker_credentials != null
   ) ? data.azurerm_key_vault_secret.docker_username[0].value : null
 
-  # Docker password Key Vault secret URL (referenced as an ACA secret).
   docker_password_kv_url = (
     var.registry_type == "dockerhub" && var.docker_credentials != null
   ) ? "${data.azurerm_key_vault.docker_creds[0].vault_uri}secrets/${var.docker_credentials.password_secret}" : null
