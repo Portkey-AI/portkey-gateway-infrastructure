@@ -3,10 +3,12 @@
 ################################################################################
 
 module "redis" {
-  count        = var.redis_configuration.redis_type == "redis" ? 1 : 0
-  source       = "./modules/ecs-service"
-  project_name = var.project_name
-  environment  = var.environment
+  count          = var.redis_configuration.redis_type == "redis" ? 1 : 0
+  source         = "./modules/ecs-service"
+  project_name   = var.project_name
+  environment    = var.environment
+  aws_region     = local.region
+  aws_account_id = local.account_id
   container_config = [
     {
       docker_repository_name = var.redis_image.image
@@ -27,13 +29,11 @@ module "redis" {
     }
   ]
 
-  # Task Definition Configuration
   task_definition_config = {
     cpu    = var.redis_configuration.cpu
     memory = var.redis_configuration.memory
   }
 
-  # ECS Service Configuration
   ecs_service_config = {
     service_name                       = "redis"
     cluster_name                       = local.cluster_name
@@ -41,7 +41,7 @@ module "redis" {
     deployment_maximum_percent         = 200
     deployment_minimum_healthy_percent = 100
     health_check_grace_period_seconds  = 150
-    enable_execute_command             = true
+    enable_execute_command             = var.redis_configuration.enable_execute_command
     capacity_provider                  = local.capacity_provider_name
     deployment_configuration = {
       enable_blue_green = false
@@ -77,7 +77,6 @@ module "redis" {
     service_subnets = local.private_subnet_ids
   }
 
-  # Load Balancer Configuration
   load_balancer_config = {
     create_lb = false
   }

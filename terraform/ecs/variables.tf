@@ -200,6 +200,17 @@ variable "target_capacity" {
   default     = 100
 }
 
+variable "instance_refresh" {
+  description = "Rolling instance refresh for the ECS capacity-provider ASG. When enabled, instances are replaced on launch template changes (e.g. AMI updates). Disabled by default so node replacement stays manual."
+  type = object({
+    enabled                = optional(bool, false)
+    min_healthy_percentage = optional(number, 50)
+    max_healthy_percentage = optional(number, 100)
+    instance_warmup        = optional(number, 300)
+  })
+  default = {}
+}
+
 ###########################################################################
 #                         DOCKER IMAGE CONFIGURATION                      #
 ###########################################################################
@@ -211,7 +222,7 @@ variable "gateway_image" {
   })
   default = {
     image = "portkeyai/gateway_enterprise"
-    tag   = "latest"
+    tag   = "2.10.0"
   }
 }
 
@@ -223,7 +234,7 @@ variable "data_service_image" {
   })
   default = {
     image = "portkeyai/data-service"
-    tag   = "latest"
+    tag   = "1.8.0"
   }
 }
 
@@ -251,11 +262,12 @@ variable "redis_image" {
 variable "gateway_config" {
   description = "Gateway service configuration"
   type = object({
-    desired_task_count = number
-    cpu                = number
-    memory             = number
-    gateway_port       = number
-    mcp_port           = number
+    desired_task_count     = number
+    cpu                    = number
+    memory                 = number
+    gateway_port           = number
+    mcp_port               = number
+    enable_execute_command = optional(bool, false)
   })
   default = {
     desired_task_count = 1
@@ -339,10 +351,12 @@ variable "gateway_lifecycle_hook" {
 variable "dataservice_config" {
   description = "Data service configuration"
   type = object({
-    enable_dataservice = bool
-    desired_task_count = number
-    cpu                = number
-    memory             = number
+    enable_dataservice     = bool
+    desired_task_count     = number
+    cpu                    = number
+    memory                 = number
+    port                   = optional(number, 8081)
+    enable_execute_command = optional(bool, false)
   })
   default = {
     enable_dataservice = false
@@ -393,12 +407,13 @@ variable "dataservice_autoscaling" {
 variable "redis_configuration" {
   description = "Redis configuration object"
   type = object({
-    redis_type = string
-    cpu        = number
-    memory     = number
-    endpoint   = string
-    tls        = bool
-    mode       = string
+    redis_type             = string
+    cpu                    = number
+    memory                 = number
+    endpoint               = string
+    tls                    = bool
+    mode                   = string
+    enable_execute_command = optional(bool, false)
   })
   default = {
     redis_type = "redis"

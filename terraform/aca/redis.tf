@@ -30,9 +30,10 @@ module "redis" {
   }
 
   # No registry credentials needed - public image
-  registry_type       = "dockerhub"
-  docker_registry_url = "docker.io"
-  docker_credentials  = null
+  registry_type          = "dockerhub"
+  docker_registry_url    = "docker.io"
+  docker_username        = null
+  docker_password_kv_url = null
 
   # Ingress configuration - internal TCP only
   ingress_enabled     = true

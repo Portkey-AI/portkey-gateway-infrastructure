@@ -3,17 +3,19 @@
 ################################################################################
 
 module "data_service" {
-  count        = var.dataservice_config.enable_dataservice ? 1 : 0
-  source       = "./modules/ecs-service"
-  project_name = var.project_name
-  environment  = var.environment
+  count          = var.dataservice_config.enable_dataservice ? 1 : 0
+  source         = "./modules/ecs-service"
+  project_name   = var.project_name
+  environment    = var.environment
+  aws_region     = local.region
+  aws_account_id = local.account_id
   container_config = [
     {
       docker_repository_name = var.data_service_image.image
       image_tag              = var.data_service_image.tag
       container_name         = "data-service"
       docker_cred_secret_arn = var.docker_cred_secret_arn
-      container_port         = 8081
+      container_port         = var.dataservice_config.port
       container_port_name    = "data-service-port"
       essential              = true
       environment_variables = merge(
@@ -24,7 +26,7 @@ module "data_service" {
       secrets = local.dataservice_secrets
 
       health_check = {
-        command      = ["CMD-SHELL", "wget -qO- http://localhost:8081/health || exit 1"]
+        command      = ["CMD-SHELL", "wget -qO- http://localhost:${var.dataservice_config.port}/health || exit 1"]
         interval     = 30
         timeout      = 5
         retries      = 3
@@ -33,7 +35,6 @@ module "data_service" {
     }
   ]
 
-  # Task Definition Configuration
   task_definition_config = {
     cpu                       = var.dataservice_config.cpu
     memory                    = var.dataservice_config.memory
@@ -41,7 +42,6 @@ module "data_service" {
     track_latest              = true
   }
 
-  # ECS Service Configuration
   ecs_service_config = {
     service_name                       = "data-service"
     cluster_name                       = local.cluster_name
@@ -49,7 +49,7 @@ module "data_service" {
     deployment_maximum_percent         = 200
     deployment_minimum_healthy_percent = 100
     health_check_grace_period_seconds  = 150
-    enable_execute_command             = true
+    enable_execute_command             = var.dataservice_config.enable_execute_command
     capacity_provider                  = local.capacity_provider_name
     deployment_configuration = {
       enable_blue_green = false
@@ -68,7 +68,7 @@ module "data_service" {
         discovery_name = "data-service"
         port_name      = "data-service-port"
         client_alias = {
-          port     = 8081
+          port     = var.dataservice_config.port
           dns_name = "data-service"
         }
       }
@@ -89,7 +89,6 @@ module "data_service" {
     service_subnets = local.private_subnet_ids
   }
 
-  # Load Balancer Configuration
   load_balancer_config = {
     create_lb = false
   }

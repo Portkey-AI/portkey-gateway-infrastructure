@@ -203,7 +203,19 @@ variable "gateway_image" {
   })
   default = {
     image = "portkeyai/gateway_enterprise"
-    tag   = "latest"
+    tag   = "2.10.0"
+  }
+}
+
+variable "data_service_image" {
+  description = "Data Service container image configuration"
+  type = object({
+    image = string
+    tag   = string
+  })
+  default = {
+    image = "portkeyai/data-service"
+    tag   = "1.8.0"
   }
 }
 
@@ -261,6 +273,26 @@ variable "mcp_config" {
     memory_scale_threshold         = null
     http_scale_concurrent_requests = 100
   }
+}
+
+#########################################################################
+#                     DATA SERVICE CONFIGURATION                        #
+#########################################################################
+
+variable "dataservice_config" {
+  description = "Data Service Container App configuration. The Data Service is internal-only: reachable from the gateway within the Container Apps Environment and never exposed publicly."
+  type = object({
+    enable_dataservice             = optional(bool, false)
+    cpu                            = optional(number, 1)
+    memory                         = optional(string, "2Gi")
+    min_replicas                   = optional(number, 1)
+    max_replicas                   = optional(number, 3)
+    port                           = optional(number, 8081)
+    cpu_scale_threshold            = optional(number, 70)
+    memory_scale_threshold         = optional(number, null)
+    http_scale_concurrent_requests = optional(number, 100)
+  })
+  default = {}
 }
 
 variable "server_mode" {

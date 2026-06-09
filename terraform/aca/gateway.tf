@@ -37,7 +37,6 @@ module "gateway" {
   user_assigned_identity_id    = azurerm_user_assigned_identity.aca.id
   tags                         = local.tags
 
-  # Container configuration
   container_config = {
     image        = var.gateway_image.image
     tag          = var.gateway_image.tag
@@ -53,11 +52,11 @@ module "gateway" {
     secrets = local.gateway_secrets
   }
 
-  # Registry configuration
-  registry_type       = var.registry_type
-  acr_login_server    = var.registry_type == "acr" ? data.azurerm_container_registry.acr[0].login_server : null
-  docker_registry_url = "docker.io"
-  docker_credentials  = var.registry_type == "dockerhub" ? var.docker_credentials : null
+  registry_type          = var.registry_type
+  acr_login_server       = var.registry_type == "acr" ? data.azurerm_container_registry.acr[0].login_server : null
+  docker_registry_url    = "docker.io"
+  docker_username        = local.docker_username
+  docker_password_kv_url = local.docker_password_kv_url
 
   # Ingress configuration — always VNET-accessible
   # Public vs private is determined by the ACA environment (internal_load_balancer_enabled)
@@ -66,12 +65,10 @@ module "gateway" {
   ingress_target_port = var.gateway_config.port
   ingress_transport   = "auto"
 
-  # Scaling configuration
   cpu_scale_threshold            = var.gateway_config.cpu_scale_threshold
   memory_scale_threshold         = var.gateway_config.memory_scale_threshold
   http_scale_concurrent_requests = var.gateway_config.http_scale_concurrent_requests
 
-  # Key Vault for secrets
   key_vault_url = data.azurerm_key_vault.secrets.vault_uri
 
   secret_volume_mounts = var.gateway_secret_volume_mounts
@@ -81,6 +78,7 @@ module "gateway" {
 
   depends_on = [
     azurerm_role_assignment.secrets_kv_user,
+    azurerm_role_assignment.storage_blob_read_write,
     azurerm_role_assignment.acr_pull,
     azurerm_role_assignment.docker_kv_secrets_user
   ]
@@ -118,11 +116,11 @@ module "mcp" {
     secrets = local.gateway_secrets
   }
 
-  # Registry configuration
-  registry_type       = var.registry_type
-  acr_login_server    = var.registry_type == "acr" ? data.azurerm_container_registry.acr[0].login_server : null
-  docker_registry_url = "docker.io"
-  docker_credentials  = var.registry_type == "dockerhub" ? var.docker_credentials : null
+  registry_type          = var.registry_type
+  acr_login_server       = var.registry_type == "acr" ? data.azurerm_container_registry.acr[0].login_server : null
+  docker_registry_url    = "docker.io"
+  docker_username        = local.docker_username
+  docker_password_kv_url = local.docker_password_kv_url
 
   # Ingress configuration — always VNET-accessible
   # Public vs private is determined by the ACA environment (internal_load_balancer_enabled)
@@ -131,12 +129,10 @@ module "mcp" {
   ingress_target_port = var.mcp_config.port
   ingress_transport   = "auto"
 
-  # Scaling configuration
   cpu_scale_threshold            = var.mcp_config.cpu_scale_threshold
   memory_scale_threshold         = var.mcp_config.memory_scale_threshold
   http_scale_concurrent_requests = var.mcp_config.http_scale_concurrent_requests
 
-  # Key Vault for secrets
   key_vault_url = data.azurerm_key_vault.secrets.vault_uri
 
   secret_volume_mounts = var.gateway_secret_volume_mounts
@@ -146,6 +142,7 @@ module "mcp" {
 
   depends_on = [
     azurerm_role_assignment.secrets_kv_user,
+    azurerm_role_assignment.storage_blob_read_write,
     azurerm_role_assignment.acr_pull,
     azurerm_role_assignment.docker_kv_secrets_user
   ]

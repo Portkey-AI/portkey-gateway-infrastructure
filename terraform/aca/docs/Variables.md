@@ -8,6 +8,7 @@ Complete documentation of all Terraform input variables for the Azure Container 
 - [Network](#network)
 - [Container Registry](#container-registry)
 - [Gateway & MCP Services](#gateway--mcp-services)
+- [Data Service](#data-service)
 - [Redis](#redis)
 - [Storage](#storage)
 - [Ingress](#ingress)
@@ -121,7 +122,7 @@ docker_credentials = {
 ```hcl
 gateway_image = {
   image = "portkeyai/gateway_enterprise"
-  tag   = "latest"
+  tag   = "2.10.0"
 }
 ```
 
@@ -142,6 +143,40 @@ gateway_image = {
 - **Default**: CPU-based scaling at 70% utilization
 - **If `cpu_scale_threshold` set to `null` and `memory_scale_threshold` is `null`**: Falls back to HTTP concurrent requests scaling
 - **CPU + Memory together**: Scales when either threshold is reached
+
+---
+
+## Data Service
+
+The Data Service is an optional, **internal-only** container app. When enabled it is reachable from the gateway within the Container Apps Environment (never exposed publicly), runs under its **own dedicated managed identity** with least-privilege role assignments (scoped Key Vault secrets, ACR/Docker pull, and blob read/write on the log container), and receives the same environment and secrets as the gateway except `MCP_GATEWAY_BASE_URL`. When enabled, the gateway is given `DATASERVICE_BASEPATH` so it can reach the service internally.
+
+| Variable | Type | Default | Required | Description |
+|----------|------|---------|----------|-------------|
+| `data_service_image` | `object` | See below | No | Container image for the Data Service app. |
+| `dataservice_config` | `object` | See below | No | Data Service enablement, sizing, port, and scaling. |
+
+**`data_service_image` default:**
+
+```hcl
+data_service_image = {
+  image = "portkeyai/data-service"
+  tag   = "1.8.0"
+}
+```
+
+**`dataservice_config` fields:**
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `enable_dataservice` | `bool` | `false` | Deploy the Data Service (and its managed identity + role assignments). |
+| `cpu` | `number` | `1` | vCPU cores (0.25, 0.5, 1, 2, 4). |
+| `memory` | `string` | `"2Gi"` | Memory (must match CPU tier). |
+| `min_replicas` | `number` | `1` | Minimum replica count. |
+| `max_replicas` | `number` | `3` | Maximum replica count (auto-scaled). |
+| `port` | `number` | `8081` | Container listening port (ingress target + health probe). |
+| `cpu_scale_threshold` | `number` | `70` | CPU % threshold (0-100) to trigger scaling. Set to `null` to fall back to HTTP scaling. |
+| `memory_scale_threshold` | `number` | `null` | Memory % threshold (0-100) to trigger scaling. |
+| `http_scale_concurrent_requests` | `number` | `100` | Concurrent HTTP requests per replica to trigger scaling. Used when both CPU and memory thresholds are `null`. |
 
 ---
 

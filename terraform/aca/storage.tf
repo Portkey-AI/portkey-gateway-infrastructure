@@ -51,7 +51,6 @@ resource "azurerm_storage_account" "main" {
   tags = local.tags
 }
 
-# Create blob container
 resource "azurerm_storage_container" "main" {
   count                 = local.create_storage_account ? 1 : 0
   name                  = local.container_name
@@ -70,9 +69,33 @@ data "azurerm_storage_account" "existing" {
 #                     RBAC ASSIGNMENTS FOR STORAGE                       #
 #########################################################################
 
-# Grant Container Apps managed identity access to the specific blob container
-resource "azurerm_role_assignment" "storage_blob_contributor" {
-  scope                = local.create_storage_account ? "${azurerm_storage_account.main[0].id}/blobServices/default/containers/${local.container_name}" : "${data.azurerm_storage_account.existing[0].id}/blobServices/default/containers/${local.container_name}"
-  role_definition_name = "Storage Blob Data Contributor"
-  principal_id         = azurerm_user_assigned_identity.aca.principal_id
+locals {
+  storage_account_id  = local.create_storage_account ? azurerm_storage_account.main[0].id : data.azurerm_storage_account.existing[0].id
+  log_container_scope = "${local.storage_account_id}/blobServices/default/containers/${local.container_name}"
+}
+
+# Read + write (and append) on blobs, no delete (no built-in role covers this).
+resource "azurerm_role_definition" "blob_read_write" {
+  name        = "blob-read-write-${local.name_prefix}-${local.name_suffix}"
+  scope       = local.storage_account_id
+  description = "Read and write (no delete) access to blobs for the gateway log store"
+
+  permissions {
+    actions = []
+    data_actions = [
+      "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read",
+      "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write",
+      "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/add/action",
+    ]
+    not_actions      = []
+    not_data_actions = []
+  }
+
+  assignable_scopes = [local.storage_account_id]
+}
+
+resource "azurerm_role_assignment" "storage_blob_read_write" {
+  scope              = local.log_container_scope
+  role_definition_id = azurerm_role_definition.blob_read_write.role_definition_resource_id
+  principal_id       = azurerm_user_assigned_identity.aca.principal_id
 }

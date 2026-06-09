@@ -2,7 +2,6 @@
 # FILE: modules/ecs-service/iam.tf
 # ============================================================================
 
-# Task Role ECS task
 resource "aws_iam_role" "ecs_task_role" {
   name = "ecsTaskRole-${var.project_name}-${random_id.suffix.hex}"
 
@@ -28,7 +27,6 @@ resource "aws_iam_role" "ecs_task_role" {
   })
 }
 
-# Attach access polices to task role
 resource "aws_iam_role_policy_attachment" "task_role_policies" {
   for_each = local.task_policy_map
 
@@ -36,12 +34,30 @@ resource "aws_iam_role_policy_attachment" "task_role_policies" {
   policy_arn = each.value
 }
 
-# Attach access policy to allow ECS Exec
-resource "aws_iam_role_policy_attachment" "task_exec_policies" {
+# Minimal inline policy to allow ECS Exec (SSM session channels only).
+# Replaces the broad AmazonSSMManagedInstanceCore managed policy, which also
+# grants ssm:GetParameter*/GetDocument/etc. on "*" and is not needed for ECS Exec.
+resource "aws_iam_role_policy" "task_exec_policies" {
   count = var.ecs_service_config.enable_execute_command ? 1 : 0
 
-  role       = aws_iam_role.ecs_task_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+  name = "ecs-exec-ssmmessages"
+  role = aws_iam_role.ecs_task_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ssmmessages:CreateControlChannel",
+          "ssmmessages:CreateDataChannel",
+          "ssmmessages:OpenControlChannel",
+          "ssmmessages:OpenDataChannel"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
 }
 
 

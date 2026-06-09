@@ -8,8 +8,7 @@
       "ENABLE_PROMETHEUS":"false",
       "PROMETHEUS_PUSH_ENABLED":"false",
       "LOKI_PUSH_ENABLED":"false",
-      "HYBRID_DEPLOYMENT":"ON",
-      "NODE_DEBUG":"dataservice:*"
+      "HYBRID_DEPLOYMENT":"ON"
    },
    "gateway":{
       "SERVICE_NAME":"gateway",

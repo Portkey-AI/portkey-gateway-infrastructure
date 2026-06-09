@@ -3,49 +3,19 @@
 ################################################################################
 
 #########################################################################
-#                   DOCKER HUB CREDENTIALS FROM KEY VAULT               #
-#########################################################################
-
-# Data source to fetch Docker credentials Key Vault
-data "azurerm_key_vault" "docker_creds" {
-  count = var.registry_type == "dockerhub" && var.docker_credentials != null ? 1 : 0
-
-  name                = var.docker_credentials.key_vault_name
-  resource_group_name = var.docker_credentials.key_vault_rg
-}
-
-# Fetch Docker username from Key Vault
-# (ACA registry block requires username as plain string, not secret reference)
-data "azurerm_key_vault_secret" "docker_username" {
-  count = var.registry_type == "dockerhub" && var.docker_credentials != null ? 1 : 0
-
-  name         = var.docker_credentials.username_secret
-  key_vault_id = data.azurerm_key_vault.docker_creds[0].id
-}
-
-#########################################################################
 #                              LOCALS                                   #
 #########################################################################
 
 locals {
-  # Build full image URL based on registry type
   image_url = var.registry_type == "acr" ? (
     "${var.acr_login_server}/${var.container_config.image}:${var.container_config.tag}"
     ) : (
     "${var.docker_registry_url}/${var.container_config.image}:${var.container_config.tag}"
   )
 
-  # Docker username value from Key Vault
-  docker_username = var.registry_type == "dockerhub" && var.docker_credentials != null ? (
-    data.azurerm_key_vault_secret.docker_username[0].value
-  ) : null
+  docker_username        = var.docker_username
+  docker_password_kv_url = var.docker_password_kv_url
 
-  # Docker password Key Vault secret URL (constructed from credentials config)
-  docker_password_kv_url = var.registry_type == "dockerhub" && var.docker_credentials != null ? (
-    "${data.azurerm_key_vault.docker_creds[0].vault_uri}secrets/${var.docker_credentials.password_secret}"
-  ) : null
-
-  # Convert environment variables to list format (filter out null/empty values)
   env_vars = [
     for k, v in var.container_config.environment_variables : {
       name  = k
@@ -53,16 +23,14 @@ locals {
     } if v != null && v != ""
   ]
 
-  # Convert secrets to list format for secret env vars
-  # secrets is a map of ENV_VAR_NAME => secret_name
   secret_env_vars = [
     for env_var, secret_name in var.container_config.secrets : {
-      name        = env_var     # ORGANISATIONS_TO_SYNC
-      secret_name = secret_name # org-secret-name
+      name        = env_var
+      secret_name = secret_name
     }
   ]
 
-  # Build secrets list for Container App (Key Vault references)
+  # Container App secrets as Key Vault references (value is null by design)
   secrets = [
     for env_var, secret_name in var.container_config.secrets : {
       name                = secret_name
@@ -71,8 +39,7 @@ locals {
     }
   ]
 
-  # Docker password secret (if using Docker Hub)
-  docker_password_secret = var.registry_type == "dockerhub" && var.docker_credentials != null ? [
+  docker_password_secret = var.registry_type == "dockerhub" && var.docker_password_kv_url != null ? [
     {
       name                = "docker-password"
       key_vault_secret_id = local.docker_password_kv_url
@@ -177,7 +144,7 @@ resource "azurerm_container_app" "main" {
       # Liveness probe
       liveness_probe {
         transport               = var.ingress_transport == "tcp" ? "TCP" : "HTTP"
-        path                    = var.ingress_transport == "tcp" ? null : "/v1/health"
+        path                    = var.ingress_transport == "tcp" ? null : var.health_probes.path
         port                    = var.ingress_target_port
         initial_delay           = var.health_probes.liveness.initial_delay
         interval_seconds        = var.health_probes.liveness.interval_seconds
@@ -188,7 +155,7 @@ resource "azurerm_container_app" "main" {
       # Readiness probe
       readiness_probe {
         transport               = var.ingress_transport == "tcp" ? "TCP" : "HTTP"
-        path                    = var.ingress_transport == "tcp" ? null : "/v1/health"
+        path                    = var.ingress_transport == "tcp" ? null : var.health_probes.path
         port                    = var.ingress_target_port
         initial_delay           = var.health_probes.readiness.initial_delay
         interval_seconds        = var.health_probes.readiness.interval_seconds
@@ -199,7 +166,7 @@ resource "azurerm_container_app" "main" {
       # Startup probe
       startup_probe {
         transport               = var.ingress_transport == "tcp" ? "TCP" : "HTTP"
-        path                    = var.ingress_transport == "tcp" ? null : "/v1/health"
+        path                    = var.ingress_transport == "tcp" ? null : var.health_probes.path
         port                    = var.ingress_target_port
         interval_seconds        = var.health_probes.startup.interval_seconds
         timeout                 = var.health_probes.startup.timeout

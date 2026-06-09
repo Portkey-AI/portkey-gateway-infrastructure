@@ -114,8 +114,7 @@ Non-sensitive information can be supplied by updating the **environment-variable
       "ENABLE_PROMETHEUS":"true",                          
       "PROMETHEUS_PUSH_ENABLED":"true",
       "LOKI_PUSH_ENABLED":"true",
-      "HYBRID_DEPLOYMENT":"ON",
-      "NODE_DEBUG":"dataservice:*"
+      "HYBRID_DEPLOYMENT":"ON"
    },
    
    "gateway":{

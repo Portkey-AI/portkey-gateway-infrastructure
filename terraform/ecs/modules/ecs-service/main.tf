@@ -10,7 +10,6 @@ resource "random_id" "suffix" {
   byte_length = 6
 }
 
-# Extract existing namespace
 data "aws_service_discovery_http_namespace" "service_namespace" {
 
   count = local.service_connect_enabled && local.service_namespace != null ? 1 : 0
@@ -19,9 +18,14 @@ data "aws_service_discovery_http_namespace" "service_namespace" {
 
 locals {
 
-  account_id = data.aws_caller_identity.current.account_id
+  # Prefer values passed from the root (known at plan time). Fall back to the
+  # data sources so the module still works standalone. Using the passed-in
+  # values keeps cluster ARN / log region / IAM policies known at plan time,
+  # which avoids phantom ECS service & task definition replacements when these
+  # data sources get deferred to apply (e.g. due to module depends_on).
+  account_id = var.aws_account_id != null ? var.aws_account_id : data.aws_caller_identity.current.account_id
 
-  region = data.aws_region.current.region
+  region = var.aws_region != null ? var.aws_region : data.aws_region.current.region
 
   vpc_id = var.ecs_service_config.vpc_id
 
@@ -71,16 +75,12 @@ locals {
       if c.docker_cred_secret_arn != null && c.docker_cred_secret_arn != ""
   ])
 
-  #
-  # Extract all ARNs polcies to attach
   task_policy_map = var.task_definition_config.task_role_policy_arns_map
 
-  # Extract load balancer configuration
   create_lb   = var.load_balancer_config.create_lb
   lb_type     = var.load_balancer_config.type
   lb_internal = var.load_balancer_config.lb_internal
 
-  # Build container definition
   containers_definition = jsonencode([
     for container in var.container_config : {
       name = container.container_name
@@ -114,7 +114,6 @@ locals {
         }
       ] : []
 
-      # Environment variables
       environment = [
         for key, value in container.environment_variables : {
           name  = key
@@ -122,7 +121,6 @@ locals {
         }
       ]
 
-      # Secrets
       secrets = [
         for key, value in container.secrets : {
           name      = key
@@ -291,14 +289,13 @@ resource "aws_ecs_service" "service" {
   depends_on = [
     aws_iam_role_policy_attachment.ecs_execution_role_policy,
     aws_iam_role_policy_attachment.ecs_load_balancer_policy,
-    aws_iam_role_policy_attachment.task_exec_policies,
+    aws_iam_role_policy.task_exec_policies,
     aws_iam_role_policy_attachment.task_role_policies,
     aws_iam_role_policy_attachment.task_role_policy_attach
   ]
 }
 
 
-# Create CloudWatch logging config
 resource "aws_cloudwatch_log_group" "ecs_service" {
   count             = var.ecs_service_config.log_config.enable_logging ? 1 : 0
   name              = "/ecs/${var.project_name}/${local.service_name}"
