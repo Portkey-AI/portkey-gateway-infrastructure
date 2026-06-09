@@ -95,8 +95,8 @@ module "data_service" {
     max_replicas = var.dataservice_config.max_replicas
     environment_variables = merge(
       local.common_env,
-      local.gateway_variables,
-      local.dataservice_env
+      local.dataservice_env,
+      local.dataservice_variables
     )
     secrets = merge(local.gateway_secrets, local.dataservice_secrets)
   }
