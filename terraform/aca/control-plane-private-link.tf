@@ -13,14 +13,14 @@ locals {
 resource "azurerm_private_endpoint" "control_plane" {
   count = local.control_plane_pl_outbound ? 1 : 0
 
-  name                = "pe-controlplane-${local.name_prefix}"
+  name                = "pe-controlplane-v2-${local.name_prefix}"
   location            = var.azure_region
   resource_group_name = local.resource_group_name
   subnet_id           = local.private_endpoint_subnet_id
 
   private_service_connection {
-    name                              = "psc-controlplane-${local.name_prefix}"
-    private_connection_resource_alias = "portkey-privatelink-pls.d17828ab-c5d7-4f67-aae6-1f5b68ae0565.eastus2.azure.privatelinkservice"
+    name                              = "psc-controlplane-v2-${local.name_prefix}"
+    private_connection_resource_alias = "portkey-privatelink-pls.4c0cb660-8f0d-49ad-beee-b234fa25cb40.eastus2.azure.privatelinkservice"
     is_manual_connection              = true
     request_message                   = "Portkey Gateway ${var.project_name}-${var.environment} requesting Private Link to Control Plane"
   }
@@ -32,7 +32,7 @@ resource "azurerm_private_endpoint" "control_plane" {
 resource "azurerm_private_dns_zone" "control_plane" {
   count = local.control_plane_pl_outbound ? 1 : 0
 
-  name                = "privatelink-az.portkey.ai"
+  name                = "private.azure-cp.portkey.ai"
   resource_group_name = local.resource_group_name
 
   tags = local.tags
@@ -55,7 +55,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "control_plane" {
 resource "azurerm_private_dns_a_record" "control_plane" {
   count = local.control_plane_pl_outbound ? 1 : 0
 
-  name                = "azure-cp"
+  name                = "@"
   zone_name           = azurerm_private_dns_zone.control_plane[0].name
   resource_group_name = local.resource_group_name
   ttl                 = 300
