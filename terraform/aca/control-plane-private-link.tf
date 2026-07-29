@@ -32,7 +32,7 @@ resource "azurerm_private_endpoint" "control_plane" {
 resource "azurerm_private_dns_zone" "control_plane" {
   count = local.control_plane_pl_outbound ? 1 : 0
 
-  name                = "private.azure-cp.portkey.ai"
+  name                = "azure-cp.portkey.ai"
   resource_group_name = local.resource_group_name
 
   tags = local.tags
@@ -55,7 +55,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "control_plane" {
 resource "azurerm_private_dns_a_record" "control_plane" {
   count = local.control_plane_pl_outbound ? 1 : 0
 
-  name                = "@"
+  name                = "private"
   zone_name           = azurerm_private_dns_zone.control_plane[0].name
   resource_group_name = local.resource_group_name
   ttl                 = 300

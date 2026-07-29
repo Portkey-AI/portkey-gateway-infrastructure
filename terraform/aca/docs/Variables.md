@@ -419,8 +419,8 @@ environment_variables = {
 
 When `outbound = true`, the module creates:
 - A **Private Endpoint** in the PE subnet connecting to Portkey's Private Link Service
-- A **Private DNS Zone** (`privatelink-az.portkey.ai`) linked to the VNET
-- An **A record** (`azure-cp`) pointing to the PE's private IP
+- A **Private DNS Zone** (`azure-cp.portkey.ai`) linked to the VNET
+- An **A record** (`private`) pointing to the PE's private IP
 
 > The PE connection requires **manual approval** from Portkey. Contact the Portkey team after deployment.
 
