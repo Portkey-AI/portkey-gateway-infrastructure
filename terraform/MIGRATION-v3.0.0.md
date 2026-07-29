@@ -17,7 +17,7 @@ It applies to both **Clone & Deploy** (you edit `environments/<env>/*`) and **Mo
 |---|----------|--------|-----------------|
 | 1 | ACA | Control Plane Private Endpoint **recreated** (new name + new PLS alias) and **DNS zone/FQDN changed** | Follow [Safe Migration](#safe-migration--control-plane-private-link-aca); re-approve the new PE; update Control Plane URLs |
 | 2 | ACA | **Least-privilege RBAC** replaces vault-wide / broad blob roles | Re-apply; identity must be able to create custom roles + role assignments |
-| 3 | ACA & ECS | Default image tags **pinned** (`gateway` → `2.10.0`, `data-service` → `1.8.0`) | Confirm or set your own tags |
+| 3 | ACA & ECS | Default image tags **pinned** (`gateway` → `2.16.0`, `data-service` → `1.9.0`) | Confirm or set your own tags |
 | 4 | ACA | **Data Service** now supported (was hard-disabled) | Opt in via `dataservice_config` if desired |
 | 5 | ECS | `dataservice_config.port` + `enable_execute_command` now configurable; SSM via scoped policy; ASG `instance_refresh` added | Set `enable_execute_command = true` where you rely on ECS Exec |
 
@@ -124,7 +124,7 @@ wget -qO- https://private.azure-cp.portkey.ai/albus/health
 ## Other ACA Changes
 
 - **Least-privilege RBAC (#2):** Key Vault access is now granted per-secret, and the gateway uses a custom blob role (read/write/append, no delete) instead of `Storage Blob Data Contributor`. Data Service runs under its own identity with scoped roles. No variable changes, but the applying identity must be able to create custom role definitions and role assignments; expect an IAM diff.
-- **Data Service (#4):** opt in via `dataservice_config = { enable_dataservice = true }` and `data_service_image = { image = "portkeyai/data-service", tag = "1.8.0" }`. Internal-only; defaults to disabled.
+- **Data Service (#4):** opt in via `dataservice_config = { enable_dataservice = true }` and `data_service_image = { image = "portkeyai/data-service", tag = "1.9.0" }`. Internal-only; defaults to disabled.
 
 ## Other ECS Changes
 
@@ -137,8 +137,8 @@ wget -qO- https://private.azure-cp.portkey.ai/albus/health
 Defaults are pinned. If your `*.tfvars` still uses `latest`, set explicit tags:
 
 ```hcl
-gateway_image      = { image = "portkeyai/gateway_enterprise", tag = "2.10.0" }
-data_service_image = { image = "portkeyai/data-service",        tag = "1.8.0" }
+gateway_image      = { image = "portkeyai/gateway_enterprise", tag = "2.16.0" }
+data_service_image = { image = "portkeyai/data-service",        tag = "1.9.0" }
 ```
 
 ---

@@ -32,7 +32,7 @@ See the [migration guide](./MIGRATION-v3.0.0.md#breaking-changes) for full detai
   Private Link Service alias). The connection must be **re-approved by Portkey**.
 - **[ACA] RBAC tightened** — vault-wide Key Vault access and `Storage Blob Data Contributor`
   are replaced by per-secret assignments and custom blob roles. Expect role diffs on apply.
-- **[ACA & ECS] Default image tags pinned** — `gateway` → `2.10.0`, `data-service` → `1.8.0`
+- **[ACA & ECS] Default image tags pinned** — `gateway` → `2.16.0`, `data-service` → `1.9.0`
   (previously `latest`).
 - **[ECS] `enable_execute_command` now defaults to `false`** for gateway, data-service, and
   redis (previously hard-coded `true` for data-service/redis).

@@ -122,7 +122,7 @@ docker_credentials = {
 ```hcl
 gateway_image = {
   image = "portkeyai/gateway_enterprise"
-  tag   = "2.10.0"
+  tag   = "2.16.0"
 }
 ```
 
@@ -160,7 +160,7 @@ The Data Service is an optional, **internal-only** container app. When enabled i
 ```hcl
 data_service_image = {
   image = "portkeyai/data-service"
-  tag   = "1.8.0"
+  tag   = "1.9.0"
 }
 ```
 
