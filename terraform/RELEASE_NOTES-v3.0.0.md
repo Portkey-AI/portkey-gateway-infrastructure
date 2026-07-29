@@ -77,8 +77,3 @@ Quick summary:
 4. **ACA only:** submit the new Control Plane Private Endpoint ID to Portkey and wait for approval.
 
 ---
-
-## Compatibility
-
-- Upgrades from **v2.x**.
-- No changes required to remote state backends.
