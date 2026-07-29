@@ -330,10 +330,10 @@ module "portkey_gateway" {
       NODE_ENV                  = "production"
       ANALYTICS_STORE           = "control_plane"
       AZURE_MANAGED_VERSION     = "2019-08-01"
-      ALBUS_BASEPATH            = "https://azure-cp.privatelink-az.portkey.ai/albus"
-      CONTROL_PLANE_BASEPATH    = "https://azure-cp.privatelink-az.portkey.ai/api/v1"
-      SOURCE_SYNC_API_BASEPATH  = "https://azure-cp.privatelink-az.portkey.ai/api/v1/sync"
-      CONFIG_READER_PATH        = "https://azure-cp.privatelink-az.portkey.ai/api/model-configs"
+      ALBUS_BASEPATH            = "https://private.azure-cp.portkey.ai/albus"
+      CONTROL_PLANE_BASEPATH    = "https://private.azure-cp.portkey.ai/api/v1"
+      SOURCE_SYNC_API_BASEPATH  = "https://private.azure-cp.portkey.ai/api/v1/sync"
+      CONFIG_READER_PATH        = "https://private.azure-cp.portkey.ai/api/model-configs"
     }
   }
 
@@ -468,10 +468,10 @@ module "portkey_gateway" {
       NODE_ENV                  = "development"
       ANALYTICS_STORE           = "control_plane"
       AZURE_MANAGED_VERSION     = "2019-08-01"
-      ALBUS_BASEPATH            = "https://azure-cp.privatelink-az.portkey.ai/albus"
-      CONTROL_PLANE_BASEPATH    = "https://azure-cp.privatelink-az.portkey.ai/api/v1"
-      SOURCE_SYNC_API_BASEPATH  = "https://azure-cp.privatelink-az.portkey.ai/api/v1/sync"
-      CONFIG_READER_PATH        = "https://azure-cp.privatelink-az.portkey.ai/api/model-configs"
+      ALBUS_BASEPATH            = "https://private.azure-cp.portkey.ai/albus"
+      CONTROL_PLANE_BASEPATH    = "https://private.azure-cp.portkey.ai/api/v1"
+      SOURCE_SYNC_API_BASEPATH  = "https://private.azure-cp.portkey.ai/api/v1/sync"
+      CONFIG_READER_PATH        = "https://private.azure-cp.portkey.ai/api/model-configs"
     }
   }
 
@@ -481,7 +481,7 @@ module "portkey_gateway" {
 
 **What gets created:**
 - Private Endpoint in your VNET
-- Private DNS Zone (`privatelink-az.portkey.ai`) with A record (`azure-cp`)
+- Private DNS Zone (`azure-cp.portkey.ai`) with A record (`private`)
 - VNET link for DNS resolution
 
 **Post-deployment:**

@@ -140,9 +140,9 @@ When enabled, the refresh uses the `Rolling` strategy, triggers on `launch_templ
 | Variable | Default | Required | Description |
 |----------|---------|----------|-------------|
 | `gateway_image.image` | `"portkeyai/gateway_enterprise"` | No | Gateway container image |
-| `gateway_image.tag` | `"2.10.0"` | No | Gateway image tag/version |
+| `gateway_image.tag` | `"2.16.0"` | No | Gateway image tag/version |
 | `data_service_image.image` | `"portkeyai/data-service"` | No | Data Service container image |
-| `data_service_image.tag` | `"1.8.0"` | No | Data Service image tag/version |
+| `data_service_image.tag` | `"1.9.0"` | No | Data Service image tag/version |
 | `docker_cred_secret_arn` | - | **Yes** | AWS Secrets Manager ARN for Docker credentials |
 | `redis_image.image` | `"redis"` | No | Redis container image |
 | `redis_image.tag` | `"7.2-alpine"` | No | Redis image tag/version |

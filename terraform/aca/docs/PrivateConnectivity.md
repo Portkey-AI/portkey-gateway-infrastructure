@@ -47,8 +47,8 @@ terraform apply -var-file=environments/dev/dev.tfvars
 
 **What gets created:**
 - Private Endpoint in your VNET
-- Private DNS Zone (`privatelink-az.portkey.ai`)
-- DNS A record (`azure-cp`) pointing to the Private Endpoint IP
+- Private DNS Zone (`azure-cp.portkey.ai`)
+- DNS A record (`private`) pointing to the Private Endpoint IP
 - VNET link for DNS resolution
 
 ---
@@ -87,10 +87,10 @@ az network private-endpoint show \
 ```json
 {
   "gateway": {
-    "ALBUS_BASEPATH": "https://azure-cp.privatelink-az.portkey.ai/albus",
-    "CONTROL_PLANE_BASEPATH": "https://azure-cp.privatelink-az.portkey.ai/api/v1",
-    "SOURCE_SYNC_API_BASEPATH": "https://azure-cp.privatelink-az.portkey.ai/api/v1/sync",
-    "CONFIG_READER_PATH": "https://azure-cp.privatelink-az.portkey.ai/api/model-configs"
+    "ALBUS_BASEPATH": "https://private.azure-cp.portkey.ai/albus",
+    "CONTROL_PLANE_BASEPATH": "https://private.azure-cp.portkey.ai/api/v1",
+    "SOURCE_SYNC_API_BASEPATH": "https://private.azure-cp.portkey.ai/api/v1/sync",
+    "CONFIG_READER_PATH": "https://private.azure-cp.portkey.ai/api/model-configs"
     ...rest of env variables
   }
 }
@@ -101,10 +101,10 @@ az network private-endpoint show \
 ```hcl
 environment_variables = {
   gateway = {
-    ALBUS_BASEPATH            = "https://azure-cp.privatelink-az.portkey.ai/albus"
-    CONTROL_PLANE_BASEPATH    = "https://azure-cp.privatelink-az.portkey.ai/api/v1"
-    SOURCE_SYNC_API_BASEPATH  = "https://azure-cp.privatelink-az.portkey.ai/api/v1/sync"
-    CONFIG_READER_PATH        = "https://azure-cp.privatelink-az.portkey.ai/api/model-configs"
+    ALBUS_BASEPATH            = "https://private.azure-cp.portkey.ai/albus"
+    CONTROL_PLANE_BASEPATH    = "https://private.azure-cp.portkey.ai/api/v1"
+    SOURCE_SYNC_API_BASEPATH  = "https://private.azure-cp.portkey.ai/api/v1/sync"
+    CONFIG_READER_PATH        = "https://private.azure-cp.portkey.ai/api/model-configs"
     ...rest of env variables
   }
 }

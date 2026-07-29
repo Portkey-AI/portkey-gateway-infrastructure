@@ -199,7 +199,7 @@ output "control_plane_private_ip" {
 
 output "control_plane_private_fqdn" {
   description = "FQDN to reach Portkey Control Plane over Private Link"
-  value       = length(azurerm_private_dns_a_record.control_plane) > 0 ? "azure-cp.privatelink-az.portkey.ai" : null
+  value       = length(azurerm_private_dns_a_record.control_plane) > 0 ? "${azurerm_private_dns_a_record.control_plane[0].name}.${azurerm_private_dns_zone.control_plane[0].name}" : null
 }
 
 #########################################################################

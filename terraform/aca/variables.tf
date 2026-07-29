@@ -203,7 +203,7 @@ variable "gateway_image" {
   })
   default = {
     image = "portkeyai/gateway_enterprise"
-    tag   = "2.10.0"
+    tag   = "2.16.0"
   }
 }
 
@@ -215,7 +215,7 @@ variable "data_service_image" {
   })
   default = {
     image = "portkeyai/data-service"
-    tag   = "1.8.0"
+    tag   = "1.9.0"
   }
 }
 

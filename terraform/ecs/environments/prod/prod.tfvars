@@ -53,12 +53,12 @@ target_capacity  = 100          # Provide the capacity which ECS should try to m
 ###########################################################################
 gateway_image = {
   image = "portkeyai/gateway_enterprise"
-  tag   = "2.10.0"
+  tag   = "2.16.0"
 }
 
 data_service_image = {
   image = "portkeyai/data-service"
-  tag   = "1.8.0"
+  tag   = "1.9.0"
 }
 
 # Provide the Secret ARN obtained from output section of AWS CloudFormation Stack.

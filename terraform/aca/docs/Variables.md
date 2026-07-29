@@ -122,7 +122,7 @@ docker_credentials = {
 ```hcl
 gateway_image = {
   image = "portkeyai/gateway_enterprise"
-  tag   = "2.10.0"
+  tag   = "2.16.0"
 }
 ```
 
@@ -160,7 +160,7 @@ The Data Service is an optional, **internal-only** container app. When enabled i
 ```hcl
 data_service_image = {
   image = "portkeyai/data-service"
-  tag   = "1.8.0"
+  tag   = "1.9.0"
 }
 ```
 
@@ -419,8 +419,8 @@ environment_variables = {
 
 When `outbound = true`, the module creates:
 - A **Private Endpoint** in the PE subnet connecting to Portkey's Private Link Service
-- A **Private DNS Zone** (`privatelink-az.portkey.ai`) linked to the VNET
-- An **A record** (`azure-cp`) pointing to the PE's private IP
+- A **Private DNS Zone** (`azure-cp.portkey.ai`) linked to the VNET
+- An **A record** (`private`) pointing to the PE's private IP
 
 > The PE connection requires **manual approval** from Portkey. Contact the Portkey team after deployment.
 
